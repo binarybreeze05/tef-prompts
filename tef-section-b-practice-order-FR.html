@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="robots" content="noindex, nofollow"/>
+<meta name="googlebot" content="noindex, nofollow"/>
+<title>TEF — Section B: Smart Practice Order</title>
+<style>
+:root{
+  --ink:#1f2328; --muted:#5b6470; --line:#e4e7ec; --bg:#ffffff;
+  --accent:#2563eb; --accent-soft:#eef4ff; --ad-bg:#fbfaf6; --ad-line:#e7e2d2;
+  --chip:#eef2f7; --obj:#b4341f; --reb:#0f7a44;
+}
+*{box-sizing:border-box}
+body{max-width:860px;margin:0 auto;padding:2rem 1.1rem 5rem;
+  font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.6;color:var(--ink);background:var(--bg);}
+header.page{border-bottom:2px solid var(--line);margin-bottom:1.6rem;padding-bottom:1rem}
+header.page h1{font-size:1.65rem;margin:.2rem 0 .5rem}
+.lead{color:var(--muted);font-size:.97rem}
+.taskcard{background:var(--accent-soft);border:1px solid #d6e4ff;border-radius:12px;
+  padding:.85rem 1.1rem;margin:1rem 0 0}
+.taskcard ul{margin:.3rem 0 0;padding-left:1.15rem}
+.taskcard li{margin:.15rem 0}
+.count{color:var(--muted);font-size:.9rem;margin-top:.6rem}
+.toc{margin:1.4rem 0 0;font-size:.92rem;color:var(--muted)}
+section.topic{border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.25rem 1.35rem;
+  margin:1.5rem 0;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.topic-head{display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.7rem}
+.badge{flex:none;display:inline-flex;align-items:center;justify-content:center;
+  min-width:2rem;height:2rem;padding:0 .5rem;border-radius:999px;background:var(--accent);
+  color:#fff;font-weight:700;font-size:.95rem}
+.topic-head .intro{font-weight:600;font-size:1.06rem;margin:.15rem 0}
+.orig{color:var(--muted);font-size:.78rem;font-weight:500}
+.ad{background:var(--ad-bg);border:1px solid var(--ad-line);border-radius:10px;
+  padding:.85rem 1rem;margin:.4rem 0 1rem}
+.ad .ad-kicker{text-transform:uppercase;letter-spacing:.06em;font-size:.7rem;color:#9a8f6b;margin-bottom:.35rem}
+.ad .ad-name{font-weight:700;font-size:1.05rem;margin-bottom:.35rem}
+.ad .ad-text{font-size:.95rem;color:#3a3a32;font-style:italic}
+.list-caption{font-weight:600;color:var(--muted);font-size:.9rem;margin:.2rem 0 .5rem;
+  text-transform:uppercase;letter-spacing:.04em}
+ul.qlist{list-style:none;padding-left:0;margin:0}
+ul.qlist li{padding:.4rem 0;border-top:1px solid var(--line)}
+ul.qlist li:first-child{border-top:none}
+.label{display:inline-block;background:var(--chip);border-radius:6px;padding:.05rem .45rem;
+  font-weight:600;font-size:.86rem;margin-right:.4rem;color:#374151}
+.q{color:var(--ink)}
+ol.arglist{padding-left:0;margin:0;list-style:none;counter-reset:arg}
+ol.arglist li{padding:.55rem 0;border-top:1px solid var(--line);counter-increment:arg}
+ol.arglist li:first-child{border-top:none}
+.obj{display:block;font-weight:650;color:var(--obj);margin-bottom:.2rem}
+.obj::before{content:counter(arg) ". ";color:var(--muted);font-weight:700}
+.reb{display:block;color:var(--reb)}
+footer.page{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:1rem;
+  color:var(--muted);font-size:.82rem}
+
+.why{font-size:.86rem;color:#475467;background:#f6f8fb;border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:.45rem .7rem;margin:.1rem 0 .9rem}
+.legend{margin:.6rem 0 0;font-size:.85rem;color:var(--muted);line-height:1.9}
+.legend b{color:var(--ink)}
+/* "Drill next" — the ad that re-applies most of this ad's drill report.
+   Deliberately a <div>, not a <p>: extract_ads.py captures .ad-text greedily to
+   the last </p> in the section and rejects any nested <p>. */
+.nextup{margin:-.7rem 0 1rem;padding:.5rem .8rem;border:1px dashed #cbd5e1;
+  border-top:none;border-radius:0 0 10px 10px;background:#f8fafc;
+  font-size:.86rem;line-height:1.5;color:#475467}
+.nextup .nu-k{display:inline-block;text-transform:uppercase;letter-spacing:.06em;
+  font-size:.66rem;font-weight:700;color:#64748b;margin-right:.45rem;
+  vertical-align:.08rem}
+.nextup .nu-t{font-weight:700;color:var(--ink)}
+.nextup .nu-w{display:block;margin-top:.15rem;color:#5b6470}
+
+.daybar{margin:2.4rem 0 .3rem;padding:.55rem .95rem;border-radius:10px;
+  background:#111827;color:#fff;font-weight:700;font-size:.98rem;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.daybar:first-of-type{margin-top:1rem}
+.daybar .phase{font-weight:500;font-size:.78rem;opacity:.9;text-align:right}
+.strategy{margin:1rem 0 0;padding:.85rem 1.1rem;border:1px solid var(--line);
+  border-radius:12px;background:#fff}
+.strategy > strong{font-size:.95rem}
+.strategy p{margin:.4rem 0 0;font-size:.9rem;color:#475467}
+.strategy .topfam{font-weight:600;color:var(--ink)}
+.strategy .legend2{font-size:.82rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="page">
+<h1>TEF — Section B: Smart Practice Order</h1>
+
+
+<div class="taskcard"><strong>Your task</strong><ul>
+<li>Section B: 10 minutes</li>
+<li>Present this document to your friend.</li>
+<li>Try to convince him/her.</li>
+<li>Your examiner will play the role of your friend.</li>
+</ul></div>
+
+
+<div class="strategy"><strong>Ordre de pratique intelligent</strong><p>Les items sont regroupés par famille de réponse — l'angle de persuasion, les bénéfices mis en avant et les objections probables — d'après le contenu réel de l'annonce (les amorces, parfois volontairement décalées, sont ignorées). La ronde 1 (rangs 1–20) place un archétype clair de chaque famille par ordre de taille (proxy de la probabilité) : même en s'arrêtant tôt, on a répété chaque routine de persuasion une fois. Les rondes suivantes alternent les familles par taille : les thèmes les plus probables (bénévolat, gagner de l'argent, évasion, revente, ateliers créatifs) reviennent le plus souvent, les membres d'une famille espacés d'environ 15–20 items. Tout ce qui suit le rang 65 est un doublon ; les onze derniers (dès le rang 71) sont les plus sûrs à sauter si le budget de ~70 items est atteint. Par précaution, une deuxième analyse indépendante a été menée sur les mêmes items présentés dans l'ordre inverse (pour retirer tout biais d'ordre) ; elle a retrouvé la même structure de familles et la même fin de liste redondante à sauter, ce qui confirme cet ordre.</p><p class="topfam">Plus grandes familles : Bénévolat/solidarité (12 %), Gagner de l'argent (11 %), Voyage/évasion (10 %), Revente/partage (9 %), Atelier créatif (9 %), Aventure/sport (7 %), Rôle civique/culturel (6 %).</p><p class="legend2">Numéro d'origine indiqué pour chaque item · groupes de 5 = 1 jour (5/jour × 14 jours). Les derniers items (Optionnel) sont les plus redondants — à sauter en priorité.</p></div>
+</header>
+<div class="daybar"><span>Jour 1</span><span class="phase">Fondations</span></div>
+<section class="topic" id="p-1">
+<div class="topic-head">
+<span class="badge">1</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui aime les animaux. <span class="orig">· n° d'origine 40</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BÉNÉVOLAT DANS UN REFUGE ANIMALIER</div>
+<p class="ad-text">Les animaux ont besoin de vous :<br/>
+DEVENEZ BÉNÉVOLE DANS NOTRE REFUGE<br/>
+Vos missions :<br/>
+• Compagnie, soins, toilettage.<br/>
+• Nettoyage des boxes.<br/>
+• Accueil des visiteurs.<br/>
+• Tâches administratives (formalités d’adoption…)<br/>
+2 000 bénévoles nous ont déjà rejoints !<br/>
+Contactez le refuge<br/>
+le plus proche de chez vous :<br/>
+www.refugeanimaux.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 58 · CHIEN D’AVEUGLES</span><span class="nu-w">Same friend, same two objections — no time, and it will break my heart to give the animal back. Your concessions and si-clauses replay whole.</span></div>
+
+
+</section>
+<section class="topic" id="p-2">
+<div class="topic-head">
+<span class="badge">2</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui cherche un complément de revenus. <span class="orig">· n° d'origine 31</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SONDAGES EN LIGNE RÉMUNÉRÉS</div>
+<p class="ad-text">SONDAGES EN LIGNE RÉMUNÉRÉS<br/>
+Gagnez de l'ARGENT en remplissant des sondages !<br/>
+L'inscription est rapide et facile.<br/>
+Vos données restent confidentielles.<br/>
+Les thèmes des sondages sont variés et divertissants :<br/>
+Publicités<br/>
+Nouveaux produits<br/>
+Actualités…<br/>
+Sondages en ligne<br/>
+Sondage d'opinion<br/>
+Valider<br/>
+N'attendez plus ! Toutes les modalités d'inscription sont à retrouver sur :<br/>
+www.monsondageremunere.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 42 · VENDEUR À DOMICILE EMBAL’PLAST</span><span class="nu-w">The same «c&#x27;est une arnaque, ça ne rapporte rien» wall: you reuse the earnings, sign-up and no-obligation rebuttals with a different scheme.</span></div>
+
+
+</section>
+<section class="topic" id="p-3">
+<div class="topic-head">
+<span class="badge">3</span>
+<p class="intro">Vous avez lu cette publicité d’agence de voyage. Vous en parlez à un(e) ami(e) avec qui vous voulez partir en vacances. <span class="orig">· n° d'origine 49</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SÉJOUR CANOT CAMPING</div>
+<p class="ad-text">L'AGENCE DE VOYAGE VACANCES NATURE ORGANISE UNE SEMAINE EN « CANOT-CAMPING »<br/>
+Pagayez de jour et dormez confortablement dans une tente le soir.<br/>
+Vivez des instants de calme, mais aussi de dépassement et d'aventure ! Découvrez les plus beaux paysages de la région et faites le plein d'air pur !<br/>
+Toutes les réservations possibles sur : www.vacancesnature.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 26 · WEEK-END SPORTIF</span><span class="nu-w">Another active outdoor holiday, so the comfort-and-effort objections come back and your «on ira à ton rythme» concession is reusable as is.</span></div>
+
+
+</section>
+<section class="topic" id="p-4">
+<div class="topic-head">
+<span class="badge">4</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui veut faire des économies. <span class="orig">· n° d'origine 81</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VENTECO.COM</div>
+<p class="ad-text">Économique et Écologique<br/>
+Vendez, troquez, achetez !<br/>
+www.venteco.com<br/>
+Vêtements, voitures, meubles, accessoires, électroménager, chaussures, bijoux…<br/>
+Postez vos annonces, découvrez plein de bonnes affaires et faites des transactions entre particuliers !</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 37 · CONSOMMATION COLLABORATIVE</span><span class="nu-w">Sharing-economy again: is it safe, is it worth the hassle, will anyone want my stuff. Same trust rebuttals, same eco argument.</span></div>
+
+
+</section>
+<section class="topic" id="p-5">
+<div class="topic-head">
+<span class="badge">5</span>
+<p class="intro">Vous avez lu cette publicité pour un atelier de théâtre. Vous en parlez à un(e) ami(e) qui cherche une activité créative pour ses après-midis libres. <span class="orig">· n° d'origine 46</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ATELIER THÉÂTRE</div>
+<p class="ad-text">Nous cherchons participant pour un<br/>
+ATELIER THÉÂTRE<br/>
+- Jouer devant un public<br/>
+- Pratiquer différentes techniques : chant, danse, etc.<br/>
+- Développer la créativité, l'écoute<br/>
+- Rencontrer des comédiens professionnels<br/>
+Venez créer un spectacle !<br/>
+Renseignement complémentaire et inscription sur notre site<br/>
+www.onimprovise.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 64 · VAINCRE SA TIMIDITÉ PAR LE THÉÂTRE</span><span class="nu-w">Theatre again for someone afraid of being looked at — every shyness rebuttal you repaired gets said again, now with a free first session to close on.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 2</span><span class="phase">Fondations</span></div>
+<section class="topic" id="p-6">
+<div class="topic-head">
+<span class="badge">6</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui aime le sport. <span class="orig">· n° d'origine 19</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SAUT EN PARACHUTE</div>
+<p class="ad-text">Vous pensez connaître vos limites…<br/>
+Nous vous aidons à vous surpasser !<br/>
+Nos formateurs parachutistes vous accompagnent dans votre premier saut<br/>
+Nous vous garantissons :<br/>
+Des sensations incroyables<br/>
+Une sécurité maximale<br/>
+Un moment inoubliable<br/>
+L’envie de recommencer dès l’atterrissage !<br/>
+Vous ne verrez plus votre quotidien de la même manière : dépasser vos limites ne vous fera plus peur !<br/>
+www.paralimites.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 66 · VIVEZ L’EXPERIENCE DE LA CHUTE LIBRE</span><span class="nu-w">Fear of jumping again: supervision, statistics, tandem option, the photos afterwards. Your reassurance moves transfer word for word.</span></div>
+
+
+</section>
+<section class="topic" id="p-7">
+<div class="topic-head">
+<span class="badge">7</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui aime beaucoup le cinéma. <span class="orig">· n° d'origine 63</span></p>
+</div>
+<p class="why"><b>Rôle civique / culturel</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DEVENEZ CRITIQUE DE CINÉMA</div>
+<p class="ad-text">Le cinéma est votre passion ?<br/>
+L'Académie Du Cinéma recherche des spectateurs grand public.<br/>
+Devenez critique de cinéma pendant un an.<br/>
+Accédez aux avant-premières de films<br/>
+Partagez vos idées avec différents jurys<br/>
+Obtenez des places de cinéma gratuites<br/>
+Renseignements : www.critique-public-academieducinema.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 72 · MUSICIENS DU METRO</span><span class="nu-w">Also «become a judge of other people&#x27;s work»: legitimacy doubts, the time it takes, the access it gives. Same argument stock.</span></div>
+
+
+</section>
+<section class="topic" id="p-8">
+<div class="topic-head">
+<span class="badge">8</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui a besoin de prendre des cours de langue. <span class="orig">· n° d'origine 59</span></p>
+</div>
+<p class="why"><b>Apprendre une compétence</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">COURS DE LANGUE PAR TÉLÉPHONE</div>
+<p class="ad-text">Cours de langue par téléphone<br/>
+Flexibilité totale 24h/24 et 7j/7<br/>
+Des cours de 30 à 60 minutes<br/>
+1 cours minimum par semaine<br/>
+Pour tous les niveaux<br/>
+Professeurs diplômés<br/>
+Vous choisissez les thèmes abordés et vous progressez à votre rythme.<br/>
+Réservez dès maintenant vos cours en ligne !<br/>
+Cours d'essai gratuit !<br/>
+Plus d'informations sur www.courspartel.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 81 · CYBER ÉCOLE DE MUSIQUE</span><span class="nu-w">Learning remotely again: does it really work, will you keep it up, is it worth the price. Same flexibility and sur-mesure arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-9">
+<div class="topic-head">
+<span class="badge">9</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui souhaite organiser une soirée. <span class="orig">· n° d'origine 72</span></p>
+</div>
+<p class="why"><b>Chef / traiteur à domicile</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">UN CHEF DANS VOTRE CUISINE</div>
+<p class="ad-text">Un Chef dans votre cuisine !<br/>
+Réservez un chef cuisinier chez vous.<br/>
+Vivez une expérience culinaire unique.<br/>
+Découvrez nos menus variés et<br/>
+notre savoir-faire...<br/>
+Nos Chefs s’occupent de tout !<br/>
+Nouveaux clients : 10 % de réduction<br/>
+Informations : www.unchefdansvotrecuisine.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 75 · CHEF À DOMICILE</span><span class="nu-w">A chef in your kitchen again, so the price objection returns identically — and «comparé au restaurant» is the same counter-argument to reuse.</span></div>
+
+
+</section>
+<section class="topic" id="p-10">
+<div class="topic-head">
+<span class="badge">10</span>
+<p class="intro">Vous avez lu cette annonce pour une soirée de charité. Vous en parlez à un(e) ami(e) qui aime danser. <span class="orig">· n° d'origine 68</span></p>
+</div>
+<p class="why"><b>Événement caritatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DANSE DU CŒUR</div>
+<p class="ad-text">Danse du Cœur au profit d’une œuvre de charité :<br/>
+VENEZ DANSER POUR UNE BONNE CAUSE !<br/>
+Quand : chaque dernier vendredi du mois, à partir de 20h<br/>
+Où : au centre communautaire Kent Nagano de la ville.<br/>
+Inscriptions : en solo, en famille ou en équipe ! Activité ouverte à tous !<br/>
+Tous les dons seront acceptés.<br/>
+Les profits iront à la fondation « Danse du Cœur ».</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 73 · BOUGE ET DONNE</span><span class="nu-w">Dance for a cause again: too shy, not fit enough, doesn&#x27;t want to fundraise. Your «c&#x27;est pour une bonne cause» close transfers directly.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 3</span><span class="phase">Fondations</span></div>
+<section class="topic" id="p-11">
+<div class="topic-head">
+<span class="badge">11</span>
+<p class="intro">Vous avez lu cette publicité pour faire du gardiennage d’une maison d’une station balnéaire. Vous en parlez à un(e) ami(e) qui a envie de quitter un peu la ville. <span class="orig">· n° d'origine 48</span></p>
+</div>
+<p class="why"><b>Voyager gratuitement</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DEVENEZ GARDIEN DE MAISONS</div>
+<p class="ad-text">DEVENEZ GARDIEN DE MAISONS<br/>
+Profitez d’une jolie maison, d’un jardin, visitez une nouvelle région !<br/>
+Une belle opportunité pour changer d’air !<br/>
+Services à assurer :<br/>
+- Surveillance<br/>
+- Entretien des espaces verts<br/>
+- Soins aux animaux de compagnie<br/>
+Inscrivez-vous sur notre site : www.homesitting.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 31 · DEVENEZ TESTEUR DE VOYAGES</span><span class="nu-w">Also travel-for-free with a catch: is it real, what are you actually signing up for, what is expected of you. Same scepticism to dismantle.</span></div>
+
+
+</section>
+<section class="topic" id="p-12">
+<div class="topic-head">
+<span class="badge">12</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui aime bien cuisiner. <span class="orig">· n° d'origine 61</span></p>
+</div>
+<p class="why"><b>Cuisiner &amp; partager</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CUISINE COMMUNAUTAIRE</div>
+<p class="ad-text">CUISINE COMMUNAUTAIRE<br/>
+Rejoignez nos groupes de cuisine communautaire et créative.<br/>
+Mettez en commun votre temps et vos talents en cuisine.<br/>
+Partagez les plats cuisinés avec les autres participants.<br/>
+Succès garanti !<br/>
+Pour plus d'informations : www.cuisine-collective.qc</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 74 · REPAS CHEZ L’HABITANT</span><span class="nu-w">Cooking with people you don&#x27;t know yet: same reticence about strangers and time, same conviviality arguments and the same concrete next step.</span></div>
+
+
+</section>
+<section class="topic" id="p-13">
+<div class="topic-head">
+<span class="badge">13</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui possède un véhicule. <span class="orig">· n° d'origine 45</span></p>
+</div>
+<p class="why"><b>Atelier de bricolage partagé</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">GARAGE SOLIDAIRE</div>
+<p class="ad-text">GARAGE SOLIDAIRE<br/>
+Près de chez vous !<br/>
+Découvrez notre garage associatif et réparez vous-même votre auto !<br/>
+- Matériel à disposition dans notre atelier.<br/>
+- Achat de pièces moins chères chez nos partenaires.<br/>
+- Conseils de professionnels.<br/>
+Faites des économies !<br/>
+www.garagesolidaire.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 76 · ESPACE BRICOLAGE</span><span class="nu-w">«Je ne sais pas bricoler» again: tools on site, someone to show you, the money saved, membership. Your rebuttals fit unchanged.</span></div>
+
+
+</section>
+<section class="topic" id="p-14">
+<div class="topic-head">
+<span class="badge">14</span>
+<p class="intro">Vous avez lu cette annonce dans le journal. Vous en parlez à un(e) ami(e) qui a des problèmes de stress. <span class="orig">· n° d'origine 21</span></p>
+</div>
+<p class="why"><b>Bien-être / santé</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">UN CHAT POUR COMBATTRE LE STRESS</div>
+<p class="ad-text">Vous voulez combattre le stress ?<br/>
+Avoir un chat vous aide à vous relaxer, à vous sentir plus heureux et à dormir mieux !<br/>
+Le ronronnement du chat apaise et détend comme le ferait la musique…<br/>
+Les études scientifiques le prouvent : avoir un chat peut améliorer votre santé, et agit comme une thérapie !<br/>
+Adoptez votre nouveau compagnon :<br/>
+www.lechat-therapie.com<br/>
+RON RON RON RON RON</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 61 · SÉJOUR DE DÉTOX NUMÉRIQUE</span><span class="nu-w">Another health claim your friend will doubt: same «essaie et tu verras» structure, same si-clauses about how they would feel afterwards.</span></div>
+
+
+</section>
+<section class="topic" id="p-15">
+<div class="topic-head">
+<span class="badge">15</span>
+<p class="intro">Vous avez cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui cherche à faire des économies. <span class="orig">· n° d'origine 36</span></p>
+</div>
+<p class="why"><b>Service en ligne pratique</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ACHETEZ VOS MÉDICAMENTS EN LIGNE</div>
+<p class="ad-text">Achetez vos médicaments en ligne<br/>
+Plus besoin de faire la queue à la pharmacie !<br/>
+- Grand choix de marques<br/>
+- 30% à 40% moins cher<br/>
+- Livraison à domicile rapide<br/>
+Passez commande dès maintenant !<br/>
+Rendez-vous sur :<br/>
+www.votrepharmacie-enligne.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 79 · BIBLIOTHÈQUE NUMÉRIQUE</span><span class="nu-w">Do it online instead of going there again: trust, delivery, savings, and the «plus besoin de se déplacer» argument you already built.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 4</span><span class="phase">Fondations</span></div>
+<section class="topic" id="p-16">
+<div class="topic-head">
+<span class="badge">16</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui a bientôt des vacances. <span class="orig">· n° d'origine 2</span></p>
+</div>
+<p class="why"><b>Séjour de restauration du patrimoine</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">RESTAUREZ UN SITE HISTORIQUE</div>
+<p class="ad-text">RESTAURATION PATRIMOINE<br/>
+VENEZ PASSER DES VACANCES UTILES :<br/>
+RESTAUREZ UN SITE HISTORIQUE<br/>
+Châteaux, monuments, édifices publics, grottes préhistoriques…<br/>
+Au sein d'une équipe de bénévoles (10/15 personnes)<br/>
+Ambiance conviviale, rencontres avec des personnes du monde entier<br/>
+Plusieurs sites dans le monde<br/>
+Logement en dortoir ou en tente<br/>
+Préparation collective des repas<br/>
+Plus de renseignements sur : www.restauration-patrimoine.net</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 71 · PATRIMOINE-RESTAURATION</span><span class="nu-w">The only other useful-holiday pitch: same «des vacances, c&#x27;est fait pour se reposer» objection, same team, accommodation and no-experience answers.</span></div>
+
+
+</section>
+<section class="topic" id="p-17">
+<div class="topic-head">
+<span class="badge">17</span>
+<p class="intro">Vous avez lu cette publicité d’une association. Vous en parlez à un(e) ami(e) qui aime les activités culturelles. <span class="orig">· n° d'origine 47</span></p>
+</div>
+<p class="why"><b>Événement culturel / social</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CENTRE COMMUNAUTAIRE</div>
+<p class="ad-text">Participez à un 5 à 7 dans votre centre communautaire<br/>
+Les 1ers vendredis de chaque mois, de 17h à 19h,<br/>
+Venez en famille faire connaissance avec les gens de votre quartier<br/>
+Apportez de quoi manger !<br/>
+Piste de danse sur place<br/>
+Tirage au sort et jeux organisés !<br/>
+Inscription obligatoire au 819 846-7845</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 60 · ANIMATEURS DE KERMESSE</span><span class="nu-w">Getting a reluctant friend into a neighbourhood event: same social hesitation, same «tu vas rencontrer du monde» argument and concrete next step.</span></div>
+
+
+</section>
+<section class="topic" id="p-18">
+<div class="topic-head">
+<span class="badge">18</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui vient d’emménager en ville. <span class="orig">· n° d'origine 71</span></p>
+</div>
+<p class="why"><b>Visites de ville</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VISITES GUIDÉES À VÉLO</div>
+<p class="ad-text">VISITES GUIDÉES DE LA VILLE À VÉLO<br/>
+Prenez un bol d’air<br/>
+et découvrez notre ville à vélo !<br/>
+Partez à la découverte des<br/>
+monuments et des quartiers<br/>
+incontournables de notre ville.<br/>
+Tours guidés sur demande<br/>
+Petits groupes<br/>
+Réservation conseillée.<br/>
+Informations et location de vélos : www.toursvelo.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 80 · VISITEZ BRUXELLES EN TUK TUK</span><span class="nu-w">Guiding a friend round the city again: cost, tourist-trap objection, weather, duration. The same guided-visit arguments transfer.</span></div>
+
+
+</section>
+<section class="topic" id="p-19">
+<div class="topic-head">
+<span class="badge">19</span>
+<p class="intro">Vous avez lu cette publicité pour un nouveau restaurant. Vous en parlez à un(e) ami(e). <span class="orig">· n° d'origine 9</span></p>
+</div>
+<p class="why"><b>Restaurant insolite</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">RESTAURANT LE CRIQUET</div>
+<p class="ad-text">Restaurant Le Criquet<br/>
+La nourriture du FUTUR arrive DANS VOS ASSIETTES !<br/>
+PROMOTION -10%<br/>
+Venez découvrir nos différents menus insectes :<br/>
+moelleux, croquants, salés, sucrés…<br/>
+Nos insectes sont :<br/>
+- riches en protéines<br/>
+- pauvres en calories<br/>
+- issus d’élevages écologiques<br/>
+Repas sur place ou à emporter<br/>
+www.lecriquetdelicieux.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 49 · EXPÉRIENCE DORMIR AVEC DES LOUPS</span><span class="nu-w">Another «try something completely out of the ordinary» pitch, so the disgust-and-fear rebuttals and the «on y va ensemble» close recycle.</span></div>
+
+
+</section>
+<section class="topic" id="p-20">
+<div class="topic-head">
+<span class="badge">20</span>
+<p class="intro">Vous avez lu cette annonce pour un club de marche. Vous en parlez à un(e) ami(e) qui cherche une activité. <span class="orig">· n° d'origine 64</span></p>
+</div>
+<p class="why"><b>Club de loisirs</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BIENVENUE AU CLUB DE MARCHE</div>
+<p class="ad-text">Bienvenue au Club de marche !<br/>
+Tous les dimanches matin, notre association vous propose un nouvel itinéraire dans la ville et ses environs. Pour participer, devenez membre de l’association (cotisation annuelle).<br/>
+Parcours de difficultés variables.<br/>
+Petits groupes.<br/>
+Ambiance détendue.<br/>
+Découvertes de sites insolites.<br/>
+Inscription : www.clubdemarche.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 51 · ASSOCIATION DANSES REGIONALES</span><span class="nu-w">Another association you join and pay a subscription to: same time objection, same ambiance and no-level-needed arguments.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 5</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-21">
+<div class="topic-head">
+<span class="badge">21</span>
+<p class="intro">Vous avez lu cette publicité pour une association. Vous en parlez à un(e) ami(e) qui cherche une activité. <span class="orig">· n° d'origine 25</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BÉNÉVOLES POUR SENIORS</div>
+<p class="ad-text">RECHERCHE BÉNÉVOLES<br/>
+L'association « Loisirs pour les Seniors » recherche des bénévoles de tout âge pour animer :<br/>
+des ateliers de lecture<br/>
+des ateliers d'informatique<br/>
+des activités de jardinage<br/>
+des jeux de carte, d'échec, de scrabble...<br/>
+Donnez un peu de votre temps, donnez de la joie et rejoignez-nous.<br/>
+Contactez-nous au 0556768840</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 53 · BÉNÉVOLAT À LA MAISON DES JOUETS</span><span class="nu-w">The same volunteering ask: a few hours, pick your activity, no qualification needed. Every rebuttal you repaired is reusable.</span></div>
+
+
+</section>
+<section class="topic" id="p-22">
+<div class="topic-head">
+<span class="badge">22</span>
+<p class="intro">Vous avez lu cette offre d’emploi dans le journal. Vous en parlez à un(e) ami(e) qui cherche du travail. <span class="orig">· n° d'origine 41</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LES CLEFS DU JARDIN</div>
+<p class="ad-text">Proposez vos services sur Les Clefs du Jardin.com<br/>
+Nous recherchons des personnes pour effectuer de petits travaux de jardinage chez des particuliers :<br/>
+- Nettoyer et tondre les gazons<br/>
+- Enlever les mauvaises herbes<br/>
+- Entretenir les balcons<br/>
+- Tailler les arbres et arbustes<br/>
+- Arroser régulièrement…<br/>
+Contactez-nous vite au 0323 43 4334 ou sur lesclefsdujardin.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 54 · JE ME PROPOSE</span><span class="nu-w">Small paid jobs again: how much, how often, is it declared, is it worth the trouble. Same money arguments, same close.</span></div>
+
+
+</section>
+<section class="topic" id="p-23">
+<div class="topic-head">
+<span class="badge">23</span>
+<p class="intro">Vous avez lu cette publicité d’une agence de location. Vous en parlez à un(e) ami(e) qui cherche une idée pour voyager autrement. <span class="orig">· n° d'origine 65</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">PARTEZ EN VOYAGE EN COMBI</div>
+<p class="ad-text">PARTEZ EN VOYAGE EN COMBI<br/>
+- Des vacances inoubliables !<br/>
+- Partez en famille ou entre amis.<br/>
+- Oubliez le temps et l’espace.<br/>
+- Louez un combi tout équipé :<br/>
+lit, kitchenette et climatisation.<br/>
+Contactez-nous !!!!!!<br/>
+Pour plus d’information : www.combiparadis.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 55 · LA CAMPAGNE EN ROULOTTE</span><span class="nu-w">Also renting a rolling home: comfort, budget, itinerary, and the freedom argument. Almost every counter-argument transfers.</span></div>
+
+
+</section>
+<section class="topic" id="p-24">
+<div class="topic-head">
+<span class="badge">24</span>
+<p class="intro">Vous avez lu cette publicité pour une friperie. Vous en parlez à un(e) ami(e) qui aime les vêtements. <span class="orig">· n° d'origine 77</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">FRIPERIE ÉPHÉMÈRE</div>
+<p class="ad-text">Vous ne savez pas quoi faire ce week-end ?<br/>
+Venez découvrir la grande<br/>
+Friperie Ephémère<br/>
+Pour renouveler sa garde-robe, sans se ruiner.<br/>
+Une chance pour vous et pour la planète !!!<br/>
+On vous attend au 305 Sq. Adanson, 75005 Paris</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 56 · VIDE DRESSING</span><span class="nu-w">Second-hand clothes again: hygiene, style, «je n&#x27;ai rien à me mettre de bien». Same money and planet arguments, same invitation.</span></div>
+
+
+</section>
+<section class="topic" id="p-25">
+<div class="topic-head">
+<span class="badge">25</span>
+<p class="intro">Vous avez lu cette annonce pour des ateliers d’artisanat. Vous en parlez à un(e) ami(e) qui recherche une nouvelle activité. <span class="orig">· n° d'origine 50</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ARTISANAT POUR TOUS</div>
+<p class="ad-text">Club Artisanat pour tous<br/>
+Venez découvrir les plaisirs de l’artisanat :<br/>
+apprenez le travail du cuir, la couture ou encore la poterie…<br/>
+Ateliers à la carte<br/>
+Des conseils pour les débutants<br/>
+Une exposition des créations en fin d’année…<br/>
+Des formations diplômantes<br/>
+N’hésitez plus ! Inscription sur :<br/>
+www.artisanatpourtous.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 28 · APPRENEZ À JARDINER</span><span class="nu-w">Learning a hands-on skill from zero again: no talent, no time, no space. Your beginner reassurance and si-clauses replay.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 6</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-26">
+<div class="topic-head">
+<span class="badge">26</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui aime le sport. <span class="orig">· n° d'origine 75</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">WEEK-END SPORTIF</div>
+<p class="ad-text">WEEK-ENDS SPORTIFS<br/>
+Weekends sportifs, sur mesure, adaptés à vos envies<br/>
+Seul, en couple ou entre amis<br/>
+Choisissez votre destination : mer ou montagne<br/>
+Randonnée, snowboard, ski, escalade<br/>
+kayak, surf, plongée, bateau…<br/>
+Et bien d’autres activités à découvrir !<br/>
+Contactez-nous sur : www.weekends-sportifs.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 39 · SÉJOUR AU SKI</span><span class="nu-w">Another sporty stay to sell: level, cost, equipment. The «même si tu n&#x27;as jamais fait» concession fits without rewriting.</span></div>
+
+
+</section>
+<section class="topic" id="p-27">
+<div class="topic-head">
+<span class="badge">27</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui cherche une activité pendant son temps libre. <span class="orig">· n° d'origine 39</span></p>
+</div>
+<p class="why"><b>Rôle civique / culturel</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LE MICRO EST À VOUS</div>
+<p class="ad-text">Vous souhaitez partager vos goûts ?<br/>
+ANIMEZ UNE ÉMISSION DE RADIO LOCALE !<br/>
+Le micro est à vous !<br/>
+Parlez des sujets qui vous intéressent.<br/>
+Faites découvrir votre région.<br/>
+Participez à un projet d’intérêt général.<br/>
+Débutants bienvenus - Plages horaires flexibles – Équipe conviviale<br/>
+Rejoignez-nous en vous inscrivant sur www.radioparticipative.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 40 · REPORTER PHOTO POUR LE MAGAZINE DE LA VILLE</span><span class="nu-w">Also «put your talent out in public»: same self-doubt, same selection worry, same community argument to answer with.</span></div>
+
+
+</section>
+<section class="topic" id="p-28">
+<div class="topic-head">
+<span class="badge">28</span>
+<p class="intro">Vous avez lu cette publicité pour une formation. Vous en parlez à un(e) ami(e) qui cherche un passe-temps. <span class="orig">· n° d'origine 62</span></p>
+</div>
+<p class="why"><b>Apprendre une compétence</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">APPRENEZ À JARDINER</div>
+<p class="ad-text">Apprenez à jardiner !!!<br/>
+Plantes, fruits, légumes…<br/>
+Participez à nos cours de jardinage.<br/>
+Devenez expert et créez votre jardin chez vous.<br/>
+Prenez soin de vos plantes sans produits chimiques.<br/>
+Contactez-nous : www.mainverte.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 25 · ARTISANAT POUR TOUS</span><span class="nu-w">Learning a practical skill again for someone with no time and no confidence: same beginner arguments, same «commence petit» close.</span></div>
+
+
+</section>
+<section class="topic" id="p-29">
+<div class="topic-head">
+<span class="badge">29</span>
+<p class="intro">Vous avez lu cette publicité pour un traiteur. Vous en parlez à un(e) ami(e) qui n’aime pas cuisiner. <span class="orig">· n° d'origine 70</span></p>
+</div>
+<p class="why"><b>Chef / traiteur à domicile</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LES CHAUDRONS GOURMANDS</div>
+<p class="ad-text">Traiteur « Les chaudrons gourmands »<br/>
+Pour notre premier anniversaire :<br/>
+notre carte de fidélité en promotion<br/>
+- Carte de 20 repas<br/>
+- Menus variés (végétariens, cuisine locale)<br/>
+- Commande facile, en ligne<br/>
+- Livraison sans frais où vous voulez<br/>
+www.leschaudronsgourmands.net</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 9 · UN CHEF DANS VOTRE CUISINE</span><span class="nu-w">Paying for food someone else prepares: the same cost objection and the same «moins cher qu&#x27;au restaurant» counter, on a different formula.</span></div>
+
+
+</section>
+<section class="topic" id="p-30">
+<div class="topic-head">
+<span class="badge">30</span>
+<p class="intro">Vous avez lu cette annonce pour un défi sportif. Vous en parlez à un(e) ami(e). <span class="orig">· n° d'origine 15</span></p>
+</div>
+<p class="why"><b>Événement caritatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DÉFI CYCLISTE POUR LA PLANÈTE</div>
+<p class="ad-text">Défi cycliste<br/>
+Participez au défi cycliste pour la planète !<br/>
+Pédalez et amassez des fonds<br/>
+Défi : 135 km par jour pendant 2 jours<br/>
+- Équipes de 5 cyclistes<br/>
+- Frais d'inscription libres<br/>
+La sécurité sur la route sera assurée par la police.<br/>
+Tous les profits iront à une association écologiste.<br/>
+Grande fête à l'arrivée !</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 10 · DANSE DU CŒUR</span><span class="nu-w">Sport for charity again: too hard, too shy, doesn&#x27;t like asking for money. Your good-cause close and rhythm concession transfer.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 7</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-31">
+<div class="topic-head">
+<span class="badge">31</span>
+<p class="intro">Vous avez lu cette offre d’emploi dans le journal. Vous en parlez à un(e) ami(e) qui aime voyager. <span class="orig">· n° d'origine 42</span></p>
+</div>
+<p class="why"><b>Voyager gratuitement</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DEVENEZ TESTEUR DE VOYAGES</div>
+<p class="ad-text">Vous avez du temps ?<br/>
+Vous souhaitez voyager dans le monde entier tous frais payés ?<br/>
+Devenez testeur de voyage !<br/>
+Vous êtes une personne curieuse et observatrice.<br/>
+Vous voulez découvrir de nouvelles cultures.<br/>
+Les nouveautés culinaires ne vous font pas peur.<br/>
+Activité accessible à tous<br/>
+Inscrivez-vous sur notre site et déposez votre candidature<br/>
+www.worldtest.com<br/>
+Namibie<br/>
+Polynésie<br/>
+Argentine<br/>
+Cambodge<br/>
+Seychelles<br/>
+Australie<br/>
+NEXT 5 km</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 78 · ACCOMPAGNANTS D’ENFANTS</span><span class="nu-w">Another travel-free-if-you-take-responsibility offer: same too-good-to-be-true scepticism, same profile and obligation questions to answer.</span></div>
+
+
+</section>
+<section class="topic" id="p-32">
+<div class="topic-head">
+<span class="badge">32</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui a de mauvaises habitudes alimentaires. <span class="orig">· n° d'origine 14</span></p>
+</div>
+<p class="why"><b>Bien-être / santé</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">NUTRITIONNISTES EN LIGNE</div>
+<p class="ad-text">Changez durablement vos habitudes alimentaires grâce à nutrition-en-ligne.com<br/>
+Un programme sur-mesure pour vous aider à :<br/>
+Reprendre confiance en vous<br/>
+Apprendre à manger équilibré sans se frustrer<br/>
+Retrouver un mode de vie sain<br/>
+Nous vous proposons :<br/>
+Un nutritionniste en ligne<br/>
+Des menus à faire chez vous<br/>
+Des conseils pratiques<br/>
+Venez nous rendre visite sur notre site Internet : nutrition-en-ligne.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 77 · SPORT SUR INTERNET</span><span class="nu-w">Online coaching again: does it work without a person in front of you, will you stick to it. Same discipline rebuttals and sur-mesure argument.</span></div>
+
+
+</section>
+<section class="topic" id="p-33">
+<div class="topic-head">
+<span class="badge">33</span>
+<p class="intro">Vous avez lu cette publicité pour un festival de musique. Vous en parlez à un(e) ami(e) avec qui vous voudriez aller. <span class="orig">· n° d'origine 60</span></p>
+</div>
+<p class="why"><b>Événement culturel / social</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">FESTIVAL EN PLEIN AIR</div>
+<p class="ad-text">Festival Océan Climax<br/>
+Vous aimez la musique ? Vous voulez participez à la protection des océans et du climat ? Rejoignez-nous.<br/>
+Du 10 au 13 septembre prochain<br/>
+- Large programmation musicale.<br/>
+- Débats avec des spécialistes de l’environnement.<br/>
+- Alimentation biologique et locale.<br/>
+- Billets à la journée ou passe 4 jours.<br/>
+- Actions de préservation de l’environnement.<br/>
+Réservations sur : www.oceanclimax.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 10 · DANSE DU CŒUR</span><span class="nu-w">Music plus a cause again: cost, crowds, sleeping there. The «on y va ensemble, c&#x27;est pour une bonne cause» close transfers.</span></div>
+
+
+</section>
+<section class="topic" id="p-34">
+<div class="topic-head">
+<span class="badge">34</span>
+<p class="intro">Vous avez lu cette offre de bénévolat. Vous en parlez à un(e) ami(e) qui a du temps libre. <span class="orig">· n° d'origine 17</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BÉNÉVOLAT SOLIDAIRE</div>
+<p class="ad-text">Devenez bénévole<br/>
+pour notre association du centre-ville<br/>
+Nous organisons chaque mois différents événements pour lesquels nous avons besoin de vous !<br/>
+Votre mission :<br/>
+- gestion du standard téléphonique<br/>
+- inscription et suivi des membres<br/>
+- organisation et animation d'événements<br/>
+Quelques heures par semaine suffisent !<br/>
+Nos actions : aide aux écoliers, écrivains publics, repas partagés...<br/>
+Rejoignez notre équipe dynamique !<br/>
+Inscription: 514 876-9653</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 62 · JOURNÉES DE LA CULTURE</span><span class="nu-w">Event volunteering again, with missions to choose from: same time objection, same «tu choisis ce que tu fais» answer and same sign-up close.</span></div>
+
+
+</section>
+<section class="topic" id="p-35">
+<div class="topic-head">
+<span class="badge">35</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui a besoin d’argent. <span class="orig">· n° d'origine 5</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">MODÈLES POUR ARTISTES</div>
+<p class="ad-text">Participez à notre prochaine exposition !<br/>
+Nos photographes recherchent des modèles de mains pour une grande exposition artistique<br/>
+Rencontres artistiques<br/>
+Nombreux avantages<br/>
+Formation courte gratuite<br/>
+Possibilité de demander un double de vos photos après l’exposition !<br/>
+Contactez-nous au 418 233 3325</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 40 · REPORTER PHOTO POUR LE MAGAZINE DE LA VILLE</span><span class="nu-w">Also putting yourself forward for a selection: same embarrassment and legitimacy doubts, same free-training and exposure arguments.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 8</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-36">
+<div class="topic-head">
+<span class="badge">36</span>
+<p class="intro">Vous avez lu cette publicité pour un week-end au cœur de la nature. Vous en parlez à un(e) ami(e) qui aime les escapades de la ville. <span class="orig">· n° d'origine 54</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">PARTEZ EN WEEK-END … DANS VOTRE BULLE</div>
+<p class="ad-text">Partez en week-end … dans votre bulle !<br/>
+Détente, calme et nature<br/>
+Ressourcez-vous dans nos bulles 100% écologiques<br/>
+Profitez de la nature et du calme le temps d’un week-end<br/>
+Contactez-nous : www.weekend-au-vert.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 61 · SÉJOUR DE DÉTOX NUMÉRIQUE</span><span class="nu-w">Another disconnect-in-nature weekend: boredom and price objections, same calm and eco arguments, same «tu en as besoin» move.</span></div>
+
+
+</section>
+<section class="topic" id="p-37">
+<div class="topic-head">
+<span class="badge">37</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui a besoin d’argent. <span class="orig">· n° d'origine 30</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CONSOMMATION COLLABORATIVE</div>
+<p class="ad-text">CONSOMMATION COLLABORATIVE.ORG<br/>
+Vous n’utilisez plus certains objets mais vous ne voulez pas les vendre ?<br/>
+Louez-les par Internet !<br/>
+La location est un nouveau système écologique :<br/>
+louez votre vélo pour la journée, ou votre appartement pour un weekend…<br/>
+Tous les articles sont acceptés !<br/>
+Ce système vous permet d’agir de manière éco-responsable et économique.<br/>
+N’hésitez plus, postez votre petite annonce sur notre site.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 50 · ÉCHANGES DE SERVICES ENTRE PARTICULIERS</span><span class="nu-w">Peer-to-peer again: is it safe, is it worth the time, who else uses it. Your trust and profile arguments carry straight over.</span></div>
+
+
+</section>
+<section class="topic" id="p-38">
+<div class="topic-head">
+<span class="badge">38</span>
+<p class="intro">Vous avez cette annonce. Vous en parlez à un(e) ami(e) qui aime bien écrire. <span class="orig">· n° d'origine 24</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CONCOURS DE CONTES</div>
+<p class="ad-text">CONCOURS DE CONTE<br/>
+Vous avez du talent et de la créativité ? Le festival du conte ouvre son concours !<br/>
+Venez raconter votre histoire devant le jury :<br/>
+- de 10 à 20 minutes<br/>
+- choix parmi plusieurs thèmes.<br/>
+Plusieurs prix à gagner !<br/>
+Les gagnants feront une tournée de spectacles.<br/>
+Renseignements et inscriptions : 450-621-1460</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 57 · ATELIERS D’ECRITURE POETIQUE</span><span class="nu-w">Writing put in front of other people again: same «je n&#x27;ai pas de talent» objection, same publication and encouragement arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-39">
+<div class="topic-head">
+<span class="badge">39</span>
+<p class="intro">Vous avez cette publicité pour une école de ski. Vous en parlez à un(e) ami(e) avec qui vous aimeriez partir en vacances. <span class="orig">· n° d'origine 79</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SÉJOUR AU SKI</div>
+<p class="ad-text">École de ski Ourson et flocon<br/>
+Nous vous proposons un séjour incluant :<br/>
+des moniteurs d’expérience<br/>
+des cours débutant ou avancé, pour toute la famille<br/>
+un cadre sécuritaire et amusant<br/>
+des skis et des planches à neige<br/>
+Des dizaines de destination à bas prix !<br/>
+Rendez-vous sur www.oursonetflocon.qc</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 46 · RANDONNEE EN CHIENS DE TRAINEAU</span><span class="nu-w">Snow with beginners again: cold, cost, never done it. The «débutants acceptés» and group arguments transfer unchanged.</span></div>
+
+
+</section>
+<section class="topic" id="p-40">
+<div class="topic-head">
+<span class="badge">40</span>
+<p class="intro">Vous avez lu cette offre d’emploi dans le journal. Vous en parlez à un(e) ami(e) qui cherche du travail. <span class="orig">· n° d'origine 20</span></p>
+</div>
+<p class="why"><b>Rôle civique / culturel</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">REPORTER PHOTO POUR LE MAGAZINE DE LA VILLE</div>
+<p class="ad-text">Participez à notre concours pour devenir<br/>
+Reporter photo pour le magazine de la ville<br/>
+Mettez votre talent au service de la communauté<br/>
+Apportez vos plus belles photos pour une première sélection<br/>
+Formation assurée<br/>
+Titre de transport gratuit pour tous vos déplacements<br/>
+Envoyez un mail : reporter-ville@rendez-vous-paris.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 38 · CONCOURS DE CONTES</span><span class="nu-w">Another competition with a jury: same self-doubt, same «tu ne perds rien à essayer» concession and the same concrete deadline close.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 9</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-41">
+<div class="topic-head">
+<span class="badge">41</span>
+<p class="intro">Vous avez lu cette publicité pour une association. Vous en parlez à un(e) ami(e) qui aime les espaces verts. <span class="orig">· n° d'origine 16</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ASSOCIATION POUR LA SAUVEGARDE DE LA MONTAGNE</div>
+<p class="ad-text">ASSOCIATION POUR LA SAUVEGARDE DE LA MONTAGNE<br/>
+Nous recherchons des bénévoles pour le ramassage des déchets sur les sentiers de randonnées<br/>
+Tous les premiers dimanches du mois (à partir de 7h)<br/>
+Vous planterez des panneaux pour sensibiliser les promeneurs<br/>
+Vous installerez des poubelles pour le recyclage<br/>
+Repas pique-nique à midi<br/>
+Pour plus d'information : www.pensonsenvert.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 47 · VILLE SANS VOITURES</span><span class="nu-w">Green activism again: it&#x27;s free, it&#x27;s good for you and for the city. Same scepticism about whether it changes anything.</span></div>
+
+
+</section>
+<section class="topic" id="p-42">
+<div class="topic-head">
+<span class="badge">42</span>
+<p class="intro">Vous avez lu cette offre d’emploi sur Internet. Vous en parlez à un(e) ami(e) qui cherche du travail. <span class="orig">· n° d'origine 1</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VENDEUR À DOMICILE EMBAL’PLAST</div>
+<p class="ad-text">DEVENEZ VENDEUR/VENDEUSE À DOMICILE<br/>
+Vendre des produits Embal’Plast, rien de plus facile !<br/>
+VDI<br/>
+Vendeur à Domicile Indépendant<br/>
+1. Vous invitez vos ami(e)s chez vous.<br/>
+2. Vous préparez un plat de votre choix.<br/>
+3. Vous présentez nos emballages plastiques alimentaires Embal’Plast.<br/>
+→ vos invités achètent votre plat emballé !<br/>
+Rémunération + nombreux cadeaux Embal’Plast<br/>
+Plus d’informations sur embalplast.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 65 · ENQUÊTES MONOPINION</span><span class="nu-w">Earning from home again: same «arnaque» objection, same questions on real earnings and commitment, same reassurance.</span></div>
+
+
+</section>
+<section class="topic" id="p-43">
+<div class="topic-head">
+<span class="badge">43</span>
+<p class="intro">Vous avez lu cette publicité pour des croisières en Méditerranée. Vous en parlez à un(e) ami(e) avec qui vous voulez partir en vacances. <span class="orig">· n° d'origine 76</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CROISIÈRE EN MÉDITERRANÉE</div>
+<p class="ad-text">Vivez une expérience inoubliable…<br/>
+…En Mer Méditerranée !<br/>
+Nous vous proposons 8 jours et 7 nuits<br/>
+et 2 escales au choix sur nos luxueux navires…<br/>
+À bord :<br/>
+• Des dizaines d'activités ludiques et sportives<br/>
+• Des restaurants gastronomiques<br/>
+• Des cabines tout confort<br/>
+• Une ambiance festive tous les soirs !<br/>
+OFFRE EXCEPTIONNELLE !<br/>
+En ce moment le tarif<br/>
+« groupes » est à -50%<br/>
+Rendez-vous sur www.croisiereplus.com<br/>
+et recevez notre catalogue</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 70 · LOCATION DE BATEAUX SANS PERMIS</span><span class="nu-w">Days on the water again: cost, seasickness, no licence. Your comfort and all-inclusive arguments fit the smaller boat too.</span></div>
+
+
+</section>
+<section class="topic" id="p-44">
+<div class="topic-head">
+<span class="badge">44</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui cherche des vêtements pour une fête. <span class="orig">· n° d'origine 66</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LOCATION (VÊTEMENTS ET ACCESSOIRES)</div>
+<p class="ad-text">Vous avez besoin de vêtements et accessoires pour une occasion particulière mais vous avez un petit budget ?<br/>
+Louez sur internet et économisez de l’argent!<br/>
+Avec Internet, c’est simple et facile !<br/>
+Rendez-vous sur notre site :<br/>
+Sélectionnez les articles<br/>
+Payez en ligne<br/>
+Recevez vos articles chez vous !<br/>
+Le site s’engage à vous rembourser si vous ne recevez pas vos articles.<br/>
+www.desvetementsalouer.qc.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 24 · FRIPERIE ÉPHÉMÈRE</span><span class="nu-w">Clothes without buying them again: hygiene, fit, budget. Same savings and planet arguments, same «on y va ce week-end» close.</span></div>
+
+
+</section>
+<section class="topic" id="p-45">
+<div class="topic-head">
+<span class="badge">45</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui cherche une activité amusante à faire en après-midi. <span class="orig">· n° d'origine 28</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">FLASH MOB</div>
+<p class="ad-text">La compagnie Dance'Art cherche des personnes volontaires pour participer à un ...<br/>
+FLASH MOB<br/>
+- Sept répétitions programmées à l'atelier de danse de la compagnie<br/>
+- Vidéo de la chorégraphie disponible en ligne<br/>
+Rencontrez et échangez avec des artistes, habitants ou amateurs de musique !<br/>
+Participez à un évènement sympathique dans votre ville !<br/>
+Plus d'infos sur notre site : www.tadanse.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 51 · ASSOCIATION DANSES REGIONALES</span><span class="nu-w">Dancing in a group again: shyness, rehearsals, «je danse mal». Your reassurance and ambiance arguments replay identically.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 10</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-46">
+<div class="topic-head">
+<span class="badge">46</span>
+<p class="intro">Vous avez lu cette publicité pour des randonnées en traîneau. Vous en parlez à un(e) ami(e) qui cherche une idée originale pour ses vacances d’hiver. <span class="orig">· n° d'origine 57</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">RANDONNEE EN CHIENS DE TRAINEAU</div>
+<p class="ad-text">Vous aimez la neige et l'aventure ? On vous propose :<br/>
+RANDONNEE EN CHIENS DE TRAINEAU<br/>
+Débutants acceptés<br/>
+Plusieurs circuits possibles<br/>
+Activité en groupe<br/>
+Guides professionnels<br/>
+Possibilité de s'occuper des chiens<br/>
+Réserver au 07 98 76 54 32</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 52 · CAMP ÉQUESTRE</span><span class="nu-w">Another animal activity outdoors for a beginner: cost, fear, cold. Same guides-and-beginners reassurance to reuse.</span></div>
+
+
+</section>
+<section class="topic" id="p-47">
+<div class="topic-head">
+<span class="badge">47</span>
+<p class="intro">Vous avez lu cette annonce pour une association. Vous en parlez à un(e) ami(e) qui habite en ville. <span class="orig">· n° d'origine 12</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VILLE SANS VOITURES</div>
+<p class="ad-text">POUR UNE VILLE SANS VOITURES<br/>
+VOTRE VILLE SANS VOITURES :<br/>
+OUI C’EST POSSIBLE !<br/>
+Devenez membre bénévole de notre association « anti-pollution » : c’est facile, c’est gratuit et c’est bon pour votre santé.<br/>
+Ambiance conviviale !<br/>
+Vos missions :<br/>
+Distribution de brochures d’information.<br/>
+Animation de réunions d’échanges d’idées.<br/>
+Collecte de vieux vélos et de trottinettes pour recyclage.<br/>
+Participation annuelle à une grande marche sans moteur.<br/>
+Plus de renseignements sur www.villesansvoitures.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 41 · ASSOCIATION POUR LA SAUVEGARDE DE LA MONTAGNE</span><span class="nu-w">Environmental association again: free, collective, good for your health. The same «ça ne sert à rien» objection to dismantle.</span></div>
+
+
+</section>
+<section class="topic" id="p-48">
+<div class="topic-head">
+<span class="badge">48</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui aime le sport. <span class="orig">· n° d'origine 8</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DES COURS POUR AIDER.COM</div>
+<p class="ad-text">Vous êtes bon bricoleur, jardinier ou cuisinier ?<br/>
+Vous recherchez une rémunération grâce à votre passe-temps favori ?<br/>
+Vous avez du temps libre ?<br/>
+« des cours pour aider.com »<br/>
+recherche des passionnés pour donner des cours<br/>
+de bricolage, de jardinage,<br/>
+de peinture ou de cuisine.<br/>
+Pour plus d'informations sur nos recrutements<br/>
+n'hésitez pas à nous contacter sur<br/>
+www.descourspouraider.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 59 · DES MONITEURS ET DES ANIMATEURS</span><span class="nu-w">Getting paid for what you already enjoy: same doubts about qualification and pay, same training and flexibility answers.</span></div>
+
+
+</section>
+<section class="topic" id="p-49">
+<div class="topic-head">
+<span class="badge">49</span>
+<p class="intro">Vous avez lu cette publicité pour une expérience atypique. Vous en parlez à un(e) ami(e) qui aime l’aventure. <span class="orig">· n° d'origine 23</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">EXPÉRIENCE DORMIR AVEC DES LOUPS</div>
+<p class="ad-text">EXPERIENCE DORMIR AVEC DES LOUPS<br/>
+Vivez une expérience incroyable au parc FestaPlus !<br/>
+Dormez en famille avec les loups.<br/>
+Chalets confortables.<br/>
+Plus d'information sur notre site :<br/>
+www.paris.experience.rendezvous.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 46 · RANDONNEE EN CHIENS DE TRAINEAU</span><span class="nu-w">Animals and the cold again, sold as an unforgettable experience: same fear and price objections, same guides argument.</span></div>
+
+
+</section>
+<section class="topic" id="p-50">
+<div class="topic-head">
+<span class="badge">50</span>
+<p class="intro">Vous avez lu cette annonce sur Internet. Vous en parlez à un(e) ami(e) qui aime rendre service. <span class="orig">· n° d'origine 52</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ÉCHANGES DE SERVICES ENTRE PARTICULIERS</div>
+<p class="ad-text">Échanges de services entre particuliers<br/>
+1. Créez votre profil en quelques minutes sur Internet.<br/>
+2. Décrivez les services que vous pouvez rendre et vos disponibilités.<br/>
+3. Et voilà ! Vous êtes dans le réseau.<br/>
+Maud s'occupe des animaux de Lucie<br/>
+Lucie rédige des cv pour Alex et s'occupe des papiers de…<br/>
+Leyla…<br/>
+Yann apprend la photo à Leyla<br/>
+Alex emprunte le vélo de Yann<br/>
+Vous aussi vous souhaitez rendre service ?<br/>
+À Montréal, Casablanca ou Marseille… Inscrivez-vous sur<br/>
+www.echangesdeservice.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 4 · VENTECO.COM</span><span class="nu-w">Exchange between individuals again: is it safe, is it worth it, will anyone answer. Same trust and profile-building rebuttals.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 11</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-51">
+<div class="topic-head">
+<span class="badge">51</span>
+<p class="intro">Vous avez lu cette publicité d’une association. Vous en parlez à un(e) ami(e) qui aime les activités culturelles. <span class="orig">· n° d'origine 44</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ASSOCIATION DANSES REGIONALES</div>
+<p class="ad-text">Vous aimez danser et découvrir différentes cultures<br/>
+Rejoignez-nous<br/>
+Association danses régionales<br/>
+Apprendre les danses du monde<br/>
+Enseigner des danses de sa région ou de son pays<br/>
+Ambiance conviviale<br/>
+Préparation de la fête annuelle du quartier<br/>
+Envoyez un mail : folklore@danse_du_monde.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 12 · CUISINE COMMUNAUTAIRE</span><span class="nu-w">Sharing what you know with a group again: same time and shyness objections, same conviviality and culture arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-52">
+<div class="topic-head">
+<span class="badge">52</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui aime faire du sport. <span class="orig">· n° d'origine 38</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CAMP ÉQUESTRE</div>
+<p class="ad-text">CENTRE ÉQUESTRE<br/>
+Offrez-vous une fin de semaine sportive à notre camp équestre !<br/>
+Nous vous proposons :<br/>
+• de connaitre le cheval et ses équipements.<br/>
+• d’apprendre à guider le cheval.<br/>
+• de prendre soin des montures.<br/>
+Venez profiter d’un cadre magique !<br/>
+Hébergement confortable. Repas bio.<br/>
+Renseignements et tarifs sur<br/>
+www.campequestre.qc.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 26 · WEEK-END SPORTIF</span><span class="nu-w">Another sporty weekend to sell: level, cost, fear of the animal or the terrain. Same reassurance and «on commence doucement» concession.</span></div>
+
+
+</section>
+<section class="topic" id="p-53">
+<div class="topic-head">
+<span class="badge">53</span>
+<p class="intro">Vous avez lu cette publicité pour une association. Vous en parlez à un(e) ami(e) qui a du temps libre. <span class="orig">· n° d'origine 35</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BÉNÉVOLAT À LA MAISON DES JOUETS</div>
+<p class="ad-text">Devenez bénévole à la MAISON DES JOUETS<br/>
+- Notre association permet aux enfants de 0 à 12 ans d'emprunter des jouets -<br/>
+Nous recherchons une personne pour :<br/>
+• Accueillir et conseiller les enfants<br/>
+• Vérifier et classer les jouets<br/>
+• Surveiller l'espace jeux<br/>
+Emploi du temps adaptable selon vos disponibilités (jours d'ouverture : mercredi, vendredi et samedi)<br/>
+Appelez-nous au 514-555-5958</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 60 · ANIMATEURS DE KERMESSE</span><span class="nu-w">Volunteering around children again: hours, responsibility, no experience. Your flexibility and «tu verras, c&#x27;est gratifiant» close transfer.</span></div>
+
+
+</section>
+<section class="topic" id="p-54">
+<div class="topic-head">
+<span class="badge">54</span>
+<p class="intro">Vous avez lu cette annonce dans le journal. Vous en parlez à un(e) ami(e) qui cherche du travail. <span class="orig">· n° d'origine 29</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">JE ME PROPOSE</div>
+<p class="ad-text">Vous avez du temps libre pour faire les courses d’une personne âgée ou aller chercher un enfant à l’école ?<br/>
+Inscrivez-vous sur JE ME PROPOSE.ORG pour déposer l’annonce de votre choix !<br/>
+Nous vous proposons des activités sans nécessité d’avoir un engagement régulier. Vous fixez vos propres tarifs et disponibilités.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 22 · LES CLEFS DU JARDIN</span><span class="nu-w">Small paid services again: pay, schedule, whether it is worth the trouble. Same arguments, a different set of tasks.</span></div>
+
+
+</section>
+<section class="topic" id="p-55">
+<div class="topic-head">
+<span class="badge">55</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) avec qui vous voulez passer des vacances. <span class="orig">· n° d'origine 51</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LA CAMPAGNE EN ROULOTTE</div>
+<p class="ad-text">Découvrez la campagne française en louant une roulotte<br/>
+Découvrez nos circuits : visites de villages typiques et étapes chez des agriculteurs de la région.<br/>
+En famille ou entre amis<br/>
+Une ou plusieurs roulottes<br/>
+Séjours de 3 à 15 jours<br/>
+Guides disponibles<br/>
+Renseignements et réservation sur notre site<br/>
+www.france-en-roulotte.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 3 · SÉJOUR CANOT CAMPING</span><span class="nu-w">Another slow rustic holiday: comfort, boredom, budget. The «déconnecter, prendre le temps» argument recycles completely.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 12</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-56">
+<div class="topic-head">
+<span class="badge">56</span>
+<p class="intro">Vous avez lu cette publicité dans le journal. Vous en parlez à un(e) ami(e) qui aime la mode. <span class="orig">· n° d'origine 78</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VIDE DRESSING</div>
+<p class="ad-text">Trop d’affaires dans vos placards ?<br/>
+Participez à notre soirée vide dressing<br/>
+- Débarrassez-vous de vos vieux vêtements, chaussures etc.<br/>
+- Gagnez un peu d’argent !<br/>
+- Participez à un événement convivial !<br/>
+INSCRIVEZ-VOUS VITE POUR RESERVER VOTRE PLACE !<br/>
+www.levidedressingmalin.com<br/>
+Pratique, écologique et solidaire !<br/>
+À la fin de la soirée, une association peut récupérer vos vêtements invendus.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 67 · VIDE-GRENIER DE QUARTIER</span><span class="nu-w">Clearing out and selling again: attachment to things, the hassle, will anyone buy. Same money and declutter arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-57">
+<div class="topic-head">
+<span class="badge">57</span>
+<p class="intro">Vous avez lu cette publicité pour un atelier d’écriture poétique. Vous en parlez à un(e) ami(e) qui cherche une activité créative pour ses heures libres. <span class="orig">· n° d'origine 27</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ATELIERS D’ECRITURE POETIQUE</div>
+<p class="ad-text">Vous aimez écrire, vous aimez la poésie<br/>
+Ateliers d’écriture poétique<br/>
+Lecture de poèmes<br/>
+Atelier d’écriture<br/>
+Concours d’écriture<br/>
+Publication dans la revue de la ville<br/>
+Envoyez un mail : poésie@atelier_écriture.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 63 · CLUB DE LECTURE</span><span class="nu-w">Reading and writing aloud in front of others: same shyness objection, same sharing argument, same low-commitment close.</span></div>
+
+
+</section>
+<section class="topic" id="p-58">
+<div class="topic-head">
+<span class="badge">58</span>
+<p class="intro">Vous avez lu cette annonce dans le journal. Vous en parlez à un(e) ami(e) qui aime les animaux. <span class="orig">· n° d'origine 7</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CHIEN D’AVEUGLES</div>
+<p class="ad-text">Devenez famille d’accueil pour chien-guide pour une période de 10 mois.<br/>
+Ensuite, il poursuivra son cheminement de chien-guide pour aveugle.<br/>
+Vous devrez apprendre au chien à :<br/>
+- être propre<br/>
+- répondre à son nom<br/>
+- comprendre des consignes simples (assis, couché)<br/>
+- se familiariser avec les endroits publics<br/>
+Nous fournissons la nourriture !<br/>
+Plus de renseignements sur<br/>
+www.chienguide.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 14 · UN CHAT POUR COMBATTRE LE STRESS</span><span class="nu-w">Taking an animal into your home again: responsibility, attachment, time. Your reassurance and si-clauses transfer with the species changed.</span></div>
+
+
+</section>
+<section class="topic" id="p-59">
+<div class="topic-head">
+<span class="badge">59</span>
+<p class="intro">Vous avez lu cette annonce dans un centre de loisirs. Vous en parlez à un(e) ami(e) qui est très dynamique. <span class="orig">· n° d'origine 56</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">DES MONITEURS ET DES ANIMATEURS</div>
+<p class="ad-text">Nous recherchons<br/>
+Des moniteurs et des animateurs<br/>
+Centres de loisirs pour jeunes<br/>
+Randonnées en montagne<br/>
+Journées à la plage<br/>
+Jeux et animations<br/>
+Stage de formation<br/>
+Salaire motivant<br/>
+Visitez notre site :<br/>
+www.animation centre loisir.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 68 · ORGANISMES DE SÉJOURS LINGUISTIQUES</span><span class="nu-w">Getting paid to look after young people again: responsibility, pay, training. Same arguments and the same qualification worry to answer.</span></div>
+
+
+</section>
+<section class="topic" id="p-60">
+<div class="topic-head">
+<span class="badge">60</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui vient d’emménager en ville. <span class="orig">· n° d'origine 10</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ANIMATEURS DE KERMESSE</div>
+<p class="ad-text">KERMESSE<br/>
+L'école Pitchounet organise sa fête de fin d'année !<br/>
+Nous recherchons des parents volontaires pour :<br/>
+- participer à l'organisation<br/>
+- animer les jeux<br/>
+- tenir les stands<br/>
+L'argent récolté servira aux prochaines sorties de l'école.<br/>
+Contact : www.ecole-pitchounet.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 17 · CENTRE COMMUNAUTAIRE</span><span class="nu-w">The neighbourhood again for someone who has just moved: same social hesitation, same «tu vas connaître tes voisins» argument.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 13</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-61">
+<div class="topic-head">
+<span class="badge">61</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui passe tout son temps sur les écrans. <span class="orig">· n° d'origine 18</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SÉJOUR DE DÉTOX NUMÉRIQUE</div>
+<p class="ad-text">Libérez-vous de vos instruments numériques !<br/>
+Offrez-vous un séjour de « détox numérique » à la campagne…<br/>
+Se déconnecter (de votre téléphone, ordinateur, tablette)<br/>
+Rompre avec le quotidien<br/>
+Se ressourcer face à la mer<br/>
+Accessible à tous - stage de 2 jours ou plus - chambres d'hôtes (maximum : 10 personnes) - nombreuses activités proposées - promotions en basse saison<br/>
+Contactez-nous par téléphone au 802 833 844</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 32 · NUTRITIONNISTES EN LIGNE</span><span class="nu-w">Changing a stubborn habit again: same «je n&#x27;y arriverai jamais» objection, same programme and «tu te sentiras mieux» conditional.</span></div>
+
+
+</section>
+<section class="topic" id="p-62">
+<div class="topic-head">
+<span class="badge">62</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui aime bien cuisiner. <span class="orig">· n° d'origine 11</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">JOURNÉES DE LA CULTURE</div>
+<p class="ad-text">CULTURE POUR TOUS<br/>
+C<br/>
+JOURNÉES DE LA CULTURE<br/>
+le week-end prochain<br/>
+Devenez bénévole et participez au bon déroulement de cette journée.<br/>
+Grand choix de missions bénévoles : guide, renfort sur les points d'accueil…<br/>
+Horaires flexibles (matin ou après-midi)<br/>
+Pour vous remercier : monuments, musées et parcs seront gratuits pendant un an.<br/>
+Renseignements : www.journeesculture.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 34 · BÉNÉVOLAT SOLIDAIRE</span><span class="nu-w">Event volunteering with missions to pick again: same time objection, same choice and «une seule journée» concession.</span></div>
+
+
+</section>
+<section class="topic" id="p-63">
+<div class="topic-head">
+<span class="badge">63</span>
+<p class="intro">Vous avez lu cette annonce dans le journal. Vous en parlez à un(e) ami(e) qui cherche une activité de loisir. <span class="orig">· n° d'origine 43</span></p>
+</div>
+<p class="why"><b>Bénévolat / solidarité</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CLUB DE LECTURE</div>
+<p class="ad-text">Club de lecture<br/>
+La bibliothèque Yves-Thériault recherche des bénévoles pour des lectures à voix haute.<br/>
+Vous aimez lire ?<br/>
+Vous avez le goût du partage ?<br/>
+Publics divers - Lectures variées<br/>
+Échanges après lectures - Choix des séances<br/>
+Renseignements et inscriptions sur www.biblio-y-t.qc.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 21 · BÉNÉVOLES POUR SENIORS</span><span class="nu-w">Reading workshops again, for an association: same time and shyness objections, same «quelques heures par mois» answer.</span></div>
+
+
+</section>
+<section class="topic" id="p-64">
+<div class="topic-head">
+<span class="badge">64</span>
+<p class="intro">Vous avez lu cette publicité pour des cours de théâtre. Vous en parlez à un(e) ami(e) qui est très timide. <span class="orig">· n° d'origine 13</span></p>
+</div>
+<p class="why"><b>Atelier créatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VAINCRE SA TIMIDITÉ PAR LE THÉÂTRE</div>
+<p class="ad-text">PREMIÈRE SÉANCE OFFERTE<br/>
+ATELIER DE THÉÂTRE CONTREPOINT<br/>
+VAINCRE SA TIMIDITÉ GRÂCE AU THÉÂTRE<br/>
+Travaillez de manière ludique sur la confiance en soi, la timidité, le stress au travail…<br/>
+Au programme :<br/>
+improvisations, découverte de textes contemporains, spectacle de fin d’année.<br/>
+Formule : atelier ouvert à tous. Petits groupes, séance hebdomadaire de 3h.<br/>
+Inscrivez-vous sur :<br/>
+theatre.contrepoint.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 45 · FLASH MOB</span><span class="nu-w">Performing in front of people again: same shyness, same rehearsal commitment, same «personne ne te regardera toi» reassurance.</span></div>
+
+
+</section>
+<section class="topic" id="p-65">
+<div class="topic-head">
+<span class="badge">65</span>
+<p class="intro">Vous avez lu cette annonce pour des sondages rémunérés. Vous en parlez à un(e) ami(e) qui cherche un complément de revenus. <span class="orig">· n° d'origine 34</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ENQUÊTES MONOPINION</div>
+<p class="ad-text">MonOpinion.com<br/>
+Participez à nos enquêtes en ligne et recevez des récompenses !<br/>
+Vous vous inscrivez sur le site MonOpinion.com<br/>
+Vous recevez par mail des sondages sur des programmes télévisés, des marques, des nouveaux produits…<br/>
+Vous êtes libre d’y répondre ou non.<br/>
+Vous répondez à nos enquêtes : vous êtes rémunéré(e) et vous gagnez des cadeaux et des bons d’achat.<br/>
+N’attendez plus, inscrivez-vous et rejoignez la communauté<br/>
+MonOpinion.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 31 · DEVENEZ TESTEUR DE VOYAGES</span><span class="nu-w">Another «is this real money or a scam» pitch: same earnings, sign-up and time arguments, on a different reward.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 14</span><span class="phase">Renforcement (répétition espacée)</span></div>
+<section class="topic" id="p-66">
+<div class="topic-head">
+<span class="badge">66</span>
+<p class="intro">Vous avez lu cette publicité dans votre ville. Vous en parlez à un(e) ami(e) qui cherche une idée originale pour son week-end. <span class="orig">· n° d'origine 26</span></p>
+</div>
+<p class="why"><b>Aventure / sport</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VIVEZ L’EXPERIENCE DE LA CHUTE LIBRE</div>
+<p class="ad-text">Vivez l’expérience de la chute libre !<br/>
+- En tandem ou en solo.<br/>
+- Une équipe professionnelle à vos côtés.<br/>
+- Des sites d’exception.<br/>
+- Des photos et vidéos de votre saut pour immortaliser ce moment.<br/>
+Une expérience inoubliable !<br/>
+Retrouvez-nous sur www.experiencechutelibre.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 49 · EXPÉRIENCE DORMIR AVEC DES LOUPS</span><span class="nu-w">Fear sold as a once-in-a-lifetime experience again: supervision, safety, the memory afterwards. Same rebuttals, new setting.</span></div>
+
+
+</section>
+<section class="topic" id="p-67">
+<div class="topic-head">
+<span class="badge">67</span>
+<p class="intro">Vous avez lu cette annonce dans le journal. Vous en parlez à un(e) ami(e) qui a des affaires à vendre. <span class="orig">· n° d'origine 80</span></p>
+</div>
+<p class="why"><b>Revente / économie du partage</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VIDE-GRENIER DE QUARTIER</div>
+<p class="ad-text">Vide Grenier<br/>
+Participez au vide grenier de votre quartier !<br/>
+Videz votre grenier et donnez une nouvelle vie à vos vieux objets, vêtements…<br/>
+Inscrivez-vous pour participer au prochain vide grenier organisé par la mairie<br/>
+Renseignements et inscriptions : 450-629-6997</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 24 · FRIPERIE ÉPHÉMÈRE</span><span class="nu-w">Another second-hand neighbourhood event: hassle, attachment, «personne n&#x27;en voudra». Same money, planet and «on y va ensemble» arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-68">
+<div class="topic-head">
+<span class="badge">68</span>
+<p class="intro">Vous avez lu cette publicité pour un atelier de théâtre. Vous en parlez à un(e) ami(e) qui cherche une activité créative pour ses après-midis libres. <span class="orig">· n° d'origine 6</span></p>
+</div>
+<p class="why"><b>Gagner de l'argent</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ORGANISMES DE SÉJOURS LINGUISTIQUES</div>
+<p class="ad-text">NOTRE ORGANISME DE SEJOURS LINGUISTIQUES<br/>
+RECRUTE DES ACCOMPAGNATEURS/TRICES DE GROUPES DE JEUNES<br/>
+Description des missions :<br/>
+- Accompagner des jeunes partant en séjour (trajets, visites…).<br/>
+- Accueillir les groupes et coordonner leurs départs ou retours en gare.<br/>
+Profil recherché :<br/>
+- Personnes responsables, intéressées par l'encadrement de jeunes.<br/>
+- Disponibles pendant les vacances scolaires.<br/>
+- Aucune formation exigée !<br/>
+Contact :<br/>
+Envoyez votre CV et lettre de motivation à<br/>
+voyagesjeunes@sejours.qc.ca</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 69 · GUIDE LOCAL POUR ETUDIANTS ETRANGERS</span><span class="nu-w">Accompanying and helping newcomers again: time, responsibility, language. Your reassurance and benefit arguments transfer directly.</span></div>
+
+
+</section>
+<section class="topic" id="p-69">
+<div class="topic-head">
+<span class="badge">69</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui connaît bien la ville. <span class="orig">· n° d'origine 32</span></p>
+</div>
+<p class="why"><b>Rôle civique / culturel</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">GUIDE LOCAL POUR ETUDIANTS ETRANGERS</div>
+<p class="ad-text">Devenez<br/>
+Guide local pour étudiants étrangers<br/>
+Aider les étudiants étrangers :<br/>
+A s'adapter<br/>
+A comprendre le fonctionnement des transports<br/>
+A repérer les coins intéressants de la ville<br/>
+Titre de transport gratuit pour tous vos déplacements<br/>
+Envoyez un mail :<br/>
+référent-local@rendez-vous-paris.fr</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 68 · ORGANISMES DE SÉJOURS LINGUISTIQUES</span><span class="nu-w">Helping young people find their feet again: time, language, what you get out of it. Same arguments, a paid version this time.</span></div>
+
+
+</section>
+<section class="topic" id="p-70">
+<div class="topic-head">
+<span class="badge">70</span>
+<p class="intro">Vous avez lu cette publicité pour des vacances sur l’eau. Vous en parlez à un(e) ami(e) qui cherche une idée originale pour ses vacances. <span class="orig">· n° d'origine 55</span></p>
+</div>
+<p class="why"><b>Voyage / évasion</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">LOCATION DE BATEAUX SANS PERMIS</div>
+<p class="ad-text">LOCATION DE BATEAUX SANS PERMIS<br/>
+- Séjour de 2 à 10 jours<br/>
+- Aucune expérience ou permis nécessaire<br/>
+- Bateaux tout confort<br/>
+- Visites étapes<br/>
+La location d'un bateau est une occasion unique de découvrir cette région de façon insolite. Tous nos itinéraires sont adaptés pour les navigateurs débutants ou expérimentés.<br/>
+Itinéraires et réservation sur notre site : www.bateauxcroisières.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 23 · PARTEZ EN VOYAGE EN COMBI</span><span class="nu-w">Rent it and go again: no licence, no experience, comfort, price. Your reassurance moves fit the boat and the road equally.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 15</span><span class="phase">Optionnel — à sauter si le temps manque</span></div>
+<section class="topic" id="p-71">
+<div class="topic-head">
+<span class="badge">71</span>
+<p class="intro">Vous avez lu cette annonce pour des séjours de restauration du patrimoine . Vous en parlez à un(e) ami(e) qui prend bientôt des vacances. <span class="orig">· n° d'origine 3</span></p>
+</div>
+<p class="why"><b>Séjour de restauration du patrimoine</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">PATRIMOINE-RESTAURATION</div>
+<p class="ad-text">Avec PATRIMOINE-RESTAURATION<br/>
+Passez des vacances originales : participez à la restauration de monuments historiques !<br/>
+Restauration de bâtiments historiques.<br/>
+Nettoyage de la végétation, tri de pierres et reconstruction de murs.<br/>
+Activités encadrées par des professionnels.<br/>
+Séjours de 2 semaines.<br/>
+Hébergement sous tente.<br/>
+Groupes de 20 personnes.<br/>
+Réservez dès maintenant et profitez d’une remise exceptionnelle !<br/>
+Pour plus d’informations, allez sur www.patrimoine-restauration.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 41 · ASSOCIATION POUR LA SAUVEGARDE DE LA MONTAGNE</span><span class="nu-w">Volunteering outdoors in a team again: physical effort, early starts, «ce ne sont pas des vacances». Same usefulness argument.</span></div>
+
+
+</section>
+<section class="topic" id="p-72">
+<div class="topic-head">
+<span class="badge">72</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui voyage souvent. <span class="orig">· n° d'origine 4</span></p>
+</div>
+<p class="why"><b>Rôle civique / culturel</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">MUSICIENS DU METRO</div>
+<p class="ad-text">Musiciens du métro<br/>
+Vous avez toujours rêvé de participer à la sélection des talents qui se produiront sur la grande scène du métropolitain ?<br/>
+Métro de Lyon vous propose de faire partie du jury.<br/>
+Assistez aux prochains castings des musiciens du métro !<br/>
+Plus d’info sur notre site : www.metrolyonnouveau.ly</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 7 · DEVENEZ CRITIQUE DE CINÉMA</span><span class="nu-w">Judging other people&#x27;s work again: legitimacy, time, and the access it gives. Same arguments, a different selection to sit on.</span></div>
+
+
+</section>
+<section class="topic" id="p-73">
+<div class="topic-head">
+<span class="badge">73</span>
+<p class="intro">Vous avez lu cette publicité pour une session de Zumba. Vous en parlez à un(e) ami(e) qui aime le sport. <span class="orig">· n° d'origine 74</span></p>
+</div>
+<p class="why"><b>Événement caritatif</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BOUGE ET DONNE</div>
+<p class="ad-text">Danse avec le cœur<br/>
+Vous aimez le sport et la danse ?<br/>
+Participez à une session de Zumba en contribuant à une collecte de fonds au profit des enfants malades !<br/>
+Pour plus d'informations contactez-nous : 07 98 76 54 32</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 30 · DÉFI CYCLISTE POUR LA PLANÈTE</span><span class="nu-w">Sport for a cause again: fitness, shyness, fundraising. Same good-cause close and the same «tu iras à ton rythme» concession.</span></div>
+
+
+</section>
+<section class="topic" id="p-74">
+<div class="topic-head">
+<span class="badge">74</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui aime cuisiner. <span class="orig">· n° d'origine 37</span></p>
+</div>
+<p class="why"><b>Cuisiner &amp; partager</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">REPAS CHEZ L’HABITANT</div>
+<p class="ad-text">REPAS CHEZ L'HABITANT<br/>
+Faites DÉCOUVRIR à des voyageurs du monde entier LES PLATS que vous aimez…<br/>
+CUISINEZ avec eux, chez vous !<br/>
+Rejoignez nos 20 000 hôtes déjà inscrits :<br/>
+Inscription simple et gratuite sur Internet<br/>
+Échange direct avec le/les voyageur(s)<br/>
+Choix libre du prix du repas<br/>
+UNE OCCASION DE FAIRE DE BELLES RENCONTRES !<br/>
+Renseignements complémentaires sur : www.chezlhabitant.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 12 · CUISINE COMMUNAUTAIRE</span><span class="nu-w">Cooking with strangers again: privacy, time, «je ne cuisine pas si bien». Same conviviality arguments and sign-up close.</span></div>
+
+
+</section>
+<section class="topic" id="p-75">
+<div class="topic-head">
+<span class="badge">75</span>
+<p class="intro">Vous avez lu cette publicité pour un traiteur à domicile . Vous en parlez à un(e) ami(e) qui organise une soirée. <span class="orig">· n° d'origine 69</span></p>
+</div>
+<p class="why"><b>Chef / traiteur à domicile</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CHEF À DOMICILE</div>
+<p class="ad-text">ARTHUR MONIER VOTRE CHEF À DOMICILE<br/>
+Une cuisine exotique chez vous, dans le confort de votre maison !<br/>
+Économique et savoureux, c'est bien mieux qu'au restaurant !<br/>
+Souper en amoureux, réunion de famille, soirée entre amis ou entre collègues : savourez ces moments autour d'un repas magique !<br/>
+Contactez-moi au 418-555-3636.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 29 · LES CHAUDRONS GOURMANDS</span><span class="nu-w">Paying for someone else&#x27;s cooking again: cost objection, occasion, menus. The «moins cher qu&#x27;au restaurant» counter transfers.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 16</span><span class="phase">Optionnel — à sauter si le temps manque</span></div>
+<section class="topic" id="p-76">
+<div class="topic-head">
+<span class="badge">76</span>
+<p class="intro">Vous avez lu cette publicité pour un espace de bricolage. Vous en parlez à un(e) ami(e) qui fait beaucoup de travaux. <span class="orig">· n° d'origine 33</span></p>
+</div>
+<p class="why"><b>Atelier de bricolage partagé</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ESPACE BRICOLAGE</div>
+<p class="ad-text">Le bon plan PRO<br/>
+ESPACE BRICOLAGE<br/>
+Vous avez un projet de rénovation ?<br/>
+Vous avez besoin d’espace pour bricoler ?<br/>
+Devenez membre : notre association est là pour vous !<br/>
+Avantages pour les membres :<br/>
+- Location d’outils<br/>
+- Location d’un espace de travail<br/>
+- Formations sur différents thèmes<br/>
+- Participation aux réunions de l’organisme<br/>
+Participez à une économie solidaire et à un mode de vie écologique !<br/>
+Toutes nos informations sur : www.espace-bricolage.org</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 13 · GARAGE SOLIDAIRE</span><span class="nu-w">Fixing things yourself with help again: no skill, no tools, is it worth the membership. Same rebuttals, a car instead of a wall.</span></div>
+
+
+</section>
+<section class="topic" id="p-77">
+<div class="topic-head">
+<span class="badge">77</span>
+<p class="intro">Vous avez lu cette publicité. Vous en parlez à un(e) ami(e) qui veut faire une activité sportive. <span class="orig">· n° d'origine 58</span></p>
+</div>
+<p class="why"><b>Apprendre une compétence</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">SPORT SUR INTERNET</div>
+<p class="ad-text">Votre entraînement sportif sur Internet<br/>
+Faites du sport<br/>
+avec un entraîneur certifié<br/>
+Plusieurs forfaits disponibles<br/>
+ou cours à la carte<br/>
+Séances sur-mesure<br/>
+selon vos objectifs<br/>
+Plus de 20 cours proposés<br/>
+plus de 400 exercices en vidéo<br/>
+Disponibilité 7j/7 et 24h/24<br/>
+Profitez du confort de votre maison<br/>
+Gagnez du temps sur vos déplacements<br/>
+Cours d'essai gratuit !<br/>
+Visitez : www.sportenligne.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 8 · COURS DE LANGUE PAR TÉLÉPHONE</span><span class="nu-w">Learning remotely with a professional again: discipline, price, does it really work. Same flexibility and sur-mesure arguments.</span></div>
+
+
+</section>
+<section class="topic" id="p-78">
+<div class="topic-head">
+<span class="badge">78</span>
+<p class="intro">Vous avez lu cette annonce. Vous en parlez à un(e) ami(e) qui voyage souvent. <span class="orig">· n° d'origine 22</span></p>
+</div>
+<p class="why"><b>Voyager gratuitement</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">ACCOMPAGNANTS D’ENFANTS</div>
+<p class="ad-text">Voyagez gratuitement en train, en avion ou en voiture en accompagnant des enfants.<br/>
+Vous aimez les enfants et vous avez plus de 18 ans ?<br/>
+DEVENEZ ACCOMPAGNATEUR D’ENFANTS<br/>
+- Créez votre profil sur notre site en répondant à notre questionnaire.<br/>
+- Les parents de notre réseau prennent contact avec vous.*<br/>
+- Vous accompagnez des enfants lors de vos trajets personnels, et pour vous le transport est gratuit !<br/>
+Plus de renseignements :<br/>
+www.accompagnernosenfants.com<br/>
+*Après vérification des informations données.</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 11 · DEVENEZ GARDIEN DE MAISONS</span><span class="nu-w">Responsibility in exchange for free travel again: same «c&#x27;est trop beau» scepticism, same profile and obligations to explain.</span></div>
+
+
+</section>
+<section class="topic" id="p-79">
+<div class="topic-head">
+<span class="badge">79</span>
+<p class="intro">Vous avez lu cette publicité pour une bibliothèque numérique. Vous en parlez à un(e) ami(e) qui lit beaucoup. <span class="orig">· n° d'origine 73</span></p>
+</div>
+<p class="why"><b>Service en ligne pratique</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">BIBLIOTHÈQUE NUMÉRIQUE</div>
+<p class="ad-text">Inscrivez-vous à la bibliothèque numérique !<br/>
+PLUS BESOIN DE VOUS DÉPLACER POUR ALLER À LA BIBLIOTHÈQUE<br/>
+Vaste collection de livres en ligne<br/>
+Lecture sous format numérique<br/>
+Prêts de liseuses sur demande<br/>
+Emprunts jusqu'à 21 jours<br/>
+Inscription en ligne sur<br/>
+www.mabibliothequenumerique.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 15 · ACHETEZ VOS MÉDICAMENTS EN LIGNE</span><span class="nu-w">Doing it online instead of going there again: attachment to the old way, trust, convenience, savings. Same argument shape.</span></div>
+
+
+</section>
+<section class="topic" id="p-80">
+<div class="topic-head">
+<span class="badge">80</span>
+<p class="intro">Vous avez lu cette publicité pour visiter la ville autrement. Vous en parlez à un(e) ami(e) qui veut voyager avec vous. <span class="orig">· n° d'origine 67</span></p>
+</div>
+<p class="why"><b>Visites de ville</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">VISITEZ BRUXELLES EN TUK TUK</div>
+<p class="ad-text">Visitez Bruxelles en Tuk Tuk<br/>
+Découvrez les sites bruxellois sous un autre angle lors de cette visite en tuk tuk avec un guide local.<br/>
+Admirez les attractions les plus populaires de la capitale belge et ses monuments à bord d'un véhicule écologique.<br/>
+Prix attractifs<br/>
+Guides expérimentés<br/>
+Itinéraires modifiables<br/>
+Retrouvez-nous : www.tuktuk.danstaville.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 18 · VISITES GUIDÉES À VÉLO</span><span class="nu-w">Showing a friend the city again: cost, touristy, weather, duration. Same guided-visit arguments and the same close.</span></div>
+
+
+</section>
+<div class="daybar"><span>Jour 17</span><span class="phase">Optionnel — à sauter si le temps manque</span></div>
+<section class="topic" id="p-81">
+<div class="topic-head">
+<span class="badge">81</span>
+<p class="intro">Vous avez lu cette publicité pour une école de musique en ligne. Vous en parlez à un(e) ami(e) qui veut prendre des cours de musique. <span class="orig">· n° d'origine 53</span></p>
+</div>
+<p class="why"><b>Apprendre une compétence</b></p>
+
+<div class="ad">
+<div class="ad-kicker">Advertisement</div>
+<div class="ad-name">CYBER ÉCOLE DE MUSIQUE</div>
+<p class="ad-text">Web-Note<br/>
+SATISFACTION 100% GARANTIE<br/>
+Votre cyber école de musique<br/>
+Cours de musique et de chant sur Internet 24h sur 24.<br/>
+Tous types d’instruments et de musique :<br/>
+classique, pop, jazz, rock, traditionnelle…<br/>
+Nombreux échanges entre les musiciens.<br/>
+Niveau débutant, intermédiaire et avancé.<br/>
+Prix imbattables !<br/>
+www.web-note.com</p>
+</div>
+<div class="nextup"><span class="nu-k">Drill next</span><span class="nu-t">n° 77 · SPORT SUR INTERNET</span><span class="nu-w">Online with a certified professional again: discipline, price, efficacy. Same forfait and sur-mesure arguments to reuse.</span></div>
+
+
+</section>
+
+
+<script src="tef-clusters.js"></script>
+</body></html>
