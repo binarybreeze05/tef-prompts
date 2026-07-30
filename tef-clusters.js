@@ -1,10 +1,18 @@
 /* TEF practice-order — cluster grouping / filtering overlay.
-   One file drives all six practice pages. It auto-detects Section A (78 ads)
+   One file drives all ten practice pages. It auto-detects Section A (78 ads)
    vs Section B (81 ads) by counting section.topic elements, then lets you
    regroup the ads by any of 10 clustering methodologies and filter to a
    single cluster. Ads are addressed by their practice-order badge number,
    which is identical across the FR / EN / images variants.
-   Cluster + methodology names are English by design. */
+   Cluster + methodology names are English by design.
+
+   The four ecrite pages (72 / 73 prompts) have no cluster methodologies, so
+   they get a toolbar with just the practice order and the difficulty order.
+
+   Difficulty order is read straight from the DOM: every item prints its
+   source rank as "· was #N" in span.orig, and ascending N reproduces the
+   difficulty-ranked list exactly. Nothing is hardcoded here, so the two
+   orderings can never drift apart. */
 
 var TEF_CLUSTERS = {
   A: {
@@ -257,7 +265,11 @@ if (typeof document !== "undefined") (function(){
   function init(){
     var sections = Array.prototype.slice.call(document.querySelectorAll("section.topic"));
     if (!sections.length) return;
-    var pack = (sections.length === 81) ? TEF_CLUSTERS.B : TEF_CLUSTERS.A;
+    var pack = (sections.length === 78) ? TEF_CLUSTERS.A
+             : (sections.length === 81) ? TEF_CLUSTERS.B
+             : null;
+    var unit = pack ? "ads" : "prompts";
+    if (!pack) pack = { total: sections.length, label: "", methods: [] };
 
     // Map badge number -> section
     var byNum = {};
@@ -266,6 +278,19 @@ if (typeof document !== "undefined") (function(){
       var n = b ? parseInt((b.textContent||"").trim(), 10) : NaN;
       if (!isNaN(n)) byNum[n] = s;
     });
+
+    // Difficulty order: each item prints its source rank in span.orig —
+    // "· was #21" on the EN pages, "· n° d'origine 21" on the FR ones. Take the
+    // last run of digits so both wordings parse (note the FR "n°" carries no
+    // digit of its own). Only offered when every item carries a rank, so a
+    // partial list can never silently drop items.
+    var ranked = sections.map(function(s){
+      var o = s.querySelector(".orig");
+      var d = o ? (o.textContent || "").match(/\d+/g) : null;
+      return { el: s, rank: d ? parseInt(d[d.length - 1], 10) : NaN };
+    }).filter(function(r){ return !isNaN(r.rank); })
+      .sort(function(a, b){ return a.rank - b.rank; });
+    var hasDifficulty = (ranked.length === sections.length);
 
     // Flow = day-bars + sections, in document order. Wrap them so we can reorder cleanly.
     var flow = Array.prototype.slice.call(document.querySelectorAll(".daybar, section.topic"));
@@ -298,12 +323,26 @@ if (typeof document !== "undefined") (function(){
 
     function render(){
       wrap.querySelectorAll(".tef-cluster-head").forEach(function(h){ h.remove(); });
+
+      // Difficulty order is a flat sort, not a grouping: no cluster heads, no chips.
+      if (state.methodId === "difficulty"){
+        document.body.classList.add("tef-mode-cluster");   // parks the day-bars
+        sections.forEach(function(s){ s.style.display=""; });
+        ranked.forEach(function(r){ wrap.appendChild(r.el); });
+        daybars.forEach(function(d){ wrap.appendChild(d); });
+        ui.desc.textContent = "Sequenced by the difficulty ranking, rank 1 first. "
+          + "The origin number printed on each item is its difficulty rank.";
+        ui.summary.textContent = "Difficulty order · " + pack.total + " " + unit;
+        ui.chips.innerHTML = "";
+        return;
+      }
+
       var m = currentMethod();
       if (!m){
         document.body.classList.remove("tef-mode-cluster");
         sections.forEach(function(s){ s.style.display=""; });
         original.forEach(function(el){ wrap.appendChild(el); });
-        ui.summary.textContent = "Original practice order · " + pack.total + " ads";
+        ui.summary.textContent = "Original practice order · " + pack.total + " " + unit;
         ui.chips.innerHTML = "";
         ui.desc.textContent = "";
         return;
@@ -327,7 +366,7 @@ if (typeof document !== "undefined") (function(){
       daybars.forEach(function(d){ wrap.appendChild(d); });
 
       ui.desc.textContent = m.desc;
-      ui.summary.textContent = m.name + " · " + m.clusters.length + " clusters · " + pack.total + " ads"
+      ui.summary.textContent = m.name + " · " + m.clusters.length + " clusters · " + pack.total + " " + unit
         + (state.filter ? "  (filtered)" : "");
       buildChips(m);
     }
@@ -359,16 +398,22 @@ if (typeof document !== "undefined") (function(){
       var bar = document.createElement("div");
       bar.className = "tef-clusterbar";
       var row = document.createElement("div"); row.className = "tef-row";
-      var lab = document.createElement("label"); lab.className = "tef-lab"; lab.textContent = "Group by";
+      var lab = document.createElement("label"); lab.className = "tef-lab";
+      lab.textContent = pack.methods.length ? "Sort / group by" : "Sort by";
       var sel = document.createElement("select"); sel.className = "tef-select";
       var optD = document.createElement("option"); optD.value="default"; optD.textContent="Practice order (default)";
       sel.appendChild(optD);
+      if (hasDifficulty){
+        var optDiff = document.createElement("option");
+        optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
+        sel.appendChild(optDiff);
+      }
       pack.methods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
       });
       lab.setAttribute("for","tef-select"); sel.id="tef-select";
       var summary = document.createElement("span"); summary.className="tef-summary";
-      summary.textContent = "Original practice order · " + pack.total + " ads";
+      summary.textContent = "Original practice order · " + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
       var desc = document.createElement("div"); desc.className="tef-desc";
       var chips = document.createElement("div"); chips.className="tef-chips";
