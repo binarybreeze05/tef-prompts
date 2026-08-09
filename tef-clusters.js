@@ -12,7 +12,14 @@
    Difficulty order is read straight from the DOM: every item prints its
    source rank as "· was #N" in span.orig, and ascending N reproduces the
    difficulty-ranked list exactly. Nothing is hardcoded here, so the two
-   orderings can never drift apart. */
+   orderings can never drift apart.
+
+   Coverage order is the one ordering that cannot be derived from the DOM, so
+   it lives in its own data file, tef-coverage.js, keyed by the same badge
+   numbers. That file is ~300 KB of per-item rationale, so it is NOT loaded
+   with the page — it is fetched lazily the first time the reader actually
+   picks "Coverage order" from the dropdown. Nothing else on the page changes
+   if the fetch fails; the option just reports that it could not load. */
 
 var TEF_CLUSTERS = {
   A: {
@@ -271,6 +278,15 @@ if (typeof document !== "undefined") (function(){
     var unit = pack ? "ads" : "prompts";
     if (!pack) pack = { total: sections.length, label: "", methods: [] };
 
+    // Coverage order keys the same four content sets by the same head-count.
+    // The three EO-A pages all report 78, the three EO-B pages 81, and the
+    // ecrite pairs 72 / 73 — so one key serves every variant of a set.
+    var covKey = (sections.length === 78) ? "A"
+               : (sections.length === 81) ? "B"
+               : (sections.length === 72) ? "EA"
+               : (sections.length === 73) ? "EB"
+               : null;
+
     // Map badge number -> section
     var byNum = {};
     sections.forEach(function(s){
@@ -312,8 +328,28 @@ if (typeof document !== "undefined") (function(){
     ui.select.addEventListener("change", function(){
       state.methodId = ui.select.value;
       state.filter = null;
-      render();
+      if (state.methodId === "coverage" && !window.TEF_COVERAGE) loadCoverage(render);
+      else render();
     });
+
+    // Lazy-load tef-coverage.js. Called at most once; concurrent callers queue
+    // on the same script element rather than injecting a second copy.
+    var covLoad = null;
+    function loadCoverage(done){
+      if (window.TEF_COVERAGE) return done();
+      ui.desc.textContent = "Loading the coverage data…";
+      if (!covLoad){
+        covLoad = document.createElement("script");
+        covLoad.src = "tef-coverage.js";
+        covLoad.setAttribute("data-tef-coverage", "1");
+        document.head.appendChild(covLoad);
+      }
+      covLoad.addEventListener("load", function(){ done(); });
+      covLoad.addEventListener("error", function(){
+        state.coverageFailed = true;
+        done();
+      });
+    }
 
     function currentMethod(){
       if (state.methodId === "default") return null;
@@ -321,8 +357,21 @@ if (typeof document !== "undefined") (function(){
       return null;
     }
 
+    // Coverage mode injects nodes into and between the sections. Every other
+    // mode starts by taking them back out, so switching modes is idempotent.
+    function clearCoverage(){
+      document.body.classList.remove("tef-mode-coverage");
+      wrap.querySelectorAll(".tef-milestone, .tef-caps").forEach(function(n){ n.remove(); });
+      sections.forEach(function(s){
+        s.querySelectorAll(".tef-cov-note, .tef-covrank").forEach(function(n){ n.remove(); });
+      });
+    }
+
     function render(){
       wrap.querySelectorAll(".tef-cluster-head").forEach(function(h){ h.remove(); });
+      if (state.methodId !== "coverage") clearCoverage();
+
+      if (state.methodId === "coverage"){ renderCoverage(); return; }
 
       // Difficulty order is a flat sort, not a grouping: no cluster heads, no chips.
       if (state.methodId === "difficulty"){
@@ -371,6 +420,127 @@ if (typeof document !== "undefined") (function(){
       buildChips(m);
     }
 
+    // Coverage order: a flat sort like difficulty, but each item also carries
+    // its rank, the two cumulative coverage readings, and the reason it sits
+    // where it sits — plus milestone banners at the ranks where the coverage
+    // curve changes shape.
+    function renderCoverage(){
+      var pk = window.TEF_COVERAGE && covKey ? window.TEF_COVERAGE[covKey] : null;
+      if (!pk){
+        ui.desc.textContent = state.coverageFailed
+          ? "Could not load tef-coverage.js — the other orderings still work."
+          : "No coverage data for this list.";
+        ui.summary.textContent = "Coverage order unavailable";
+        return;
+      }
+      clearCoverage();
+      document.body.classList.add("tef-mode-cluster");    // parks the day-bars
+      document.body.classList.add("tef-mode-coverage");
+      sections.forEach(function(s){ s.style.display = ""; });
+
+      var milestones = {};
+      (pk.milestones || []).forEach(function(ms){ milestones[ms.after_rank] = ms; });
+      var total = pk.order.length;
+
+      // The behaviour caps go first and stay first. They fire on what you do,
+      // not on how good your French is, and no amount of coverage protects
+      // against them — so they sit above the list rather than inside one item.
+      if (pk.caps && pk.caps.length){
+        var caps = document.createElement("div");
+        caps.className = "tef-caps";
+        var ch = document.createElement("div");
+        ch.className = "tef-caps-head";
+        ch.textContent = "Before anything else — these cap you on behaviour, not on level";
+        caps.appendChild(ch);
+        var cl = document.createElement("ul");
+        pk.caps.forEach(function(c){
+          var li = document.createElement("li");
+          // **bold** and *italic* only — the strings are ours, not user input.
+          li.innerHTML = String(c)
+            .replace(/[<>&]/g, function(m){ return {"<":"&lt;",">":"&gt;","&":"&amp;"}[m]; })
+            .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+            .replace(/\*(.+?)\*/g, "<i>$1</i>");
+          cl.appendChild(li);
+        });
+        caps.appendChild(cl);
+        wrap.appendChild(caps);
+      }
+
+      pk.order.forEach(function(o){
+        var s = byNum[o.badge];
+        if (!s) return;
+        wrap.appendChild(s);
+
+        var head = s.querySelector(".topic-head");
+        if (head){
+          var chip = document.createElement("span");
+          chip.className = "tef-covrank";
+          chip.innerHTML = '<b></b><i></i>';
+          chip.querySelector("b").textContent = "#" + o.rank;
+          chip.querySelector("i").textContent = "of " + total;
+          head.appendChild(chip);
+        }
+
+        var note = document.createElement("div");
+        note.className = "tef-cov-note";
+        note.innerHTML =
+            '<div class="tef-cov-why"></div>'
+          + '<div class="tef-cov-meters">'
+          +   '<span class="tef-cov-m"><em>Pool covered</em>'
+          +     '<span class="tef-cov-bar"><i></i></span><b></b></span>'
+          +   '<span class="tef-cov-m"><em>Language machinery</em>'
+          +     '<span class="tef-cov-bar tef-cov-bar-l"><i></i></span><b></b></span>'
+          + '</div>';
+        note.querySelector(".tef-cov-why").textContent = o.why || "";
+        // Projected floor: what stopping here is worth. It steps at the
+        // milestones rather than moving per item, because a per-item NCLC
+        // delta would be false precision — one ad out of 78 does not move a band.
+        if (o.floor){
+          var fl = document.createElement("span");
+          fl.className = "tef-cov-floor";
+          fl.innerHTML = '<em>Stop here</em><b></b>';
+          fl.querySelector("b").textContent = o.floor;
+          note.querySelector(".tef-cov-meters").appendChild(fl);
+        }
+        var meters = note.querySelectorAll(".tef-cov-m");
+        meters[0].querySelector("i").style.width = (o.cum_pool || 0) + "%";
+        meters[0].querySelector("b").textContent = (o.cum_pool || 0) + "%";
+        meters[1].querySelector("i").style.width = (o.cum_lang || 0) + "%";
+        meters[1].querySelector("b").textContent = (o.cum_lang || 0) + "%";
+        s.appendChild(note);
+
+        var ms = milestones[o.rank];
+        if (ms){
+          var band = document.createElement("div");
+          band.className = "tef-milestone";
+          band.innerHTML = '<div class="tef-ms-kicker"><span></span><b></b></div>'
+                         + '<div class="tef-ms-head"></div><p class="tef-ms-body"></p>';
+          band.querySelector(".tef-ms-kicker span").textContent =
+            "After " + o.rank + " item" + (o.rank === 1 ? "" : "s") + " · "
+            + (o.cum_pool || 0) + "% of the pool covered";
+          if (ms.band) band.querySelector(".tef-ms-kicker b").textContent = ms.band;
+          band.querySelector(".tef-ms-head").textContent = ms.headline || "";
+          band.querySelector(".tef-ms-body").textContent = ms.body || "";
+          wrap.appendChild(band);
+        }
+      });
+
+      // Anything the coverage list doesn't name (shouldn't happen — the data
+      // is checked against the badge set) is parked at the end, still visible.
+      var placed = {};
+      pk.order.forEach(function(o){ placed[o.badge] = 1; });
+      sections.forEach(function(s){
+        var b = s.querySelector(".badge");
+        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        if (!placed[n]) wrap.appendChild(s);
+      });
+      daybars.forEach(function(d){ wrap.appendChild(d); });
+
+      ui.desc.textContent = pk.blurb || "";
+      ui.summary.textContent = "Coverage order · " + total + " " + unit;
+      ui.chips.innerHTML = "";
+    }
+
     function buildChips(m){
       ui.chips.innerHTML = "";
       var all = document.createElement("button");
@@ -407,6 +577,12 @@ if (typeof document !== "undefined") (function(){
         var optDiff = document.createElement("option");
         optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
         sel.appendChild(optDiff);
+      }
+      if (covKey){
+        var optCov = document.createElement("option");
+        optCov.value = "coverage";
+        optCov.textContent = "Coverage order (most score per hour first)";
+        sel.appendChild(optCov);
       }
       pack.methods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
@@ -450,6 +626,47 @@ if (typeof document !== "undefined") (function(){
       + ".tef-ch-name{font-weight:700;font-size:1rem}"
       + ".tef-ch-count{font-weight:500;font-size:.8rem;opacity:.9;white-space:nowrap}"
       + ".tef-mode-cluster .daybar{display:none}"
+
+      // --- coverage order -------------------------------------------------
+      + ".tef-covrank{margin-left:auto;flex:none;display:inline-flex;align-items:baseline;gap:.3rem;"
+      + "background:#111827;color:#fff;border-radius:999px;padding:.15rem .6rem;white-space:nowrap}"
+      + ".tef-covrank b{font-size:.9rem;font-weight:700}"
+      + ".tef-covrank i{font-style:normal;font-size:.68rem;opacity:.75}"
+      + ".tef-cov-note{margin:.9rem 0 0;padding:.7rem .85rem;border-radius:10px;"
+      + "background:#f6f8fb;border:1px solid var(--line,#e4e7ec)}"
+      + ".tef-cov-why{font-size:.9rem;color:#344054;line-height:1.55}"
+      + ".tef-cov-meters{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;margin:.6rem 0 0}"
+      + ".tef-cov-m{display:flex;align-items:center;gap:.45rem;font-size:.74rem;color:var(--muted,#5b6470)}"
+      + ".tef-cov-m em{font-style:normal;text-transform:uppercase;letter-spacing:.05em;font-weight:600}"
+      + ".tef-cov-m b{font-size:.78rem;color:var(--ink,#1f2328);min-width:2.2rem}"
+      + ".tef-cov-bar{display:block;width:88px;height:6px;border-radius:999px;background:#dfe4ec;overflow:hidden}"
+      + ".tef-cov-bar i{display:block;height:100%;background:var(--accent,#2563eb)}"
+      + ".tef-cov-bar-l i{background:#b4341f}"
+      + ".tef-cov-floor{display:inline-flex;align-items:center;gap:.4rem;font-size:.74rem;"
+      + "color:var(--muted,#5b6470)}"
+      + ".tef-cov-floor em{font-style:normal;text-transform:uppercase;letter-spacing:.05em;font-weight:600}"
+      + ".tef-cov-floor b{font-size:.78rem;color:#0f7a44;background:#e8f5ee;border:1px solid #cbe7d8;"
+      + "border-radius:999px;padding:.05rem .5rem;white-space:nowrap}"
+      + ".tef-caps{margin:.2rem 0 1.4rem;padding:.8rem 1rem;border-radius:12px;"
+      + "background:#fdf3f1;border:1px solid #f0cfc7;border-left:3px solid var(--obj,#b4341f)}"
+      + ".tef-caps-head{font-weight:700;font-size:.86rem;color:var(--obj,#b4341f);"
+      + "margin-bottom:.4rem}"
+      + ".tef-caps ul{margin:0;padding-left:1.1rem}"
+      + ".tef-caps li{font-size:.86rem;line-height:1.55;color:#4a3a36;margin:.25rem 0}"
+      + ".tef-caps li b{color:#7a2415}"
+
+      + ".tef-milestone{margin:1.8rem 0 .4rem;padding:.85rem 1.1rem;border-radius:12px;"
+      + "background:#111827;color:#fff}"
+      + ".tef-ms-kicker{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;"
+      + "text-transform:uppercase;letter-spacing:.07em;font-size:.66rem;margin-bottom:.3rem}"
+      + ".tef-ms-kicker span{opacity:.7}"
+      + ".tef-ms-kicker b{letter-spacing:.04em;background:#0f7a44;color:#fff;border-radius:999px;"
+      + "padding:.1rem .55rem;font-size:.68rem}"
+      + ".tef-ms-kicker b:empty{display:none}"
+      + ".tef-ms-head{font-weight:700;font-size:1.02rem;line-height:1.35}"
+      + ".tef-ms-body{margin:.45rem 0 0;font-size:.87rem;line-height:1.6;opacity:.92}"
+      + "@media (max-width:520px){.tef-cov-bar{width:56px}}"
+
       + "@media print{.tef-clusterbar{position:static}}";
       var st = document.createElement("style");
       st.id = "tef-cluster-style";
