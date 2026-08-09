@@ -332,6 +332,28 @@ if (typeof document !== "undefined") (function(){
       else render();
     });
 
+    // Coverage order is the default view wherever there is data for it — it is
+    // the ordering that answers "what do I drill next", which is the whole
+    // point of the page. The data still loads lazily rather than blocking first
+    // paint on 180 KB: the list paints in practice order and reflows into
+    // coverage order when the file lands (immediately, on a warm cache).
+    if (covKey){
+      state.methodId = "coverage";
+      ui.select.value = "coverage";
+      loadCoverage(function(){
+        // A failed fetch must not strand the reader on a half-labelled page.
+        // Fall back to the practice order and say so.
+        if (!window.TEF_COVERAGE || !window.TEF_COVERAGE[covKey]){
+          state.methodId = "default";
+          ui.select.value = "default";
+          render();
+          ui.desc.textContent = "Coverage order could not load — showing the practice order.";
+          return;
+        }
+        render();
+      });
+    }
+
     // Lazy-load tef-coverage.js. Called at most once; concurrent callers queue
     // on the same script element rather than injecting a second copy.
     var covLoad = null;
@@ -571,25 +593,31 @@ if (typeof document !== "undefined") (function(){
       var lab = document.createElement("label"); lab.className = "tef-lab";
       lab.textContent = pack.methods.length ? "Sort / group by" : "Sort by";
       var sel = document.createElement("select"); sel.className = "tef-select";
-      var optD = document.createElement("option"); optD.value="default"; optD.textContent="Practice order (default)";
+      // Coverage order leads the list because it is what the page opens on.
+      if (covKey){
+        var optCov = document.createElement("option");
+        optCov.value = "coverage";
+        optCov.textContent = "Coverage order (default · most score per hour)";
+        sel.appendChild(optCov);
+      }
+      var optD = document.createElement("option");
+      optD.value = "default";
+      optD.textContent = covKey ? "Practice order (the original grouping)" : "Practice order (default)";
       sel.appendChild(optD);
       if (hasDifficulty){
         var optDiff = document.createElement("option");
         optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
         sel.appendChild(optDiff);
       }
-      if (covKey){
-        var optCov = document.createElement("option");
-        optCov.value = "coverage";
-        optCov.textContent = "Coverage order (most score per hour first)";
-        sel.appendChild(optCov);
-      }
       pack.methods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
       });
       lab.setAttribute("for","tef-select"); sel.id="tef-select";
       var summary = document.createElement("span"); summary.className="tef-summary";
-      summary.textContent = "Original practice order · " + pack.total + " " + unit;
+      // Neutral until the coverage file lands, so the bar never claims an
+      // ordering the list is not actually in yet.
+      summary.textContent = (covKey ? "Coverage order · " : "Original practice order · ")
+                          + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
       var desc = document.createElement("div"); desc.className="tef-desc";
       var chips = document.createElement("div"); chips.className="tef-chips";
