@@ -7,7 +7,7 @@
    Cluster + methodology names are English by design.
 
    The four ecrite pages (72 / 73 prompts) have no cluster methodologies, so
-   they get a toolbar with just the practice order and the difficulty order.
+   their toolbar is just the four orderings below.
 
    Difficulty order is read straight from the DOM: every item prints its
    source rank as "· was #N" in span.orig, and ascending N reproduces the
@@ -19,7 +19,14 @@
    numbers. That file is ~300 KB of per-item rationale, so it is NOT loaded
    with the page — it is fetched lazily the first time the reader actually
    picks "Coverage order" from the dropdown. Nothing else on the page changes
-   if the fetch fails; the option just reports that it could not load. */
+   if the fetch fails; the option just reports that it could not load.
+
+   Similarity order is the same kind of thing — not derivable from the DOM —
+   and lives in tef-similarity.js, lazily loaded the same way. It is a thread
+   rather than a ranking: the items are arranged so that each one's nearest
+   neighbours in subject matter sit directly above and below it, and a
+   connector between every pair names what the two share. Position #1 is one
+   end of the pool, not the best item. */
 
 var TEF_CLUSTERS = {
   A: {
@@ -281,7 +288,7 @@ if (typeof document !== "undefined") (function(){
     // Coverage order keys the same four content sets by the same head-count.
     // The three EO-A pages all report 78, the three EO-B pages 81, and the
     // ecrite pairs 72 / 73 — so one key serves every variant of a set.
-    var covKey = (sections.length === 78) ? "A"
+    var setKey = (sections.length === 78) ? "A"
                : (sections.length === 81) ? "B"
                : (sections.length === 72) ? "EA"
                : (sections.length === 73) ? "EB"
@@ -323,27 +330,205 @@ if (typeof document !== "undefined") (function(){
     var ui = buildToolbar();
     parent.insertBefore(ui.bar, wrap);
 
-    var state = { methodId: "default", filter: null };
+    var state = { methodId: "default", filter: null, hideDone: false };
+
+    // --- done-marking -----------------------------------------------------
+    // Ticks are stored per content SET, not per page, so an ad you tick off on
+    // the EN list is already ticked when you open the FR or the images list —
+    // same pool, same badge numbers. localStorage can be unavailable (private
+    // mode, some file:// origins), in which case the ticks still work for the
+    // session and only the persistence is lost; nothing else on the page cares.
+    var storeKey = "tef-done:" + (setKey || ("n" + sections.length));
+    var numbered = sections.map(function(s){
+      var b = s.querySelector(".badge");
+      return { el: s, num: b ? parseInt((b.textContent || "").trim(), 10) : NaN };
+    }).filter(function(it){ return !isNaN(it.num); });
+
+    function store(k, v){
+      try { window.localStorage.setItem(k, v); } catch(e){ /* session-only */ }
+    }
+    function read(k){
+      try { return window.localStorage.getItem(k); } catch(e){ return null; }
+    }
+
+    var done = (function(){
+      var m = {};
+      try {
+        var arr = JSON.parse(read(storeKey) || "[]");
+        if (Array.isArray(arr)) arr.forEach(function(n){ if (byNum[n]) m[n] = 1; });
+      } catch(e){ /* corrupt or absent — start clean */ }
+      return m;
+    })();
+    state.hideDone = read(storeKey + ":hide") === "1";
+
+    function saveDone(){
+      store(storeKey, JSON.stringify(Object.keys(done).map(Number)));
+    }
+
+    numbered.forEach(function(it){
+      var head = it.el.querySelector(".topic-head");
+      if (!head) return;
+      var lab = document.createElement("label");
+      lab.className = "tef-done";
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!done[it.num];
+      cb.setAttribute("aria-label", "Mark " + it.num + " as done");
+      var txt = document.createElement("span");
+      txt.textContent = "Done";
+      lab.appendChild(cb);
+      lab.appendChild(txt);
+      cb.addEventListener("change", function(){
+        if (cb.checked) done[it.num] = 1; else delete done[it.num];
+        saveDone();
+        refreshDone();
+      });
+      head.appendChild(lab);
+    });
+
+    // Rank chips are added by the render, after the Done pill already exists,
+    // so they are inserted before it rather than appended — the pill stays the
+    // last thing on the line whichever ordering you are in.
+    function headAdd(head, node){
+      var d = head.querySelector(".tef-done");
+      if (d) head.insertBefore(node, d); else head.appendChild(node);
+    }
+
+    // Single source of truth for everything the ticks affect. Called after
+    // every render and after every tick, so no caller has to remember which
+    // parts of the page depend on what is done.
+    function refreshDone(){
+      var total = numbered.length, ndone = 0;
+      numbered.forEach(function(it){
+        var d = !!done[it.num];
+        if (d) ndone++;
+        it.el.classList.toggle("tef-is-done", d);
+        var cb = it.el.querySelector(".tef-done input");
+        if (cb && cb.checked !== d) cb.checked = d;
+      });
+      var left = total - ndone;
+
+      // A similarity connector describes two items sitting next to each other.
+      // Hide one of them and it no longer describes anything, so it goes too.
+      wrap.querySelectorAll(".tef-link").forEach(function(l){
+        l.classList.toggle("tef-link-broken",
+          !!(done[+l.getAttribute("data-a")] || done[+l.getAttribute("data-b")]));
+      });
+
+      // Cluster heads count what is still left in them, and stand down once
+      // their whole cluster is done — an empty heading under a hide filter
+      // reads as a bug.
+      wrap.querySelectorAll(".tef-cluster-head").forEach(function(h){
+        var nums = (h.getAttribute("data-nums") || "").split(",")
+                     .filter(Boolean).map(Number);
+        var rest = nums.filter(function(n){ return !done[n]; }).length;
+        h.classList.toggle("tef-head-empty", rest === 0);
+        var c = h.querySelector(".tef-ch-count");
+        if (c) c.textContent = state.hideDone
+          ? rest + " left"
+          : nums.length + (nums.length === 1 ? " ad" : " ads");
+      });
+
+      document.body.classList.toggle("tef-hide-done", !!state.hideDone);
+      ui.hideCb.checked = !!state.hideDone;
+      ui.progFill.style.width = total ? Math.round(ndone / total * 100) + "%" : "0%";
+      ui.progText.innerHTML = "";
+      if (!ndone){
+        ui.progText.textContent = "None done yet · " + total + " " + unit + " to go";
+      } else if (!left){
+        ui.progText.textContent = "All " + total + " done.";
+      } else {
+        var b = document.createElement("b");
+        b.textContent = left + " left";
+        ui.progText.appendChild(document.createTextNode(ndone + " of " + total + " done · "));
+        ui.progText.appendChild(b);
+      }
+      ui.progReset.style.visibility = ndone ? "" : "hidden";
+    }
+
+    ui.hideCb.addEventListener("change", function(){
+      state.hideDone = ui.hideCb.checked;
+      store(storeKey + ":hide", state.hideDone ? "1" : "0");
+      refreshDone();
+    });
+
+    ui.progReset.addEventListener("click", function(){
+      var n = Object.keys(done).length;
+      if (!n) return;
+      // Destructive and not undoable, so it asks — the count is the point of
+      // the question, not the wording.
+      if (!window.confirm("Clear all " + n + " done marks for this list?")) return;
+      done = {};
+      saveDone();
+      refreshDone();
+    });
+
+    // The counter is correct from first paint, before any ordering has been
+    // rendered or any data file has landed.
+    refreshDone();
 
     ui.select.addEventListener("change", function(){
       state.methodId = ui.select.value;
       state.filter = null;
       if (state.methodId === "coverage" && !window.TEF_COVERAGE) loadCoverage(render);
+      else if (state.methodId === "similarity" && !window.TEF_SIMILARITY) loadSimilarity(render);
       else render();
     });
+
+    // Lazy-load a data file. Each src is fetched at most once: callers that
+    // arrive while a fetch is in flight queue on it, and callers that arrive
+    // after it has settled are answered straight away rather than waiting on a
+    // "load" event that already fired — which is what a reader who picks the
+    // same failed option twice would otherwise be doing, forever.
+    // Declared above the bootstrap below, which calls it during init.
+    var loaders = {};
+    function loadData(src, global, note, done){
+      if (window[global]) return done();
+      var L = loaders[src];
+      if (L && L.settled) return done();
+      ui.desc.textContent = note;
+      if (!L){
+        L = loaders[src] = { settled:false, queue:[], el:document.createElement("script") };
+        var settle = function(){
+          L.settled = true;
+          var q = L.queue; L.queue = [];
+          q.forEach(function(f){ f(); });
+        };
+        L.el.src = src;
+        L.el.setAttribute("data-tef-data", "1");
+        L.el.addEventListener("load", settle);
+        L.el.addEventListener("error", settle);
+        document.head.appendChild(L.el);
+      }
+      L.queue.push(done);
+    }
+
+    function loadCoverage(done){
+      loadData("tef-coverage.js", "TEF_COVERAGE", "Loading the coverage data…", function(){
+        if (!window.TEF_COVERAGE) state.coverageFailed = true;
+        done();
+      });
+    }
+
+    function loadSimilarity(done){
+      loadData("tef-similarity.js", "TEF_SIMILARITY", "Loading the similarity data…", function(){
+        if (!window.TEF_SIMILARITY) state.similarityFailed = true;
+        done();
+      });
+    }
 
     // Coverage order is the default view wherever there is data for it — it is
     // the ordering that answers "what do I drill next", which is the whole
     // point of the page. The data still loads lazily rather than blocking first
     // paint on 180 KB: the list paints in practice order and reflows into
     // coverage order when the file lands (immediately, on a warm cache).
-    if (covKey){
+    if (setKey){
       state.methodId = "coverage";
       ui.select.value = "coverage";
       loadCoverage(function(){
         // A failed fetch must not strand the reader on a half-labelled page.
         // Fall back to the practice order and say so.
-        if (!window.TEF_COVERAGE || !window.TEF_COVERAGE[covKey]){
+        if (!window.TEF_COVERAGE || !window.TEF_COVERAGE[setKey]){
           state.methodId = "default";
           ui.select.value = "default";
           render();
@@ -354,33 +539,15 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
-    // Lazy-load tef-coverage.js. Called at most once; concurrent callers queue
-    // on the same script element rather than injecting a second copy.
-    var covLoad = null;
-    function loadCoverage(done){
-      if (window.TEF_COVERAGE) return done();
-      ui.desc.textContent = "Loading the coverage data…";
-      if (!covLoad){
-        covLoad = document.createElement("script");
-        covLoad.src = "tef-coverage.js";
-        covLoad.setAttribute("data-tef-coverage", "1");
-        document.head.appendChild(covLoad);
-      }
-      covLoad.addEventListener("load", function(){ done(); });
-      covLoad.addEventListener("error", function(){
-        state.coverageFailed = true;
-        done();
-      });
-    }
-
     function currentMethod(){
       if (state.methodId === "default") return null;
       for (var i=0;i<pack.methods.length;i++) if (pack.methods[i].id === state.methodId) return pack.methods[i];
       return null;
     }
 
-    // Coverage mode injects nodes into and between the sections. Every other
-    // mode starts by taking them back out, so switching modes is idempotent.
+    // Coverage and similarity mode both inject nodes into and between the
+    // sections. Every other mode starts by taking them back out, so switching
+    // modes is idempotent.
     function clearCoverage(){
       document.body.classList.remove("tef-mode-coverage");
       wrap.querySelectorAll(".tef-milestone, .tef-caps").forEach(function(n){ n.remove(); });
@@ -389,11 +556,28 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
+    function clearSimilarity(){
+      document.body.classList.remove("tef-mode-similarity");
+      wrap.querySelectorAll(".tef-link").forEach(function(n){ n.remove(); });
+      sections.forEach(function(s){
+        s.querySelectorAll(".tef-simrank").forEach(function(n){ n.remove(); });
+      });
+    }
+
+    // Everything the ticks touch is recomputed after every repaint, so no
+    // render path has to remember to do it.
     function render(){
+      paint();
+      refreshDone();
+    }
+
+    function paint(){
       wrap.querySelectorAll(".tef-cluster-head").forEach(function(h){ h.remove(); });
       if (state.methodId !== "coverage") clearCoverage();
+      if (state.methodId !== "similarity") clearSimilarity();
 
       if (state.methodId === "coverage"){ renderCoverage(); return; }
+      if (state.methodId === "similarity"){ renderSimilarity(); return; }
 
       // Difficulty order is a flat sort, not a grouping: no cluster heads, no chips.
       if (state.methodId === "difficulty"){
@@ -423,9 +607,11 @@ if (typeof document !== "undefined") (function(){
       m.clusters.forEach(function(cl){
         var name = cl[0], nums = cl[1];
         if (state.filter && name !== state.filter) return;
-        var members = nums.map(function(n){ return byNum[n]; }).filter(Boolean);
+        var present = nums.filter(function(n){ return byNum[n]; });
+        var members = present.map(function(n){ return byNum[n]; });
         var head = document.createElement("div");
         head.className = "tef-cluster-head";
+        head.setAttribute("data-nums", present.join(","));
         head.innerHTML = '<span class="tef-ch-name"></span><span class="tef-ch-count"></span>';
         head.querySelector(".tef-ch-name").textContent = name;
         head.querySelector(".tef-ch-count").textContent = members.length + (members.length===1?" ad":" ads");
@@ -447,7 +633,7 @@ if (typeof document !== "undefined") (function(){
     // where it sits — plus milestone banners at the ranks where the coverage
     // curve changes shape.
     function renderCoverage(){
-      var pk = window.TEF_COVERAGE && covKey ? window.TEF_COVERAGE[covKey] : null;
+      var pk = window.TEF_COVERAGE && setKey ? window.TEF_COVERAGE[setKey] : null;
       if (!pk){
         ui.desc.textContent = state.coverageFailed
           ? "Could not load tef-coverage.js — the other orderings still work."
@@ -500,7 +686,7 @@ if (typeof document !== "undefined") (function(){
           chip.innerHTML = '<b></b><i></i>';
           chip.querySelector("b").textContent = "#" + o.rank;
           chip.querySelector("i").textContent = "of " + total;
-          head.appendChild(chip);
+          headAdd(head, chip);
         }
 
         var note = document.createElement("div");
@@ -563,6 +749,75 @@ if (typeof document !== "undefined") (function(){
       ui.chips.innerHTML = "";
     }
 
+    // Similarity order: a thread, not a ranking. The list is arranged so that
+    // each item's nearest neighbours in subject matter sit directly above and
+    // below it, and a connector between every consecutive pair names what the
+    // two share. Read top to bottom it walks the pool one small step at a
+    // time; opened anywhere it hands you a run of near-twins to drill back to
+    // back. #1 is one end of the subject space, not the best item — which is
+    // why nothing here carries a score, a meter or a stopping point.
+    function renderSimilarity(){
+      var pk = window.TEF_SIMILARITY && setKey ? window.TEF_SIMILARITY[setKey] : null;
+      if (!pk){
+        ui.desc.textContent = state.similarityFailed
+          ? "Could not load tef-similarity.js — the other orderings still work."
+          : "No similarity data for this list.";
+        ui.summary.textContent = "Similarity order unavailable";
+        return;
+      }
+      clearSimilarity();
+      document.body.classList.add("tef-mode-cluster");      // parks the day-bars
+      document.body.classList.add("tef-mode-similarity");
+      sections.forEach(function(s){ s.style.display = ""; });
+
+      var total = pk.order.length;
+      pk.order.forEach(function(o, i){
+        var s = byNum[o.badge];
+        if (!s) return;
+        wrap.appendChild(s);
+
+        var head = s.querySelector(".topic-head");
+        if (head){
+          var chip = document.createElement("span");
+          chip.className = "tef-simrank";
+          chip.innerHTML = '<b></b><i></i>';
+          chip.querySelector("b").textContent = "#" + o.rank;
+          chip.querySelector("i").textContent = "of " + total;
+          headAdd(head, chip);
+        }
+
+        // o.link names what this item shares with the NEXT one, so it is drawn
+        // between the two. The last item has none, which ends the thread. Both
+        // badges are recorded so the connector can retire when either end is
+        // ticked off and hidden.
+        var nxt = pk.order[i + 1];
+        if (o.link && nxt){
+          var link = document.createElement("div");
+          link.className = "tef-link";
+          link.setAttribute("data-a", o.badge);
+          link.setAttribute("data-b", nxt.badge);
+          link.innerHTML = '<span></span>';
+          link.querySelector("span").textContent = o.link;
+          wrap.appendChild(link);
+        }
+      });
+
+      // Anything the thread doesn't name (shouldn't happen — the data is
+      // checked against the badge set) is parked at the end, still visible.
+      var placed = {};
+      pk.order.forEach(function(o){ placed[o.badge] = 1; });
+      sections.forEach(function(s){
+        var b = s.querySelector(".badge");
+        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        if (!placed[n]) wrap.appendChild(s);
+      });
+      daybars.forEach(function(d){ wrap.appendChild(d); });
+
+      ui.desc.textContent = pk.blurb || "";
+      ui.summary.textContent = "Similarity order · " + total + " " + unit;
+      ui.chips.innerHTML = "";
+    }
+
     function buildChips(m){
       ui.chips.innerHTML = "";
       var all = document.createElement("button");
@@ -594,7 +849,7 @@ if (typeof document !== "undefined") (function(){
       lab.textContent = pack.methods.length ? "Sort / group by" : "Sort by";
       var sel = document.createElement("select"); sel.className = "tef-select";
       // Coverage order leads the list because it is what the page opens on.
-      if (covKey){
+      if (setKey){
         var optCov = document.createElement("option");
         optCov.value = "coverage";
         optCov.textContent = "Coverage order (default · most score per hour)";
@@ -602,12 +857,18 @@ if (typeof document !== "undefined") (function(){
       }
       var optD = document.createElement("option");
       optD.value = "default";
-      optD.textContent = covKey ? "Practice order (the original grouping)" : "Practice order (default)";
+      optD.textContent = setKey ? "Practice order (the original grouping)" : "Practice order (default)";
       sel.appendChild(optD);
       if (hasDifficulty){
         var optDiff = document.createElement("option");
         optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
         sel.appendChild(optDiff);
+      }
+      if (setKey){
+        var optSim = document.createElement("option");
+        optSim.value = "similarity";
+        optSim.textContent = "Similarity order (each one next to its nearest twin)";
+        sel.appendChild(optSim);
       }
       pack.methods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
@@ -616,13 +877,32 @@ if (typeof document !== "undefined") (function(){
       var summary = document.createElement("span"); summary.className="tef-summary";
       // Neutral until the coverage file lands, so the bar never claims an
       // ordering the list is not actually in yet.
-      summary.textContent = (covKey ? "Coverage order · " : "Original practice order · ")
+      summary.textContent = (setKey ? "Coverage order · " : "Original practice order · ")
                           + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
+
+      // Progress row: how much of this list you have ticked off, how much is
+      // left, and the filter that shows only what is left. It sits directly
+      // under the sort control because it applies to every ordering.
+      var prog = document.createElement("div"); prog.className = "tef-progress";
+      var pbar = document.createElement("span"); pbar.className = "tef-prog-bar";
+      var pfill = document.createElement("i");
+      pbar.appendChild(pfill);
+      var ptext = document.createElement("span"); ptext.className = "tef-prog-text";
+      var hide = document.createElement("label"); hide.className = "tef-prog-hide";
+      var hideCb = document.createElement("input"); hideCb.type = "checkbox";
+      var hideTx = document.createElement("span"); hideTx.textContent = "Hide done";
+      hide.appendChild(hideCb); hide.appendChild(hideTx);
+      var reset = document.createElement("button");
+      reset.type = "button"; reset.className = "tef-prog-reset"; reset.textContent = "Reset";
+      prog.appendChild(pbar); prog.appendChild(ptext);
+      prog.appendChild(hide); prog.appendChild(reset);
+
       var desc = document.createElement("div"); desc.className="tef-desc";
       var chips = document.createElement("div"); chips.className="tef-chips";
-      bar.appendChild(row); bar.appendChild(desc); bar.appendChild(chips);
-      return { bar:bar, select:sel, summary:summary, desc:desc, chips:chips };
+      bar.appendChild(row); bar.appendChild(prog); bar.appendChild(desc); bar.appendChild(chips);
+      return { bar:bar, select:sel, summary:summary, desc:desc, chips:chips,
+               progFill:pfill, progText:ptext, progReset:reset, hideCb:hideCb };
     }
 
     function injectStyle(){
@@ -693,7 +973,59 @@ if (typeof document !== "undefined") (function(){
       + ".tef-ms-kicker b:empty{display:none}"
       + ".tef-ms-head{font-weight:700;font-size:1.02rem;line-height:1.35}"
       + ".tef-ms-body{margin:.45rem 0 0;font-size:.87rem;line-height:1.6;opacity:.92}"
-      + "@media (max-width:520px){.tef-cov-bar{width:56px}}"
+
+      // --- similarity order -----------------------------------------------
+      // Deliberately quieter than the coverage chip: this number is a position
+      // on a thread, not a score, and it should not read like one.
+      + ".tef-simrank{margin-left:auto;flex:none;display:inline-flex;align-items:baseline;gap:.3rem;"
+      + "background:#f6f8fb;color:#344054;border:1px solid var(--line,#e4e7ec);border-radius:999px;"
+      + "padding:.15rem .6rem;white-space:nowrap}"
+      + ".tef-simrank b{font-size:.9rem;font-weight:700}"
+      + ".tef-simrank i{font-style:normal;font-size:.68rem;opacity:.7}"
+      + ".tef-link{display:flex;align-items:center;gap:.55rem;margin:.4rem 0}"
+      + ".tef-link::before,.tef-link::after{content:'';height:1px;flex:1 1 0;"
+      + "background:var(--line,#e4e7ec)}"
+      + ".tef-link span{flex:0 1 auto;max-width:62%;text-align:center;font-size:.74rem;"
+      + "line-height:1.45;color:var(--muted,#5b6470);background:#f6f8fb;"
+      + "border:1px solid var(--line,#e4e7ec);border-radius:999px;padding:.12rem .7rem}"
+      // Tighten the cards so the connector reads as the join between two of
+      // them rather than as a third thing floating in the gap.
+      + ".tef-mode-similarity #tef-flow > section.topic{margin:.6rem 0}"
+
+      // --- done-marking ---------------------------------------------------
+      // The head row is laid out so the text takes the slack: that keeps the
+      // rank chip and the Done pill hard right whether an item carries one of
+      // them, both, or neither.
+      + ".topic-head .intro,.topic-head .prompt{flex:1 1 auto}"
+      + ".tef-done{flex:none;display:inline-flex;align-items:center;gap:.32rem;cursor:pointer;"
+      + "font-size:.75rem;color:var(--muted,#5b6470);border:1px solid var(--line,#e4e7ec);"
+      + "background:#fff;border-radius:999px;padding:.12rem .55rem;margin-left:.45rem;"
+      + "white-space:nowrap;user-select:none}"
+      + ".tef-done:hover{border-color:var(--reb,#0f7a44)}"
+      + ".tef-done input{margin:0;cursor:pointer;accent-color:var(--reb,#0f7a44)}"
+      + ".tef-is-done{opacity:.55}"
+      + ".tef-is-done .tef-done{background:#e8f5ee;border-color:#cbe7d8;color:#0f7a44;font-weight:600}"
+      + "body.tef-hide-done .tef-is-done{display:none!important}"
+      + "body.tef-hide-done .tef-link-broken{display:none}"
+      + "body.tef-hide-done .tef-cluster-head.tef-head-empty{display:none}"
+      + ".tef-progress{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.5rem 0 0}"
+      + ".tef-prog-bar{display:block;flex:0 1 150px;height:7px;border-radius:999px;"
+      + "background:#dfe4ec;overflow:hidden}"
+      + ".tef-prog-bar i{display:block;height:100%;width:0;background:var(--reb,#0f7a44);"
+      + "transition:width .18s ease}"
+      + ".tef-prog-text{font-size:.8rem;color:var(--muted,#5b6470)}"
+      + ".tef-prog-text b{color:var(--reb,#0f7a44);font-size:.83rem}"
+      + ".tef-prog-hide,.tef-prog-reset{font:inherit;font-size:.76rem;cursor:pointer;"
+      + "color:var(--muted,#5b6470);display:inline-flex;align-items:center;gap:.3rem;"
+      + "border:1px solid var(--line,#e4e7ec);background:#f6f8fb;border-radius:999px;"
+      + "padding:.12rem .6rem;user-select:none}"
+      + ".tef-prog-hide{margin-left:auto}"
+      + ".tef-prog-hide input{margin:0;cursor:pointer;accent-color:var(--accent,#2563eb)}"
+      + ".tef-prog-hide:hover,.tef-prog-reset:hover{border-color:var(--accent,#2563eb)}"
+      + ".tef-prog-reset:hover{border-color:var(--obj,#b4341f);color:var(--obj,#b4341f)}"
+      + "@media print{.tef-progress{display:none}}"
+
+      + "@media (max-width:520px){.tef-cov-bar{width:56px}.tef-link span{max-width:80%}}"
 
       + "@media print{.tef-clusterbar{position:static}}";
       var st = document.createElement("style");
