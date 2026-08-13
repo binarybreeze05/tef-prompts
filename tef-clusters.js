@@ -416,6 +416,26 @@ if (typeof document !== "undefined") (function(){
           !!(done[+l.getAttribute("data-a")] || done[+l.getAttribute("data-b")]));
       });
 
+      // The similarity chip is a position, not a score, so it counts what is
+      // actually on the page: with the filter on, #3 is the third card you can
+      // see out of the ones you have left, not the third slot of a thread with
+      // holes punched in it. Both halves move together — a chip reading "3 of
+      // 78" while 78 items are no longer shown would just be a different lie.
+      // With the filter off this restores the true thread positions, so it is
+      // safe to run every time.
+      if (document.body.classList.contains("tef-mode-similarity")){
+        var shownSecs = [];
+        wrap.querySelectorAll("section.topic").forEach(function(s){
+          if (!(state.hideDone && s.classList.contains("tef-is-done"))) shownSecs.push(s);
+        });
+        shownSecs.forEach(function(s, i){
+          var chip = s.querySelector(".tef-simrank");
+          if (!chip) return;
+          chip.querySelector("b").textContent = "#" + (i + 1);
+          chip.querySelector("i").textContent = "of " + shownSecs.length;
+        });
+      }
+
       // Cluster heads count what is still left in them, and stand down once
       // their whole cluster is done — an empty heading under a hide filter
       // reads as a bug.
@@ -786,6 +806,8 @@ if (typeof document !== "undefined") (function(){
           var chip = document.createElement("span");
           chip.className = "tef-simrank";
           chip.innerHTML = '<b></b><i></i>';
+          // Seeded with the thread position; refreshDone owns these numbers
+          // from here, and recounts them against whatever is on show.
           chip.querySelector("b").textContent = "#" + o.rank;
           chip.querySelector("i").textContent = "of " + total;
           headAdd(head, chip);
