@@ -14,19 +14,20 @@
    difficulty-ranked list exactly. Nothing is hardcoded here, so the two
    orderings can never drift apart.
 
-   Coverage order is the one ordering that cannot be derived from the DOM, so
-   it lives in its own data file, tef-coverage.js, keyed by the same badge
-   numbers. That file is ~300 KB of per-item rationale, so it is NOT loaded
-   with the page — it is fetched lazily the first time the reader actually
-   picks "Coverage order" from the dropdown. Nothing else on the page changes
-   if the fetch fails; the option just reports that it could not load.
+   Coverage order cannot be derived from the DOM, so it lives in its own data
+   file, tef-coverage.js, keyed by the same badge numbers. That file is ~180 KB
+   of per-item rationale, so it is NOT loaded with the page — it is fetched
+   lazily the first time the reader picks "Coverage order" from the dropdown.
+   Nothing else on the page changes if the fetch fails; the option just reports
+   that it could not load.
 
-   Similarity order is the same kind of thing — not derivable from the DOM —
-   and lives in tef-similarity.js, lazily loaded the same way. It is a thread
-   rather than a ranking: the items are arranged so that each one's nearest
-   neighbours in subject matter sit directly above and below it, and a
-   connector between every pair names what the two share. Position #1 is one
-   end of the pool, not the best item. */
+   Similarity order is the same kind of thing, in tef-similarity.js, and is what
+   every list opens on. It is a thread rather than a ranking: the items are
+   arranged so that each one's nearest neighbours in subject matter sit directly
+   above and below it, and a connector between every pair names what the two
+   share. Position #1 is one end of the pool, not the best item. It is loaded
+   the same lazy way — the list paints in practice order and reflows when the
+   file lands — so first paint never blocks on it. */
 
 var TEF_CLUSTERS = {
   A: {
@@ -517,22 +518,26 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
-    // Coverage order is the default view wherever there is data for it — it is
-    // the ordering that answers "what do I drill next", which is the whole
-    // point of the page. The data still loads lazily rather than blocking first
-    // paint on 180 KB: the list paints in practice order and reflows into
-    // coverage order when the file lands (immediately, on a warm cache).
+    // Similarity order is the default view wherever there is data for it. It is
+    // what makes a session out of the list rather than a lucky dip: whatever you
+    // open, the things next to it rehearse the same vocabulary, so you can start
+    // anywhere and keep going. Coverage order is one click away for the separate
+    // question of what to drill first.
+    // The data still loads lazily rather than blocking first paint: the list
+    // paints in practice order and reflows into similarity order when the file
+    // lands (immediately, on a warm cache), and at 35 KB it is a fifth of the
+    // coverage file this replaces as the opening view.
     if (setKey){
-      state.methodId = "coverage";
-      ui.select.value = "coverage";
-      loadCoverage(function(){
+      state.methodId = "similarity";
+      ui.select.value = "similarity";
+      loadSimilarity(function(){
         // A failed fetch must not strand the reader on a half-labelled page.
         // Fall back to the practice order and say so.
-        if (!window.TEF_COVERAGE || !window.TEF_COVERAGE[setKey]){
+        if (!window.TEF_SIMILARITY || !window.TEF_SIMILARITY[setKey]){
           state.methodId = "default";
           ui.select.value = "default";
           render();
-          ui.desc.textContent = "Coverage order could not load — showing the practice order.";
+          ui.desc.textContent = "Similarity order could not load — showing the practice order.";
           return;
         }
         render();
@@ -848,11 +853,16 @@ if (typeof document !== "undefined") (function(){
       var lab = document.createElement("label"); lab.className = "tef-lab";
       lab.textContent = pack.methods.length ? "Sort / group by" : "Sort by";
       var sel = document.createElement("select"); sel.className = "tef-select";
-      // Coverage order leads the list because it is what the page opens on.
+      // The two computed orderings lead the list, similarity first because it is
+      // what the page opens on.
       if (setKey){
+        var optSim = document.createElement("option");
+        optSim.value = "similarity";
+        optSim.textContent = "Similarity order (default · each one next to its nearest twin)";
+        sel.appendChild(optSim);
         var optCov = document.createElement("option");
         optCov.value = "coverage";
-        optCov.textContent = "Coverage order (default · most score per hour)";
+        optCov.textContent = "Coverage order (most score per hour)";
         sel.appendChild(optCov);
       }
       var optD = document.createElement("option");
@@ -864,20 +874,14 @@ if (typeof document !== "undefined") (function(){
         optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
         sel.appendChild(optDiff);
       }
-      if (setKey){
-        var optSim = document.createElement("option");
-        optSim.value = "similarity";
-        optSim.textContent = "Similarity order (each one next to its nearest twin)";
-        sel.appendChild(optSim);
-      }
       pack.methods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
       });
       lab.setAttribute("for","tef-select"); sel.id="tef-select";
       var summary = document.createElement("span"); summary.className="tef-summary";
-      // Neutral until the coverage file lands, so the bar never claims an
+      // Neutral until the similarity file lands, so the bar never claims an
       // ordering the list is not actually in yet.
-      summary.textContent = (setKey ? "Coverage order · " : "Original practice order · ")
+      summary.textContent = (setKey ? "Similarity order · " : "Original practice order · ")
                           + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
 
