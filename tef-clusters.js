@@ -366,6 +366,28 @@ if (typeof document !== "undefined") (function(){
       store(storeKey, JSON.stringify(Object.keys(done).map(Number)));
     }
 
+    // One-time preseed of ads already drilled in the study_or dashboard as of
+    // 2026-08-22. Additive: never removes a tick, only adds ones the reader
+    // does not have yet. Guarded by a per-set version key so a later untick
+    // sticks — we don't re-add on the next visit. Bump PRESEED_VER to reapply
+    // (e.g. when a new drilled snapshot lands).
+    var PRESEED_DRILLED = {
+      A: [1,2,3,7,8,9,12],
+      B: [1,3,7,9,10,11,13,14,19,27,28,29,30,31,32,33,38,40,42,49,50,58,60,61,66,67,68,70,71,79,80]
+    };
+    var PRESEED_VER = "2026-08-22.v1";
+    if (setKey && PRESEED_DRILLED[setKey]){
+      var preseedKey = storeKey + ":preseed";
+      if (read(preseedKey) !== PRESEED_VER){
+        var added = 0;
+        PRESEED_DRILLED[setKey].forEach(function(n){
+          if (byNum[n] && !done[n]){ done[n] = 1; added++; }
+        });
+        if (added) saveDone();
+        store(preseedKey, PRESEED_VER);
+      }
+    }
+
     numbered.forEach(function(it){
       var head = it.el.querySelector(".topic-head");
       if (!head) return;
@@ -492,6 +514,7 @@ if (typeof document !== "undefined") (function(){
       state.methodId = ui.select.value;
       state.filter = null;
       if (state.methodId === "coverage" && !window.TEF_COVERAGE) loadCoverage(render);
+      else if (state.methodId === "coverage_df" && !window.TEF_COVERAGE) loadCoverage(render);
       else if (state.methodId === "similarity" && !window.TEF_SIMILARITY) loadSimilarity(render);
       else render();
     });
@@ -602,6 +625,7 @@ if (typeof document !== "undefined") (function(){
       if (state.methodId !== "similarity") clearSimilarity();
 
       if (state.methodId === "coverage"){ renderCoverage(); return; }
+      if (state.methodId === "coverage_df"){ renderCoverageDrilledFirst(); return; }
       if (state.methodId === "similarity"){ renderSimilarity(); return; }
 
       // Difficulty order is a flat sort, not a grouping: no cluster heads, no chips.
@@ -774,6 +798,129 @@ if (typeof document !== "undefined") (function(){
       ui.chips.innerHTML = "";
     }
 
+    // Coverage · drilled first — same shape as coverage order, but the sequence
+    // is permuted so the ads you have already drilled sit at the top of the list.
+    // Each swap pairs a not-yet-drilled top-N item with a drilled item further
+    // down that shares its response family (A10 / B10 cluster) — meters, caps,
+    // milestones and the stop-here bands stay position-indexed so their curve
+    // is the coverage curve unchanged. Per-item "why" rationale is omitted
+    // because it was written for the badge that originally held each rank.
+    function renderCoverageDrilledFirst(){
+      var pk = window.TEF_COVERAGE && setKey ? window.TEF_COVERAGE[setKey] : null;
+      if (!pk || !pk.df_order){
+        ui.desc.textContent = state.coverageFailed
+          ? "Could not load tef-coverage.js — the other orderings still work."
+          : "No drilled-first order for this list.";
+        ui.summary.textContent = "Coverage · drilled first unavailable";
+        return;
+      }
+      clearCoverage();
+      document.body.classList.add("tef-mode-cluster");
+      document.body.classList.add("tef-mode-coverage");
+      sections.forEach(function(s){ s.style.display = ""; });
+
+      var milestones = {};
+      (pk.milestones || []).forEach(function(ms){ milestones[ms.after_rank] = ms; });
+      var total = pk.df_order.length;
+
+      // Same caps banner as coverage order.
+      if (pk.caps && pk.caps.length){
+        var caps = document.createElement("div");
+        caps.className = "tef-caps";
+        var ch = document.createElement("div");
+        ch.className = "tef-caps-head";
+        ch.textContent = "Before anything else — these cap you on behaviour, not on level";
+        caps.appendChild(ch);
+        var cl = document.createElement("ul");
+        pk.caps.forEach(function(c){
+          var li = document.createElement("li");
+          li.innerHTML = String(c)
+            .replace(/[<>&]/g, function(m){ return {"<":"&lt;",">":"&gt;","&":"&amp;"}[m]; })
+            .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+            .replace(/\*(.+?)\*/g, "<i>$1</i>");
+          cl.appendChild(li);
+        });
+        caps.appendChild(cl);
+        wrap.appendChild(caps);
+      }
+
+      pk.df_order.forEach(function(badge, i){
+        var rank = i + 1;
+        // Meters, floor and milestone anchors are all POSITION-indexed:
+        // they come from the coverage entry that originally held this rank,
+        // which is pk.order[i].
+        var orig = pk.order[i];
+        var s = byNum[badge];
+        if (!s) return;
+        wrap.appendChild(s);
+
+        var head = s.querySelector(".topic-head");
+        if (head){
+          var chip = document.createElement("span");
+          chip.className = "tef-covrank";
+          chip.innerHTML = '<b></b><i></i>';
+          chip.querySelector("b").textContent = "#" + rank;
+          chip.querySelector("i").textContent = "of " + total;
+          headAdd(head, chip);
+        }
+
+        var note = document.createElement("div");
+        note.className = "tef-cov-note";
+        note.innerHTML =
+            '<div class="tef-cov-meters">'
+          +   '<span class="tef-cov-m"><em>Pool covered</em>'
+          +     '<span class="tef-cov-bar"><i></i></span><b></b></span>'
+          +   '<span class="tef-cov-m"><em>Language machinery</em>'
+          +     '<span class="tef-cov-bar tef-cov-bar-l"><i></i></span><b></b></span>'
+          + '</div>';
+        if (orig && orig.floor){
+          var fl = document.createElement("span");
+          fl.className = "tef-cov-floor";
+          fl.innerHTML = '<em>Stop here</em><b></b>';
+          fl.querySelector("b").textContent = orig.floor;
+          note.querySelector(".tef-cov-meters").appendChild(fl);
+        }
+        var meters = note.querySelectorAll(".tef-cov-m");
+        var poolPct = (orig && orig.cum_pool) || 0;
+        var langPct = (orig && orig.cum_lang) || 0;
+        meters[0].querySelector("i").style.width = poolPct + "%";
+        meters[0].querySelector("b").textContent = poolPct + "%";
+        meters[1].querySelector("i").style.width = langPct + "%";
+        meters[1].querySelector("b").textContent = langPct + "%";
+        s.appendChild(note);
+
+        var ms = milestones[rank];
+        if (ms){
+          var band = document.createElement("div");
+          band.className = "tef-milestone";
+          band.innerHTML = '<div class="tef-ms-kicker"><span></span><b></b></div>'
+                         + '<div class="tef-ms-head"></div><p class="tef-ms-body"></p>';
+          band.querySelector(".tef-ms-kicker span").textContent =
+            "After " + rank + " item" + (rank === 1 ? "" : "s") + " · "
+            + poolPct + "% of the pool covered";
+          if (ms.band) band.querySelector(".tef-ms-kicker b").textContent = ms.band;
+          band.querySelector(".tef-ms-head").textContent = ms.headline || "";
+          band.querySelector(".tef-ms-body").textContent = ms.body || "";
+          wrap.appendChild(band);
+        }
+      });
+
+      // Anything the drilled-first list doesn't name (shouldn't happen — the
+      // data is checked against the badge set) is parked at the end.
+      var placed = {};
+      pk.df_order.forEach(function(b){ placed[b] = 1; });
+      sections.forEach(function(s){
+        var b = s.querySelector(".badge");
+        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        if (!placed[n]) wrap.appendChild(s);
+      });
+      daybars.forEach(function(d){ wrap.appendChild(d); });
+
+      ui.desc.textContent = "Same coverage order, but the sequence is permuted so the ads you have already drilled sit at the top. Empty top-band slots swap with the drilled ad closest in response family. Meters, milestone bands and stop-here readings are position-indexed and match the plain coverage view at every rank; per-item rationale is dropped because it was written for the badge that originally held each rank.";
+      ui.summary.textContent = "Coverage · drilled first · " + total + " " + unit;
+      ui.chips.innerHTML = "";
+    }
+
     // Similarity order: a thread, not a ranking. The list is arranged so that
     // each item's nearest neighbours in subject matter sit directly above and
     // below it, and a connector between every consecutive pair names what the
@@ -886,6 +1033,14 @@ if (typeof document !== "undefined") (function(){
         optCov.value = "coverage";
         optCov.textContent = "Coverage order (most score per hour)";
         sel.appendChild(optCov);
+        // Drilled-first is only meaningful for the two EO pools (A/B) that
+        // carry a df_order in the coverage data.
+        if (setKey === "A" || setKey === "B"){
+          var optCovDF = document.createElement("option");
+          optCovDF.value = "coverage_df";
+          optCovDF.textContent = "Coverage · drilled first";
+          sel.appendChild(optCovDF);
+        }
       }
       var optD = document.createElement("option");
       optD.value = "default";
