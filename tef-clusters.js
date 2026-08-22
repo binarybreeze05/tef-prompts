@@ -561,30 +561,55 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
-    // Similarity order is the default view wherever there is data for it. It is
-    // what makes a session out of the list rather than a lucky dip: whatever you
-    // open, the things next to it rehearse the same vocabulary, so you can start
-    // anywhere and keep going. Coverage order is one click away for the separate
-    // question of what to drill first.
-    // The data still loads lazily rather than blocking first paint: the list
-    // paints in practice order and reflows into similarity order when the file
-    // lands (immediately, on a warm cache), and at 35 KB it is a fifth of the
-    // coverage file this replaces as the opening view.
+    // Default view. On the two EO pools (A and B) that carry a drilled-first
+    // dataset, "Coverage · drilled first" opens the list — that is the ordering
+    // most useful mid-drill: what you have done already sits at the top, what
+    // you have not sits in coverage-optimal order underneath, and the meters/
+    // milestones/stop-here bands stay at the ranks they were computed for.
+    // On every other list similarity order opens instead: whatever you open,
+    // the things next to it rehearse the same vocabulary, so you can start
+    // anywhere and keep going. Data still loads lazily — the list paints in
+    // practice order and reflows into the picked ordering when the file lands
+    // (immediately, on a warm cache). Any failed fetch falls the reader back
+    // through a sensible chain (drilled-first → coverage → similarity → practice)
+    // instead of stranding them on a half-labelled page.
     if (setKey){
-      state.methodId = "similarity";
-      ui.select.value = "similarity";
-      loadSimilarity(function(){
-        // A failed fetch must not strand the reader on a half-labelled page.
-        // Fall back to the practice order and say so.
-        if (!window.TEF_SIMILARITY || !window.TEF_SIMILARITY[setKey]){
-          state.methodId = "default";
-          ui.select.value = "default";
+      var hasDrilledFirst = (setKey === "A" || setKey === "B");
+      if (hasDrilledFirst){
+        state.methodId = "coverage_df";
+        ui.select.value = "coverage_df";
+        loadCoverage(function(){
+          var pk = window.TEF_COVERAGE && window.TEF_COVERAGE[setKey];
+          if (pk && pk.df_order){ render(); return; }
+          // Coverage data missing df_order or failed — try similarity, then practice.
+          loadSimilarity(function(){
+            if (window.TEF_SIMILARITY && window.TEF_SIMILARITY[setKey]){
+              state.methodId = "similarity";
+              ui.select.value = "similarity";
+              render();
+              ui.desc.textContent = "Coverage · drilled first could not load — showing similarity order.";
+              return;
+            }
+            state.methodId = "default";
+            ui.select.value = "default";
+            render();
+            ui.desc.textContent = "Coverage · drilled first could not load — showing the practice order.";
+          });
+        });
+      } else {
+        state.methodId = "similarity";
+        ui.select.value = "similarity";
+        loadSimilarity(function(){
+          if (!window.TEF_SIMILARITY || !window.TEF_SIMILARITY[setKey]){
+            state.methodId = "default";
+            ui.select.value = "default";
+            render();
+            ui.desc.textContent = "Similarity order could not load — showing the practice order.";
+            return;
+          }
           render();
-          ui.desc.textContent = "Similarity order could not load — showing the practice order.";
-          return;
-        }
-        render();
-      });
+        });
+      }
     }
 
     function currentMethod(){
@@ -1056,10 +1081,12 @@ if (typeof document !== "undefined") (function(){
       });
       lab.setAttribute("for","tef-select"); sel.id="tef-select";
       var summary = document.createElement("span"); summary.className="tef-summary";
-      // Neutral until the similarity file lands, so the bar never claims an
-      // ordering the list is not actually in yet.
-      summary.textContent = (setKey ? "Similarity order · " : "Original practice order · ")
-                          + pack.total + " " + unit;
+      // Neutral until the default ordering's data file lands, so the bar never
+      // claims an ordering the list is not actually in yet.
+      var openingLabel = setKey
+        ? ((setKey === "A" || setKey === "B") ? "Coverage · drilled first · " : "Similarity order · ")
+        : "Original practice order · ";
+      summary.textContent = openingLabel + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
 
       // Progress row: how much of this list you have ticked off, how much is
