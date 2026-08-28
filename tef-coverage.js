@@ -55,7 +55,7 @@ var TEF_COVERAGE = {
     "body": "Sixty-eight drills, 98% coverage. Each of the final ten shares between 76% and 100% of its components with an ad you have already run, and three of them are component-for-component identical to an earlier item: the bungee jump at rank 78 is the dog sled at rank 37 with different nouns. Section A now supports 7 to 8 on A1, A2, A3 and A4, which is everything the section can give you; the binding constraint is the language ceiling, min(LEX, SYN, PHON) + 1.5, and that is set jointly by both sections. Record yourself running rank 1 again and count the fillers — §6.4 shows a hesitation ratio inside the 'fluid' range on a delivery that was still NCLC 4–5 — before you spend a minute on any of these ten."
    }
   ],
-  "df_order": [1,12,3,2,8,7,9,38,6,42,11,32,13,17,16,14,33,18,20,19,21,22,5,10,31,29,63,64,34,30,15,56,46,4,43,50,45,28,35,23,36,58,57,54,51,49,40,27,59,37,48,60,53,26,47,73,24,65,66,39,52,68,25,75,67,41,61,44,77,62,69,74,71,72,76,55,78,70],
+  "df_order": [31,3,2,7,8,13,16,14,18,21,1,5,10,12,9,43,36,40,48,53,24,70,22,42,30,38,6,11,32,17,33,20,19,29,63,64,34,15,56,46,4,50,45,28,35,23,58,57,54,51,49,27,59,37,60,26,47,73,65,66,39,52,68,25,75,67,41,61,44,77,62,69,74,71,72,76,55,78],
   "order": [
    {
     "rank": 1,
@@ -730,7 +730,7 @@ var TEF_COVERAGE = {
     "body": "At 97% coverage the remaining 15 items move the number by three points in total, and 12 of them move it by nothing at all. Every objection family has been answered between four and twelve times, every lexical field has been used, and the marginal return on ad number 67 is smaller than the return on one more recorded run of rank 1 with the transcript in front of you. The honest advice at this point is the rubric's own priority list: get the conditionnel reliable, count the silence in your recordings, and answer the objection you were given rather than the one you prepared. Those three are worth more than the rest of this list combined."
    }
   ],
-  "df_order": [30,32,27,29,31,60,3,11,50,9,80,28,10,7,1,42,79,61,67,40,33,71,66,38,68,70,13,58,19,49,14,39,48,63,36,46,24,45,59,57,51,37,25,64,15,23,4,35,41,18,55,22,54,2,52,69,56,43,44,72,34,5,62,53,26,47,17,78,6,21,65,73,74,76,20,16,81,12,8,77,75],
+  "df_order": [30,32,27,29,31,60,3,11,47,28,1,42,77,38,68,58,49,21,61,9,10,50,13,33,23,4,2,40,67,70,19,5,7,26,80,66,14,74,71,79,37,48,57,62,39,56,69,64,16,6,43,25,44,63,36,46,24,45,59,51,15,35,41,18,55,22,54,52,72,34,53,17,78,65,73,76,20,81,12,8,75],
   "order": [
    {
     "rank": 1,
