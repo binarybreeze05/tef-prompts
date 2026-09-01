@@ -1,8 +1,9 @@
 /* TEF practice-order — cluster grouping / filtering overlay.
    One file drives all ten practice pages. It auto-detects Section A (78 ads)
    vs Section B (81 ads) by counting section.topic elements, then lets you
-   regroup the ads by any of 10 clustering methodologies and filter to a
-   single cluster. Ads are addressed by their practice-order badge number,
+   regroup the ads by any of the clustering methodologies — the two study-plan
+   groupings (7-day order, tree-derived clusters) plus the 10 content
+   methodologies — and filter to a single cluster. Ads are addressed by their practice-order badge number,
    which is identical across the FR / EN / images variants.
    Cluster + methodology names are English by design.
 
@@ -273,6 +274,62 @@ var TEF_CLUSTERS = {
     ]
   }
 };
+
+/* Study-plan orderings — the 7-day interleave and the tree-derived clusters from
+   nativized/study_or/study_plan.html (extracted 2026-09-01). Ids are the same
+   practice-order badge numbers. In the day order, each ad sits on the day the
+   plan schedules it; "re-runs" are ads already carded before the plan started,
+   warmed up from memory rather than given the full treatment. Clusters come
+   from the decision trees: Section A grouped by tree_A NODE-1 shape (one
+   flavor column each), Section B by the objection kit tree_B predicts.
+   Inserted at the head of each methods list so they sit first after the
+   computed orderings in the dropdown. */
+(function(){
+  TEF_CLUSTERS.A.methods.unshift(
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
+      clusters:[
+      ["Day 1",[6,11,19,20,22,23,26,4,25,17,15,44],"12 new — the grind starts"],
+      ["Day 2",[27,28,29,35,37,39,41,30,38,34,32],"11 new"],
+      ["Day 3",[42,45,46,47,49,50,55,75,68,33,72],"11 new"],
+      ["Day 4",[51,52,54,57,58,59,60,9,76,73,56],"10 new · 1 re-run"],
+      ["Day 5",[61,62,63,64,65,66,67,13,16,77,12],"8 new · 3 re-runs"],
+      ["Day 6",[1,2,3,7,69,74,78,18,5,71,14],"4 new · 7 re-runs — taper"],
+      ["Day 7",[8,24,36,40,53,70,43,48,21,10,31],"11 re-runs — last day, all review"]
+    ]},
+    { id:"SP2", name:"Study plan · shape clusters", desc:"The 5 clusters the study plan drills from: tree_A NODE-1 shapes, one flavor column applied identically across a cluster.",
+      clusters:[
+      ["GO — I go to them",[1,2,3,6,7,8,11,19,20,22,23,24,26,27,28,29,35,36,37,39,40,41,42,45,46,47,49,50,51,52,53,54,57,58,59,60,61,62,63,64,65,66,67,69,70,74,78],"session start-to-finish · beginner-fit · schedule · gear provided · food & extras — theme of day 6"],
+      ["COME — they come to me",[4,9,13,16,18,25,30,38,43,48,55,75,76],"exact coverage · who enters my home · quote & travel fees · guarantee — theme of day 1"],
+      ["TAKE — I rent a thing",[5,17,21,34,68,73,77],"models & sizes · deposit · duration & return · damage · what comes with it — theme of day 6"],
+      ["FLIP — money flows my way",[10,15,32,33,56,71],"what would I do · requirements · pay & expenses · commitment · perks — theme of day 7"],
+      ["FAR — I order remotely",[12,14,31,44,72],"process steps · delivery time · secure payment · refund window — theme of day 5"]
+    ]}
+);
+  TEF_CLUSTERS.B.methods.unshift(
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
+      clusters:[
+      ["Day 1",[34,41,18,8,22,35,15,24,6,25,17,16],"12 new — the grind starts"],
+      ["Day 2",[53,36,43,75,48,54,37,44,12,45,69,72],"12 new"],
+      ["Day 3",[62,63,3,55,81,59,65,56,39,51,73,20],"11 new · 1 re-run"],
+      ["Day 4",[1,23,9,2,78,4,14,46,57,64,7,10],"4 new · 8 re-runs"],
+      ["Day 5",[21,47,49,61,28,11,32,52,76,27,19],"2 new · 9 re-runs"],
+      ["Day 6",[58,70,29,31,42,50,67,26,66,5,30],"11 re-runs — taper"],
+      ["Day 7",[60,80,77,68,79,74,13,38,33,40,71],"11 re-runs — last day, all review"]
+    ]},
+    { id:"SP2", name:"Study plan · objection kits", desc:"The 9 kits the study plan drills from: tree_B families merged when the same 3-move kit answers them — same expected sounds, same three moves.",
+      clusters:[
+      ["« Unpaid?! »",[1,21,34,41,47,53,58,60,62,63],"MONEY-flip · TIME · BOND — fire FLIP · YOUR WORDS · GIVE & TAKE"],
+      ["« Costs a fortune » (trips)",[3,18,23,36,43,49,55,61,70,80],"MONEY · TIME · EFFORT — fire VERSUS · SHRINK · PAINT"],
+      ["« Is it worth it? » (services)",[8,9,28,29,75,77,81],"MONEY · TRUST · BOND — fire VERSUS · AD SAYS · EXIT DOOR"],
+      ["« Too good to be true »",[2,11,22,31,35,42,48,54,59,65,68,78],"TRUST · EFFORT · BOND — fire PROOF · EXIT DOOR · AD SAYS"],
+      ["« Can I trust the platform? »",[4,14,15,24,32,37,44,50,56,67,79],"TRUST · EFFORT · WANT — fire PROOF · EXIT DOOR · AD SAYS"],
+      ["« That's dangerous »",[6,12,26,39,46,52,66,74],"FEAR · ABILITY · EFFORT — fire PROOF · EXIT DOOR · TOGETHER"],
+      ["« I'd be useless »",[5,13,25,38,45,51,57,64,76],"ABILITY · FEAR · TRUST — fire AD SAYS · FLIP · TOGETHER"],
+      ["« I'm swamped »",[7,10,17,27,30,33,40,69,72,73],"TIME · BOND · WANT — fire SHRINK · AD SAYS · GIVE & TAKE"],
+      ["« Not my thing »",[16,19,20,71],"WANT · EFFORT — fire PAINT · YOUR WORDS · GIVE & TAKE"]
+    ]}
+);
+})();
 
 if (typeof module !== "undefined" && module.exports) { module.exports = TEF_CLUSTERS; }
 
@@ -689,6 +746,15 @@ if (typeof document !== "undefined") (function(){
         head.innerHTML = '<span class="tef-ch-name"></span><span class="tef-ch-count"></span>';
         head.querySelector(".tef-ch-name").textContent = name;
         head.querySelector(".tef-ch-count").textContent = members.length + (members.length===1?" ad":" ads");
+        // Optional third slot: a subtitle line under the name/count row — the
+        // study-plan methods use it for the day's new/re-run split and for a
+        // cluster's question set or move kit.
+        if (cl[2]){
+          var sub = document.createElement("span");
+          sub.className = "tef-ch-sub";
+          sub.textContent = cl[2];
+          head.appendChild(sub);
+        }
         wrap.appendChild(head);
         members.forEach(function(s){ s.style.display=""; wrap.appendChild(s); });
       });
@@ -1136,11 +1202,12 @@ if (typeof document !== "undefined") (function(){
       + ".tef-chip.on{background:var(--accent,#2563eb);color:#fff;border-color:var(--accent,#2563eb)}"
       + ".tef-chip.on b{background:rgba(255,255,255,.25);color:#fff}"
       + ".tef-chip-all{font-weight:700}"
-      + ".tef-cluster-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;"
+      + ".tef-cluster-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.15rem 1rem;"
       + "margin:1.8rem 0 .2rem;padding:.5rem .95rem;border-radius:10px;background:#111827;color:#fff}"
       + ".tef-cluster-head:first-child{margin-top:.4rem}"
       + ".tef-ch-name{font-weight:700;font-size:1rem}"
       + ".tef-ch-count{font-weight:500;font-size:.8rem;opacity:.9;white-space:nowrap}"
+      + ".tef-ch-sub{flex:1 1 100%;font-weight:400;font-size:.78rem;opacity:.85;line-height:1.45}"
       + ".tef-mode-cluster .daybar{display:none}"
 
       // --- coverage order -------------------------------------------------
