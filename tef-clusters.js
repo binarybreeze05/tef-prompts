@@ -3,8 +3,12 @@
    vs Section B (81 ads) by counting section.topic elements, then lets you
    regroup the ads by any of the clustering methodologies — the two study-plan
    groupings (7-day order, tree-derived clusters) plus the 10 content
-   methodologies — and filter to a single cluster. Ads are addressed by their practice-order badge number,
-   which is identical across the FR / EN / images variants.
+   methodologies — and filter to a single cluster. Ads are addressed by their
+   canonical practice-order number, identical across the FR / EN / images
+   variants: the static HTML prints it in the blue badge, init moves it to
+   data-num and into span.orig ("n° d'origine"), and from then on the badge
+   circle shows the item's LIVE position in whatever ordering and filter is
+   on show, renumbered on every repaint.
    Cluster + methodology names are English by design.
 
    The four ecrite pages (72 / 73 prompts) carry only the two study-plan
@@ -406,12 +410,15 @@ if (typeof document !== "undefined") (function(){
                : (sections.length === 73) ? "EB"
                : null;
 
-    // Map badge number -> section
+    // Map canonical number -> section. The badge circle prints the canonical
+    // number in the static HTML, but from here on the badge is a LIVE POSITION
+    // (renumbered on every repaint), so the canonical id is stamped onto the
+    // section as data-num and everything below reads that, never the badge.
     var byNum = {};
     sections.forEach(function(s){
       var b = s.querySelector(".badge");
       var n = b ? parseInt((b.textContent||"").trim(), 10) : NaN;
-      if (!isNaN(n)) byNum[n] = s;
+      if (!isNaN(n)){ byNum[n] = s; s.setAttribute("data-num", String(n)); }
     });
 
     // Difficulty order: each item prints its source rank in span.orig —
@@ -426,6 +433,21 @@ if (typeof document !== "undefined") (function(){
     }).filter(function(r){ return !isNaN(r.rank); })
       .sort(function(a, b){ return a.rank - b.rank; });
     var hasDifficulty = (ranked.length === sections.length);
+
+    // With the badge circle renumbering live, the canonical number moves into
+    // the span that used to print the source rank — that rank was only ever
+    // displayed to feed difficulty order, which was captured just above, so
+    // nothing else needs it on show. FR pages keep their "n° d'origine"
+    // wording; EN pages get a plain "nº".
+    sections.forEach(function(s){
+      var o = s.querySelector(".orig");
+      if (!o) return;
+      var n = s.getAttribute("data-num");
+      if (!n) return;
+      o.textContent = /origine/.test(o.textContent || "")
+        ? "· n° d'origine " + n
+        : "· nº " + n;
+    });
 
     // Flow = day-bars + sections, in document order. Wrap them so we can reorder cleanly.
     var flow = Array.prototype.slice.call(document.querySelectorAll(".daybar, section.topic"));
@@ -452,8 +474,7 @@ if (typeof document !== "undefined") (function(){
     // session and only the persistence is lost; nothing else on the page cares.
     var storeKey = "tef-done:" + (setKey || ("n" + sections.length));
     var numbered = sections.map(function(s){
-      var b = s.querySelector(".badge");
-      return { el: s, num: b ? parseInt((b.textContent || "").trim(), 10) : NaN };
+      return { el: s, num: parseInt(s.getAttribute("data-num") || "", 10) };
     }).filter(function(it){ return !isNaN(it.num); });
 
     function store(k, v){
@@ -541,6 +562,19 @@ if (typeof document !== "undefined") (function(){
         if (cb && cb.checked !== d) cb.checked = d;
       });
       var left = total - ndone;
+
+      // The blue badge is a live position: 1..K down whatever ordering and
+      // filter is on show, recounted after every repaint and every tick. The
+      // item's canonical number sits in span.orig (rewritten once at init)
+      // and in data-num; nothing reads the badge text any more.
+      var pos = 0;
+      wrap.querySelectorAll("section.topic").forEach(function(s){
+        var b = s.querySelector(".badge");
+        if (!b) return;
+        if (s.style.display === "none" ||
+            (state.hideDone && s.classList.contains("tef-is-done"))) return;
+        b.textContent = String(++pos);
+      });
 
       // A similarity connector describes two items sitting next to each other.
       // Hide one of them and it no longer describes anything, so it goes too.
@@ -732,8 +766,8 @@ if (typeof document !== "undefined") (function(){
         sections.forEach(function(s){ s.style.display=""; });
         ranked.forEach(function(r){ wrap.appendChild(r.el); });
         daybars.forEach(function(d){ wrap.appendChild(d); });
-        ui.desc.textContent = "Sequenced by the difficulty ranking, rank 1 first. "
-          + "The origin number printed on each item is its difficulty rank.";
+        ui.desc.textContent = "Sequenced by the difficulty ranking, rank 1 first "
+          + "(the order the source lists shipped in).";
         ui.summary.textContent = "Difficulty order · " + pack.total + " " + unit;
         ui.chips.innerHTML = "";
         return;
@@ -894,8 +928,7 @@ if (typeof document !== "undefined") (function(){
       var placed = {};
       pk.order.forEach(function(o){ placed[o.badge] = 1; });
       sections.forEach(function(s){
-        var b = s.querySelector(".badge");
-        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        var n = parseInt(s.getAttribute("data-num") || "", 10);
         if (!placed[n]) wrap.appendChild(s);
       });
       daybars.forEach(function(d){ wrap.appendChild(d); });
@@ -1017,8 +1050,7 @@ if (typeof document !== "undefined") (function(){
       var placed = {};
       pk.df_order.forEach(function(b){ placed[b] = 1; });
       sections.forEach(function(s){
-        var b = s.querySelector(".badge");
-        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        var n = parseInt(s.getAttribute("data-num") || "", 10);
         if (!placed[n]) wrap.appendChild(s);
       });
       daybars.forEach(function(d){ wrap.appendChild(d); });
@@ -1088,8 +1120,7 @@ if (typeof document !== "undefined") (function(){
       var placed = {};
       pk.order.forEach(function(o){ placed[o.badge] = 1; });
       sections.forEach(function(s){
-        var b = s.querySelector(".badge");
-        var n = b ? parseInt((b.textContent || "").trim(), 10) : NaN;
+        var n = parseInt(s.getAttribute("data-num") || "", 10);
         if (!placed[n]) wrap.appendChild(s);
       });
       daybars.forEach(function(d){ wrap.appendChild(d); });
