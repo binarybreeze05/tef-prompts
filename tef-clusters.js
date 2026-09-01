@@ -7,8 +7,11 @@
    which is identical across the FR / EN / images variants.
    Cluster + methodology names are English by design.
 
-   The four ecrite pages (72 / 73 prompts) have no cluster methodologies, so
-   their toolbar is just the four orderings below.
+   The four ecrite pages (72 / 73 prompts) carry only the two study-plan
+   groupings (from study_plan_ecrite.html) plus the computed orderings; the
+   ten content methodologies exist for the EO pools alone. Every list opens
+   on the study-plan clusters (SP2), whose members are threaded so that
+   neighbouring items elicit near-identical responses.
 
    Difficulty order is read straight from the DOM: every item prints its
    source rank as "· was #N" in span.orig, and ascending N reproduces the
@@ -275,15 +278,17 @@ var TEF_CLUSTERS = {
   }
 };
 
-/* Study-plan orderings — the 7-day interleave and the tree-derived clusters from
-   nativized/study_or/study_plan.html (extracted 2026-09-01). Ids are the same
-   practice-order badge numbers. In the day order, each ad sits on the day the
-   plan schedules it; "re-runs" are ads already carded before the plan started,
-   warmed up from memory rather than given the full treatment. Clusters come
-   from the decision trees: Section A grouped by tree_A NODE-1 shape (one
-   flavor column each), Section B by the objection kit tree_B predicts.
-   Inserted at the head of each methods list so they sit first after the
-   computed orderings in the dropdown. */
+/* Study-plan orderings — the 7-day interleaves and the tree-derived clusters
+   from nativized/study_or/study_plan.html and study_plan_ecrite.html
+   (extracted 2026-09-01, within-cluster threads computed 2026-09-01).
+   Ids are the same practice-order badge numbers each page prints.
+   SP1 = the plan's day-by-day interleave (oral re-runs are ads already
+   carded before the plan started). SP2 = the plan's cluster partition;
+   within every cluster the members are THREADED by response similarity —
+   Section A by the deviation questions the caller must ask, Section B by
+   the objections the friend will raise, écrite A by the continuation's
+   story beats, écrite B by the argument bank — so adjacent items drill
+   near-identically. SP2 is the view every list opens on. */
 (function(){
   TEF_CLUSTERS.A.methods.unshift(
     { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
@@ -296,15 +301,14 @@ var TEF_CLUSTERS = {
       ["Day 6",[1,2,3,7,69,74,78,18,5,71,14],"4 new · 7 re-runs — taper"],
       ["Day 7",[8,24,36,40,53,70,43,48,21,10,31],"11 re-runs — last day, all review"]
     ]},
-    { id:"SP2", name:"Study plan · shape clusters", desc:"The 5 clusters the study plan drills from: tree_A NODE-1 shapes, one flavor column applied identically across a cluster.",
+    { id:"SP2", name:"Study plan · shape clusters", desc:"The 5 clusters the study plan drills from (tree_A NODE-1 shapes, one flavor column each). Within a cluster the ads are threaded by the questions they make you ask: neighbours call for near-identical deviation questions, so drill them back to back.",
       clusters:[
-      ["GO — I go to them",[1,2,3,6,7,8,11,19,20,22,23,24,26,27,28,29,35,36,37,39,40,41,42,45,46,47,49,50,51,52,53,54,57,58,59,60,61,62,63,64,65,66,67,69,70,74,78],"session start-to-finish · beginner-fit · schedule · gear provided · food & extras — theme of day 6"],
-      ["COME — they come to me",[4,9,13,16,18,25,30,38,43,48,55,75,76],"exact coverage · who enters my home · quote & travel fees · guarantee — theme of day 1"],
-      ["TAKE — I rent a thing",[5,17,21,34,68,73,77],"models & sizes · deposit · duration & return · damage · what comes with it — theme of day 6"],
-      ["FLIP — money flows my way",[10,15,32,33,56,71],"what would I do · requirements · pay & expenses · commitment · perks — theme of day 7"],
-      ["FAR — I order remotely",[12,14,31,44,72],"process steps · delivery time · secure payment · refund window — theme of day 5"]
-    ]}
-);
+      ["GO — I go to them",[22,29,42,45,11,78,74,52,1,70,35,57,65,63,60,69,67,58,50,7,40,27,54,59,62,19,53,64,2,39,23,61,66,49,26,6,37,3,47,24,41,36,46,28,8,51,20],"session start-to-finish · beginner-fit · schedule · gear provided · food & extras — theme of day 6"],
+      ["COME — they come to me",[9,30,43,75,13,16,76,4,38,25,18,48,55],"exact coverage · who enters my home · quote & travel fees · guarantee — theme of day 1"],
+      ["TAKE — I rent a thing",[68,5,77,73,34,17,21],"models & sizes · deposit · duration & return · damage · what comes with it — theme of day 6"],
+      ["FLIP — money flows my way",[10,32,71,33,15,56],"what would I do · requirements · pay & expenses · commitment · perks — theme of day 7"],
+      ["FAR — I order remotely",[12,44,31,14,72],"process steps · delivery time · secure payment · refund window — theme of day 5"]
+    ]});
   TEF_CLUSTERS.B.methods.unshift(
     { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
       clusters:[
@@ -316,19 +320,66 @@ var TEF_CLUSTERS = {
       ["Day 6",[58,70,29,31,42,50,67,26,66,5,30],"11 re-runs — taper"],
       ["Day 7",[60,80,77,68,79,74,13,38,33,40,71],"11 re-runs — last day, all review"]
     ]},
-    { id:"SP2", name:"Study plan · objection kits", desc:"The 9 kits the study plan drills from: tree_B families merged when the same 3-move kit answers them — same expected sounds, same three moves.",
+    { id:"SP2", name:"Study plan · objection kits", desc:"The 9 kits the study plan drills from (tree_B families merged when the same 3-move kit answers them). Within a kit the ads are threaded by the objections the friend will actually raise: neighbours draw the same pushback, so rehearse them back to back.",
       clusters:[
-      ["« Unpaid?! »",[1,21,34,41,47,53,58,60,62,63],"MONEY-flip · TIME · BOND — fire FLIP · YOUR WORDS · GIVE & TAKE"],
-      ["« Costs a fortune » (trips)",[3,18,23,36,43,49,55,61,70,80],"MONEY · TIME · EFFORT — fire VERSUS · SHRINK · PAINT"],
-      ["« Is it worth it? » (services)",[8,9,28,29,75,77,81],"MONEY · TRUST · BOND — fire VERSUS · AD SAYS · EXIT DOOR"],
-      ["« Too good to be true »",[2,11,22,31,35,42,48,54,59,65,68,78],"TRUST · EFFORT · BOND — fire PROOF · EXIT DOOR · AD SAYS"],
-      ["« Can I trust the platform? »",[4,14,15,24,32,37,44,50,56,67,79],"TRUST · EFFORT · WANT — fire PROOF · EXIT DOOR · AD SAYS"],
-      ["« That's dangerous »",[6,12,26,39,46,52,66,74],"FEAR · ABILITY · EFFORT — fire PROOF · EXIT DOOR · TOGETHER"],
-      ["« I'd be useless »",[5,13,25,38,45,51,57,64,76],"ABILITY · FEAR · TRUST — fire AD SAYS · FLIP · TOGETHER"],
-      ["« I'm swamped »",[7,10,17,27,30,33,40,69,72,73],"TIME · BOND · WANT — fire SHRINK · AD SAYS · GIVE & TAKE"],
-      ["« Not my thing »",[16,19,20,71],"WANT · EFFORT — fire PAINT · YOUR WORDS · GIVE & TAKE"]
+      ["« Unpaid?! »",[1,58,53,60,62,63,21,34,47,41],"MONEY-flip · TIME · BOND — fire FLIP · YOUR WORDS · GIVE & TAKE"],
+      ["« Costs a fortune » (trips)",[80,18,3,70,55,23,43,49,36,61],"MONEY · TIME · EFFORT — fire VERSUS · SHRINK · PAINT"],
+      ["« Is it worth it? » (services)",[9,75,29,77,81,8,28],"MONEY · TRUST · BOND — fire VERSUS · AD SAYS · EXIT DOOR"],
+      ["« Too good to be true »",[2,65,35,42,48,54,22,59,68,78,31,11],"TRUST · EFFORT · BOND — fire PROOF · EXIT DOOR · AD SAYS"],
+      ["« Can I trust the platform? »",[67,56,24,44,4,37,50,79,15,32,14],"TRUST · EFFORT · WANT — fire PROOF · EXIT DOOR · AD SAYS"],
+      ["« That's dangerous »",[66,6,26,39,46,52,74,12],"FEAR · ABILITY · EFFORT — fire PROOF · EXIT DOOR · TOGETHER"],
+      ["« I'd be useless »",[64,5,45,51,38,57,25,76,13],"ABILITY · FEAR · TRUST — fire AD SAYS · FLIP · TOGETHER"],
+      ["« I'm swamped »",[7,72,27,40,69,17,10,73,30,33],"TIME · BOND · WANT — fire SHRINK · AD SAYS · GIVE & TAKE"],
+      ["« Not my thing »",[19,20,16,71],"WANT · EFFORT — fire PAINT · YOUR WORDS · GIVE & TAKE"]
+    ]});
+  TEF_CLUSTERS.EA = {
+    total: 72,
+    label: "Écrite Section A · 72 prompts (continue the fait divers)",
+    methods: [
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The écrite study plan's 7-day deal: every prompt drilled once, each day a proportional slice of every formula cluster, blocked by cluster within the day.",
+      clusters:[
+      ["Day 1",[2,3,21,4,6,1,10,13,14,5,7]],
+      ["Day 2",[20,24,35,8,9,17,18,19,22,15,16]],
+      ["Day 3",[34,41,11,12,28,31,33,37,23,25]],
+      ["Day 4",[45,46,26,27,38,42,43,44,32,36]],
+      ["Day 5",[48,55,49,29,30,47,53,54,58,39]],
+      ["Day 6",[62,56,59,40,51,52,60,61,63,50]],
+      ["Day 7",[67,68,70,72,64,65,66,69,57,71]]
+    ]},
+    { id:"SP2", name:"Study plan · story formulas", desc:"The 5 formula clusters from tree_ecrite_A. Within a cluster the prompts are threaded by the continuation they demand: neighbours share the same story beats and vocabulary field, so write them back to back.",
+      clusters:[
+      ["Save",[2,45,55,67,20,62,34,48],"Check: someone is in danger. Pay with the rescue: peril → intervention → relief. · 8 prompts"],
+      ["Fall",[49,59,24,41,46,68,56,35,3,21],"Check: a wrongdoer is loose. Pay with justice: scheme → the slip → consequence. · 10 prompts"],
+      ["Way",[8,26,4,6,52,9,11,29,72,27,12,30,70,51,40],"Check: an original solution / idea / reaction is promised. Pay with the clever plan: steps → execution → outcome. · 15 prompts"],
+      ["Thing",[33,65,64,60,22,47,58,37,19,61,54,63,44,1,14,31,13,69,43,53,42,10,28,66,17,38,18],"Check: a hidden unknown must be named (object, secret, person, cause). Pay by naming it, concrete, with one precise figure. · 27 prompts"],
+      ["Stir",[36,57,5,23,50,39,25,7,15,32,16,71],"Check: none of the above — a scene is boiling. Ride the chaos to its peak, then back to calm. · 12 prompts"]
     ]}
-);
+    ]
+  };
+  TEF_CLUSTERS.EB = {
+    total: 73,
+    label: "Écrite Section B · 73 prompts (argue the statement)",
+    methods: [
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The écrite study plan's 7-day deal: every prompt drilled once, each day a proportional slice of every formula cluster, blocked by cluster within the day.",
+      clusters:[
+      ["Day 1",[1,19,20,3,4,5,7,9,2,8,10]],
+      ["Day 2",[23,24,26,6,14,11,12,13,27,37,16]],
+      ["Day 3",[29,30,32,15,22,21,31,38,45,17,18]],
+      ["Day 4",[35,39,41,25,33,47,51,48,49,28]],
+      ["Day 5",[42,46,34,36,43,53,55,50,52,40]],
+      ["Day 6",[59,60,44,56,57,64,65,54,58,62]],
+      ["Day 7",[61,63,71,72,69,70,67,68,66,73]]
+    ]},
+    { id:"SP2", name:"Study plan · argument formulas", desc:"The 5 formula clusters from tree_ecrite_B. Within a cluster the prompts are threaded by the argument bank they draw on: neighbours share theses, examples and vocabulary, so plan them back to back.",
+      clusters:[
+      ["FORCE",[1,23,60,39,29,59,32,41,30,19,24,35,46,61,63,26,42,20],"Encourage, don't impose — good for many, wrong as a universal rule; fire FREEDOM · FAIRNESS · BETTER TOOL. · 18 prompts"],
+      ["DOOM",[44,33,22,36,25,14,3,6,43,5,34,56,15,72,71,4],"A change, not a death — the trend is real, formats stack; fire ELSEWHERE · ONE FACE · BOND. · 16 prompts"],
+      ["VERDICT",[9,31,55,51,64,7,21,13,47,69,70,11,57,12,53,65],"Appeal the verdict — split it (which X, for whom, for what?), then rehabilitate via HEALTH · BOND · MONEY. · 16 prompts"],
+      ["BAN",[2,58,8,67,52,37,49,27,38,48,54,45,50,68],"The goal, yes — the ban, no; propose the finer tool: fire FREEDOM · BACKFIRE · BETTER TOOL. · 14 prompts"],
+      ["CREED",[10,28,40,18,17,66,62,16,73],"A path, not a law — works for some, several recipes; fire ONE FACE · FAIRNESS · HEALTH. · 9 prompts"]
+    ]}
+    ]
+  };
 })();
 
 if (typeof module !== "undefined" && module.exports) { module.exports = TEF_CLUSTERS; }
@@ -339,8 +390,11 @@ if (typeof document !== "undefined") (function(){
     if (!sections.length) return;
     var pack = (sections.length === 78) ? TEF_CLUSTERS.A
              : (sections.length === 81) ? TEF_CLUSTERS.B
+             : (sections.length === 72) ? TEF_CLUSTERS.EA
+             : (sections.length === 73) ? TEF_CLUSTERS.EB
              : null;
-    var unit = pack ? "ads" : "prompts";
+    var unit = (sections.length === 78 || sections.length === 81) ? "ads" : "prompts";
+    var unitOne = (unit === "ads") ? "ad" : "prompt";
     if (!pack) pack = { total: sections.length, label: "", methods: [] };
 
     // Coverage order keys the same four content sets by the same head-count.
@@ -526,7 +580,7 @@ if (typeof document !== "undefined") (function(){
         var c = h.querySelector(".tef-ch-count");
         if (c) c.textContent = state.hideDone
           ? rest + " left"
-          : nums.length + (nums.length === 1 ? " ad" : " ads");
+          : nums.length + " " + (nums.length === 1 ? unitOne : unit);
       });
 
       document.body.classList.toggle("tef-hide-done", !!state.hideDone);
@@ -618,55 +672,17 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
-    // Default view. On the two EO pools (A and B) that carry a drilled-first
-    // dataset, "Coverage · drilled first" opens the list — that is the ordering
-    // most useful mid-drill: what you have done already sits at the top, what
-    // you have not sits in coverage-optimal order underneath, and the meters/
-    // milestones/stop-here bands stay at the ranks they were computed for.
-    // On every other list similarity order opens instead: whatever you open,
-    // the things next to it rehearse the same vocabulary, so you can start
-    // anywhere and keep going. Data still loads lazily — the list paints in
-    // practice order and reflows into the picked ordering when the file lands
-    // (immediately, on a warm cache). Any failed fetch falls the reader back
-    // through a sensible chain (drilled-first → coverage → similarity → practice)
-    // instead of stranding them on a half-labelled page.
-    if (setKey){
-      var hasDrilledFirst = (setKey === "A" || setKey === "B");
-      if (hasDrilledFirst){
-        state.methodId = "coverage_df";
-        ui.select.value = "coverage_df";
-        loadCoverage(function(){
-          var pk = window.TEF_COVERAGE && window.TEF_COVERAGE[setKey];
-          if (pk && pk.df_order){ render(); return; }
-          // Coverage data missing df_order or failed — try similarity, then practice.
-          loadSimilarity(function(){
-            if (window.TEF_SIMILARITY && window.TEF_SIMILARITY[setKey]){
-              state.methodId = "similarity";
-              ui.select.value = "similarity";
-              render();
-              ui.desc.textContent = "Coverage · drilled first could not load — showing similarity order.";
-              return;
-            }
-            state.methodId = "default";
-            ui.select.value = "default";
-            render();
-            ui.desc.textContent = "Coverage · drilled first could not load — showing the practice order.";
-          });
-        });
-      } else {
-        state.methodId = "similarity";
-        ui.select.value = "similarity";
-        loadSimilarity(function(){
-          if (!window.TEF_SIMILARITY || !window.TEF_SIMILARITY[setKey]){
-            state.methodId = "default";
-            ui.select.value = "default";
-            render();
-            ui.desc.textContent = "Similarity order could not load — showing the practice order.";
-            return;
-          }
-          render();
-        });
-      }
+    // Default view: the study-plan clusters (SP2) — the partition the drilling
+    // follows, with each cluster threaded so neighbouring items elicit
+    // near-identical responses. The SP data ships in this file, so first paint
+    // is already the default ordering with no fetch; the lazy loaders still
+    // serve the coverage / similarity options when the reader picks them.
+    // Lists without an SP2 method (shouldn't exist any more) stay on the
+    // practice order they painted in.
+    if (pack.methods.some(function(m){ return m.id === "SP2"; })){
+      state.methodId = "SP2";
+      ui.select.value = "SP2";
+      render();
     }
 
     function currentMethod(){
@@ -745,7 +761,7 @@ if (typeof document !== "undefined") (function(){
         head.setAttribute("data-nums", present.join(","));
         head.innerHTML = '<span class="tef-ch-name"></span><span class="tef-ch-count"></span>';
         head.querySelector(".tef-ch-name").textContent = name;
-        head.querySelector(".tef-ch-count").textContent = members.length + (members.length===1?" ad":" ads");
+        head.querySelector(".tef-ch-count").textContent = members.length + " " + (members.length===1?unitOne:unit);
         // Optional third slot: a subtitle line under the name/count row — the
         // study-plan methods use it for the day's new/re-run split and for a
         // cluster's question set or move kit.
@@ -1113,12 +1129,20 @@ if (typeof document !== "undefined") (function(){
       var lab = document.createElement("label"); lab.className = "tef-lab";
       lab.textContent = pack.methods.length ? "Sort / group by" : "Sort by";
       var sel = document.createElement("select"); sel.className = "tef-select";
-      // The two computed orderings lead the list, similarity first because it is
-      // what the page opens on.
+      // The study-plan pair leads the list because SP2 is what every page
+      // opens on; the computed orderings follow, then the content
+      // methodologies.
+      var spMethods = pack.methods.filter(function(m){ return m.id.indexOf("SP") === 0; });
+      var otherMethods = pack.methods.filter(function(m){ return m.id.indexOf("SP") !== 0; });
+      spMethods.forEach(function(m){
+        var o = document.createElement("option"); o.value=m.id;
+        o.textContent = m.name + (m.id === "SP2" ? " (default)" : "");
+        sel.appendChild(o);
+      });
       if (setKey){
         var optSim = document.createElement("option");
         optSim.value = "similarity";
-        optSim.textContent = "Similarity order (default · each one next to its nearest twin)";
+        optSim.textContent = "Similarity order (each one next to its nearest twin)";
         sel.appendChild(optSim);
         var optCov = document.createElement("option");
         optCov.value = "coverage";
@@ -1142,17 +1166,15 @@ if (typeof document !== "undefined") (function(){
         optDiff.value = "difficulty"; optDiff.textContent = "Difficulty order (rank #1 first)";
         sel.appendChild(optDiff);
       }
-      pack.methods.forEach(function(m){
+      otherMethods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id; o.textContent = m.id + " · " + m.name; sel.appendChild(o);
       });
       lab.setAttribute("for","tef-select"); sel.id="tef-select";
       var summary = document.createElement("span"); summary.className="tef-summary";
-      // Neutral until the default ordering's data file lands, so the bar never
-      // claims an ordering the list is not actually in yet.
-      var openingLabel = setKey
-        ? ((setKey === "A" || setKey === "B") ? "Coverage · drilled first · " : "Similarity order · ")
-        : "Original practice order · ";
-      summary.textContent = openingLabel + pack.total + " " + unit;
+      // The SP2 default renders synchronously right after the toolbar is
+      // built, so this placeholder is only ever visible on a list with no
+      // study-plan data.
+      summary.textContent = "Original practice order · " + pack.total + " " + unit;
       row.appendChild(lab); row.appendChild(sel); row.appendChild(summary);
 
       // Progress row: how much of this list you have ticked off, how much is
