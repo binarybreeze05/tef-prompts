@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Structures de questions — bilingue</title>
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --card: #ffffff;
+    --ink: #1c2430;
+    --ink-soft: #3d4a5c;
+    --en: #6b7686;
+    --accent: #1f5fa8;
+    --accent-soft: #e8f0fa;
+    --rule: #e3ded4;
+    --badge-bg: #1f5fa8;
+    --badge-ink: #ffffff;
+    --tip-bg: #fdf6e3;
+    --tip-border: #e0c675;
+    --tip-ink: #5c4a12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Georgia", "Times New Roman", serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  /* ---------- English translation styling ---------- */
+  .en {
+    display: block;
+    color: var(--en);
+    font-style: italic;
+    font-size: 0.86em;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    margin-top: 0.1rem;
+  }
+  /* Side-by-side: FR in the left column, EN in the right, split by a rule.
+     Applied to the phrase lists, the intro and the tip paragraph; falls back
+     to stacked on narrow screens (media query at the end of this sheet). */
+  .cat li > .en, .intro > .en, aside.tip > .en {
+    margin-top: 0;
+    border-left: 1px solid var(--rule);
+    padding-left: 1.25rem;
+  }
+
+  /* ---------- Document header ---------- */
+  header.doc {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.6rem 1.8rem 1.4rem;
+    margin-bottom: 1.6rem;
+    box-shadow: 0 1px 3px rgba(28,36,48,0.06);
+  }
+  .kicker {
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+  }
+  .kicker .en { text-transform: none; letter-spacing: 0.02em; font-weight: 500; }
+  h1.fr-title {
+    font-size: 1.9rem;
+    line-height: 1.2;
+    margin: 0 0 0.2rem;
+    color: var(--ink);
+  }
+  h1 .en { font-size: 0.55em; font-weight: 500; }
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin: 0.5rem 0 0;
+  }
+  .meta {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .meta .item { min-width: 10rem; }
+  .meta .fr { display: block; font-weight: 600; color: var(--ink); }
+
+  /* ---------- Intro ---------- */
+  .intro {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.3rem;
+    margin: 0 0 2.2rem;
+  }
+  .intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.25rem;
+  }
+  .intro p.fr { margin: 0; color: var(--ink); }
+  .intro > .en { border-left-color: rgba(31,95,168,0.25); }
+
+  /* ---------- Page markers ---------- */
+  .pagemark {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 2.4rem 0 1.4rem;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--en);
+  }
+  .pagemark::before, .pagemark::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ---------- Sections ---------- */
+  section.cat {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 1.15rem 1.5rem 1.2rem;
+    margin-bottom: 1.1rem;
+    box-shadow: 0 1px 2px rgba(28,36,48,0.05);
+  }
+  .cat h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 1.22rem;
+    margin: 0 0 0.7rem;
+    color: var(--ink);
+  }
+  .cat h2 .num {
+    flex: none;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 50%;
+    background: var(--badge-bg);
+    color: var(--badge-ink);
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  h2 .titles {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+  }
+  h2 .titles .en { margin-top: 0; margin-left: auto; text-align: right; }
+  .cat h2 .en { font-size: 0.72em; }
+  .cat ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .cat li {
+    padding: 0.55rem 0 0.55rem 1.4rem;
+    position: relative;
+    border-top: 1px dashed var(--rule);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.25rem;
+  }
+  .cat li:first-child { border-top: none; }
+  .cat li::before {
+    content: "•";
+    position: absolute;
+    left: 0.25rem;
+    top: 0.5rem;
+    color: var(--accent);
+    font-size: 1.05rem;
+  }
+  .cat li .fr { color: var(--ink); font-size: 1.03rem; }
+
+  /* ---------- Tip box ---------- */
+  aside.tip {
+    background: var(--tip-bg);
+    border: 1px solid var(--tip-border);
+    border-radius: 12px;
+    padding: 1.15rem 1.4rem 1.25rem;
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.25rem;
+  }
+  aside.tip h2 { grid-column: 1 / -1; }
+  aside.tip h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1.15rem;
+    margin: 0 0 0.6rem;
+    color: var(--tip-ink);
+  }
+  aside.tip h2 .icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--tip-ink);
+    color: var(--tip-ink);
+    font-family: "Georgia", serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  aside.tip h2 .titles .en { color: #8a7635; }
+  aside.tip p.fr { margin: 0; color: #4a3d10; }
+  aside.tip .en { color: #8a7635; }
+  aside.tip > .en { border-left-color: var(--tip-border); }
+
+  footer.note {
+    margin-top: 2.5rem;
+    text-align: center;
+    font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.75rem;
+    color: var(--en);
+  }
+
+  /* Narrow screens: no room for two columns — stack EN back under FR. */
+  @media (max-width: 620px) {
+    .cat li, .intro, aside.tip { display: block; }
+    .cat li > .en, .intro > .en, aside.tip > .en {
+      border-left: none;
+      padding-left: 0;
+      margin-top: 0.35rem;
+    }
+    h2 .titles .en { margin-left: 0; text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ======================= Document header (repeated on both PDF pages) ======================= -->
+  <header class="doc">
+    <p class="kicker">COURS DE PRÉPARATION TCF / TEF
+      <span class="en">TCF / TEF preparation course</span>
+    </p>
+    <h1 class="fr-title">Structures interrogatives B2+
+      <span class="en">B2+ question structures</span>
+    </h1>
+    <p class="subtitle">Tâche 2 — Épreuve d'expression orale (TCF / TEF)
+      <span class="en">Task 2 — Speaking test (TCF / TEF)</span>
+    </p>
+    <div class="meta">
+      <div class="item">
+        <span class="fr">Cours de préparation TCF/TEF</span>
+        <span class="en">TCF/TEF preparation course</span>
+      </div>
+      <div class="item">
+        <span class="fr">avec Paul</span>
+        <span class="en">with Paul</span>
+      </div>
+      <div class="item">
+        <span class="fr">Préparation TCF / TEF</span>
+        <span class="en">TCF / TEF preparation</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================= Intro ======================= -->
+  <div class="intro">
+    <p class="fr">Liste de référence des structures interrogatives transférables à tous les contextes de la Tâche 2 (atelier culturel, recrutement, séminaire, cours, événement associatif, etc.). Objectif&nbsp;: varier les tournures et démontrer la maîtrise du registre soutenu attendue au niveau B2 et au-delà.</p>
+    <span class="en">Reference list of question structures that carry over to every Task 2 context (cultural workshop, recruitment, seminar, class, community event, etc.). Goal: vary your phrasing and show the command of formal register expected at B2 level and beyond.</span>
+  </div>
+
+  <div class="pagemark">Page 1</div>
+
+  <!-- ======================= 1 ======================= -->
+  <section class="cat">
+    <h2><span class="num">1</span>
+      <span class="titles">Inversion sujet-verbe
+        <span class="en">Subject–verb inversion</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Pourriez-vous me préciser…&nbsp;?</span>
+          <span class="en">Could you clarify for me…?</span></li>
+      <li><span class="fr">Serait-il possible de…&nbsp;?</span>
+          <span class="en">Would it be possible to…?</span></li>
+      <li><span class="fr">Auriez-vous…&nbsp;?</span>
+          <span class="en">Would you happen to have…?</span></li>
+      <li><span class="fr">Pouvez-vous m'indiquer…&nbsp;?</span>
+          <span class="en">Can you tell me…?</span></li>
+      <li><span class="fr">Savez-vous si…&nbsp;?</span>
+          <span class="en">Do you know whether…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 2 ======================= -->
+  <section class="cat">
+    <h2><span class="num">2</span>
+      <span class="titles">Questions indirectes
+        <span class="en">Indirect questions</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Je voudrais savoir si…</span>
+          <span class="en">I would like to know whether…</span></li>
+      <li><span class="fr">Pourriez-vous me dire dans quelle mesure…&nbsp;?</span>
+          <span class="en">Could you tell me to what extent…?</span></li>
+      <li><span class="fr">J'aimerais savoir comment / pourquoi / à partir de quand…</span>
+          <span class="en">I'd like to know how / why / starting from when…</span></li>
+      <li><span class="fr">Sauriez-vous m'indiquer si…</span>
+          <span class="en">Would you be able to tell me whether…</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 3 ======================= -->
+  <section class="cat">
+    <h2><span class="num">3</span>
+      <span class="titles">Demande de précision / reformulation
+        <span class="en">Asking for clarification / rephrasing</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Qu'entendez-vous exactement par…&nbsp;?</span>
+          <span class="en">What exactly do you mean by…?</span></li>
+      <li><span class="fr">Pourriez-vous développer ce point&nbsp;?</span>
+          <span class="en">Could you expand on that point?</span></li>
+      <li><span class="fr">Cela signifie-t-il que…&nbsp;?</span>
+          <span class="en">Does that mean that…?</span></li>
+      <li><span class="fr">Si je comprends bien, vous voulez dire que…&nbsp;?</span>
+          <span class="en">If I understand correctly, you're saying that…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 4 ======================= -->
+  <section class="cat">
+    <h2><span class="num">4</span>
+      <span class="titles">Cause / justification
+        <span class="en">Cause / justification</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Comment expliquez-vous que…&nbsp;?</span>
+          <span class="en">How do you explain the fact that…?</span></li>
+      <li><span class="fr">Qu'est-ce qui justifie…&nbsp;?</span>
+          <span class="en">What justifies…?</span></li>
+      <li><span class="fr">Pour quelle raison…&nbsp;?</span>
+          <span class="en">For what reason…?</span></li>
+      <li><span class="fr">À quoi est dû le fait que…&nbsp;?</span>
+          <span class="en">What accounts for the fact that…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 5 ======================= -->
+  <section class="cat">
+    <h2><span class="num">5</span>
+      <span class="titles">Conséquence / hypothèse
+        <span class="en">Consequence / hypothesis</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Que se passerait-il si…&nbsp;?</span>
+          <span class="en">What would happen if…?</span></li>
+      <li><span class="fr">Dans quelle mesure cela affecterait-il…&nbsp;?</span>
+          <span class="en">To what extent would that affect…?</span></li>
+      <li><span class="fr">Au cas où…, que devrais-je faire&nbsp;?</span>
+          <span class="en">In the event that…, what should I do?</span></li>
+      <li><span class="fr">Envisageriez-vous la possibilité de…&nbsp;?</span>
+          <span class="en">Would you consider the possibility of…?</span></li>
+    </ul>
+  </section>
+
+  <div class="pagemark">Page 2</div>
+
+  <!-- ======================= 6 ======================= -->
+  <section class="cat">
+    <h2><span class="num">6</span>
+      <span class="titles">Vérification / confirmation
+        <span class="en">Checking / confirming</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Puis-je confirmer que…&nbsp;?</span>
+          <span class="en">May I confirm that…?</span></li>
+      <li><span class="fr">Cela veut-il dire que… est obligatoire&nbsp;?</span>
+          <span class="en">Does that mean that… is mandatory?</span></li>
+      <li><span class="fr">Y a-t-il une condition particulière à respecter pour…&nbsp;?</span>
+          <span class="en">Is there any particular condition to meet in order to…?</span></li>
+      <li><span class="fr">Est-ce bien vous qui vous occupez de…&nbsp;?</span>
+          <span class="en">Are you indeed the person who handles…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 7 ======================= -->
+  <section class="cat">
+    <h2><span class="num">7</span>
+      <span class="titles">Comparaison
+        <span class="en">Comparison</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">En quoi… diffère-t-il de…&nbsp;?</span>
+          <span class="en">In what way does… differ from…?</span></li>
+      <li><span class="fr">Lequel des deux recommanderiez-vous&nbsp;?</span>
+          <span class="en">Which of the two would you recommend?</span></li>
+      <li><span class="fr">Y a-t-il une différence notable entre… et…&nbsp;?</span>
+          <span class="en">Is there a notable difference between… and…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 8 ======================= -->
+  <section class="cat">
+    <h2><span class="num">8</span>
+      <span class="titles">Quantité / mesure
+        <span class="en">Quantity / measurement</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Dans quelle proportion…&nbsp;?</span>
+          <span class="en">In what proportion…?</span></li>
+      <li><span class="fr">À quelle fréquence…&nbsp;?</span>
+          <span class="en">How often…?</span></li>
+      <li><span class="fr">Sur quelle durée…&nbsp;?</span>
+          <span class="en">Over what length of time…?</span></li>
+      <li><span class="fr">Jusqu'à quel point…&nbsp;?</span>
+          <span class="en">To what extent…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 9 ======================= -->
+  <section class="cat">
+    <h2><span class="num">9</span>
+      <span class="titles">Connecteurs d'enchaînement
+        <span class="en">Linking connectors</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Par ailleurs, pourriez-vous me dire…&nbsp;?</span>
+          <span class="en">Furthermore, could you tell me…?</span></li>
+      <li><span class="fr">Cela dit, qu'en est-il de…&nbsp;?</span>
+          <span class="en">That said, what about…?</span></li>
+      <li><span class="fr">À ce propos, savez-vous si…&nbsp;?</span>
+          <span class="en">On that note, do you know whether…?</span></li>
+      <li><span class="fr">D'autre part, serait-il envisageable de…&nbsp;?</span>
+          <span class="en">On the other hand, might it be feasible to…?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= 10 ======================= -->
+  <section class="cat">
+    <h2><span class="num">10</span>
+      <span class="titles">Questions de clôture
+        <span class="en">Closing questions</span>
+      </span>
+    </h2>
+    <ul>
+      <li><span class="fr">Quels documents / démarches dois-je prévoir&nbsp;?</span>
+          <span class="en">What documents / steps should I plan for?</span></li>
+      <li><span class="fr">Pourriez-vous m'indiquer le délai à prévoir&nbsp;?</span>
+          <span class="en">Could you tell me how long I should expect it to take?</span></li>
+      <li><span class="fr">Auriez-vous un contact pour toute question complémentaire&nbsp;?</span>
+          <span class="en">Would you have a contact for any further questions?</span></li>
+    </ul>
+  </section>
+
+  <!-- ======================= Teaching tip ======================= -->
+  <aside class="tip">
+    <h2><span class="icon">I</span>
+      <span class="titles">Conseil pédagogique
+        <span class="en">Teaching tip</span>
+      </span>
+    </h2>
+    <p class="fr">La grille d'évaluation TCF/TEF au niveau B2+ valorise trois éléments&nbsp;: la variété syntaxique (ne pas enchaîner deux «&nbsp;Est-ce que&nbsp;»), l'usage du conditionnel de politesse, et au moins une question de vérification ou d'hypothèse par échange. Rappel important&nbsp;: la Tâche 2 vise l'obtention d'informations pratiques — les tournures d'opinion («&nbsp;Quel est votre avis sur…&nbsp;?&nbsp;») ne sont donc pas adaptées à cet exercice.</p>
+    <span class="en">The TCF/TEF assessment grid at B2+ level rewards three things: syntactic variety (don't string together two "Est-ce que" questions in a row), use of the polite conditional, and at least one verification or hypothetical question per exchange. Important reminder: Task 2 is about obtaining practical information — opinion phrasings ("Quel est votre avis sur… ?" — "What is your opinion on…?") are therefore not suited to this exercise.</span>
+  </aside>
+
+  <footer class="note">Version bilingue générée à partir de question_structures.pdf (2 pages) — French verbatim on the left, English translations on the right.</footer>
+
+</div>
+</body>
+</html>

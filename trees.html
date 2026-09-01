@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<title>TEF Decision Trees</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+:root{ --sh-bg:#ffffff; --sh-line:#ddd8d2; --sh-ink:#2a2622; --sh-mut:#6f675f; --sh-ground:#f4f2ef; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --sh-bg:#171412; --sh-line:#322c27; --sh-ink:#e9e4df; --sh-mut:#a2988e; --sh-ground:#100e0c; }
+}
+:root[data-theme="dark"]{ --sh-bg:#171412; --sh-line:#322c27; --sh-ink:#e9e4df; --sh-mut:#a2988e; --sh-ground:#100e0c; }
+html,body{margin:0;padding:0}
+body{background:var(--sh-ground); font-family:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.tabbar{position:sticky; top:0; z-index:60; display:flex; gap:.35rem; flex-wrap:wrap;
+  padding:.5rem .8rem; background:var(--sh-bg); border-bottom:1px solid var(--sh-line);}
+.tabbar button{display:inline-flex; align-items:center; gap:.45rem; cursor:pointer;
+  font-family:"Bricolage Grotesque","Atkinson Hyperlegible",sans-serif; font-weight:700; font-size:.9rem;
+  color:var(--sh-mut); background:none; border:1.5px solid transparent; border-radius:999px; padding:.3rem .75rem;}
+.tabbar button .tn{font-weight:400; font-size:.78rem; color:var(--sh-mut); display:none;}
+@media (min-width:640px){ .tabbar button .tn{display:inline;} }
+.tabbar button .dot{width:.6rem; height:.6rem; border-radius:50%; background:var(--dl); flex:none;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tabbar button .dot{background:var(--dd);} }
+:root[data-theme="dark"] .tabbar button .dot{background:var(--dd);}
+.tabbar button[aria-pressed="true"]{color:var(--sh-ink); border-color:var(--sh-line); background:var(--sh-ground);}
+.tabbar button:focus-visible{outline:2px solid var(--sh-mut); outline-offset:2px;}
+.tab-page{display:none;}
+.tab-page.active{display:block;}
+</style>
+<style>
+/* ===== ten-slots.html ===== */
+#pg-oa{
+  --bg:#f7fafa; --card:#ffffff; --ink:#182225; --muted:#59696e; --line:#d9e2e3;
+  --accent:#0b7a6b; --accent-ink:#ffffff; --wash:#e9f3f1;
+  --go:#0b7a6b; --come:#a85f14; --take:#6250c7; --far:#2467b5; --flip:#af3d77;
+  --go-wash:#e3f1ee; --come-wash:#f6ecdd; --take-wash:#ebe8f9; --far-wash:#e3edf8; --flip-wash:#f7e6ef;
+  --code:#41525a;
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) #pg-oa{
+    --bg:#0e1516; --card:#141d1e; --ink:#e4edee; --muted:#8fa2a6; --line:#253334;
+    --accent:#3cbfab; --accent-ink:#07211d; --wash:#16302c;
+    --go:#3cbfab; --come:#e09a4e; --take:#a89bf0; --far:#6ea8e8; --flip:#e07ab0;
+    --go-wash:#12312c; --come-wash:#33261373; --take-wash:#241f42; --far-wash:#152840; --flip-wash:#38182a;
+    --code:#a9bcc1;
+  }
+}
+:root[data-theme="dark"] #pg-oa{
+  --bg:#0e1516; --card:#141d1e; --ink:#e4edee; --muted:#8fa2a6; --line:#253334;
+  --accent:#3cbfab; --accent-ink:#07211d; --wash:#16302c;
+  --go:#3cbfab; --come:#e09a4e; --take:#a89bf0; --far:#6ea8e8; --flip:#e07ab0;
+  --go-wash:#12312c; --come-wash:#33261373; --take-wash:#241f42; --far-wash:#152840; --flip-wash:#38182a;
+  --code:#a9bcc1;
+}
+#pg-oa *{box-sizing:border-box}
+#pg-oa{background:var(--bg); color:var(--ink); margin:0;
+  font-family:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55; font-size:16.5px;}
+#pg-oa main{max-width:840px; margin:0 auto; padding:2.2rem 1.1rem 5rem;}
+#pg-oa h1, #pg-oa h2, #pg-oa h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",-apple-system,sans-serif; text-wrap:balance; line-height:1.15;}
+#pg-oa h1{font-size:2.35rem; font-weight:800; margin:.2rem 0 .4rem;}
+#pg-oa h2{font-size:1.35rem; font-weight:700; margin:2.6rem 0 .6rem;}
+#pg-oa h3{font-size:1.02rem; font-weight:700; margin:1.4rem 0 .4rem;}
+#pg-oa p{margin:.55rem 0; max-width:68ch;}
+#pg-oa .sub{color:var(--muted); max-width:66ch;}
+#pg-oa .kicker{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:700;}
+#pg-oa .node-tag{display:inline-block; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.7rem;
+  letter-spacing:.12em; text-transform:uppercase; background:var(--wash); color:var(--accent);
+  border-radius:4px; padding:.14rem .5rem; font-weight:700; margin-right:.4rem; vertical-align:2px;}
+#pg-oa /* pocket card */
+.pocket{border:1.5px solid var(--accent); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.6rem 0;}
+#pg-oa .pocket .kicker{display:block; margin-bottom:.4rem;}
+#pg-oa .pocket ol{margin:.3rem 0 0; padding-left:1.4rem;}
+#pg-oa .pocket li{margin:.12rem 0;}
+#pg-oa .pocket b{font-weight:700;}
+#pg-oa /* shapes */
+.shape-row{display:flex; gap:.75rem; align-items:baseline; padding:.6rem .2rem; border-top:1px solid var(--line); flex-wrap:wrap;}
+#pg-oa .shape-row:first-of-type{border-top:none;}
+#pg-oa .chip{flex:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem;
+  letter-spacing:.06em; border-radius:6px; padding:.14rem .55rem; color:var(--card);}
+#pg-oa .chip.go{background:var(--go)}
+#pg-oa .chip.come{background:var(--come)}
+#pg-oa .chip.take{background:var(--take)}
+#pg-oa .chip.far{background:var(--far)}
+#pg-oa .chip.flip{background:var(--flip)}
+#pg-oa .shape-row .def{flex:1 1 20ch; min-width:16ch;}
+#pg-oa .shape-row .n{color:var(--muted); font-size:.85rem; font-variant-numeric:tabular-nums; flex:none;}
+#pg-oa /* slot walker */
+.picker{display:flex; gap:.45rem; flex-wrap:wrap; margin:.9rem 0 1.1rem; position:sticky; top:0;
+  background:var(--bg); padding:.6rem 0; z-index:5;}
+#pg-oa .picker button{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.82rem;
+  letter-spacing:.05em; border:1.5px solid var(--line); background:var(--card); color:var(--muted);
+  border-radius:999px; padding:.32rem .8rem; cursor:pointer;}
+#pg-oa .picker button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+#pg-oa .picker button[aria-pressed="true"]{color:var(--card);}
+#pg-oa .picker button.go[aria-pressed="true"]{background:var(--go); border-color:var(--go);}
+#pg-oa .picker button.come[aria-pressed="true"]{background:var(--come); border-color:var(--come);}
+#pg-oa .picker button.take[aria-pressed="true"]{background:var(--take); border-color:var(--take);}
+#pg-oa .picker button.far[aria-pressed="true"]{background:var(--far); border-color:var(--far);}
+#pg-oa .picker button.flip[aria-pressed="true"]{background:var(--flip); border-color:var(--flip);}
+#pg-oa .slot{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.55rem 0;
+  padding:.7rem .95rem .75rem; display:grid; grid-template-columns:2.1rem 1fr; gap:.15rem .7rem;}
+#pg-oa .slot .num{grid-row:1/span 3; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700;
+  font-size:1.25rem; color:var(--accent); font-variant-numeric:tabular-nums; padding-top:.1rem;}
+#pg-oa .slot .name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:1.02rem;}
+#pg-oa .slot .core{color:var(--muted); font-size:.9rem;}
+#pg-oa .slot .flavor{font-size:.95rem; margin-top:.3rem; border-radius:7px; padding:.42rem .6rem;}
+#pg-oa .slot .flavor b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.08em; margin-right:.35rem;}
+#pg-oa .flavor.go{background:var(--go-wash); }
+#pg-oa .flavor.go b{color:var(--go);}
+#pg-oa .flavor.come{background:var(--come-wash);}
+#pg-oa .flavor.come b{color:var(--come);}
+#pg-oa .flavor.take{background:var(--take-wash);}
+#pg-oa .flavor.take b{color:var(--take);}
+#pg-oa .flavor.far{background:var(--far-wash);}
+#pg-oa .flavor.far b{color:var(--far);}
+#pg-oa .flavor.flip{background:var(--flip-wash);}
+#pg-oa .flavor.flip b{color:var(--flip);}
+#pg-oa /* modifiers */
+table{border-collapse:collapse; width:100%; font-size:.92rem;}
+#pg-oa .scroll{overflow-x:auto;}
+#pg-oa th, #pg-oa td{text-align:left; padding:.45rem .6rem; border-top:1px solid var(--line); vertical-align:top;}
+#pg-oa th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); border-top:none;}
+#pg-oa td .slots{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--accent); font-weight:700; white-space:nowrap;}
+#pg-oa /* levers */
+.lever{border-left:3px solid var(--accent); padding:.15rem 0 .15rem .9rem; margin:.9rem 0;}
+#pg-oa .lever b{font-family:"Bricolage Grotesque",sans-serif;}
+#pg-oa .lever .eg{color:var(--muted); font-style:italic;}
+#pg-oa /* examples */
+details{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.6rem 0; padding:0;}
+#pg-oa summary{cursor:pointer; padding:.7rem .95rem; font-weight:700; font-family:"Bricolage Grotesque",sans-serif;}
+#pg-oa summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:10px;}
+#pg-oa details .body{padding:0 .95rem .8rem;}
+#pg-oa details ol{padding-left:1.3rem; margin:.3rem 0;}
+#pg-oa details li{margin:.28rem 0;}
+#pg-oa details li b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.06em; color:var(--accent);}
+#pg-oa .mini{font-size:.92rem; color:var(--muted);}
+#pg-oa footer{margin-top:3rem; border-top:1px solid var(--line); padding-top:.9rem; color:var(--muted); font-size:.85rem; max-width:68ch;}
+@media (prefers-reduced-motion:no-preference){
+#pg-oa .slot .flavor{transition:background .15s ease;}
+}
+
+/* ===== ten-moves.html ===== */
+#pg-ob{
+  --bg:#faf8f6; --card:#ffffff; --ink:#25201c; --muted:#6e6259; --line:#e6ddd5;
+  --accent:#b04416; --accent-ink:#ffffff; --wash:#f7eae2;
+  --hot:#b04416; --hot-wash:#f9e8de;
+  --code:#5a4d42;
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) #pg-ob{
+    --bg:#151110; --card:#1d1815; --ink:#ece5df; --muted:#a89a8e; --line:#332b25;
+    --accent:#ef9463; --accent-ink:#2a1105; --wash:#33201573;
+    --hot:#ef9463; --hot-wash:#3a2213;
+    --code:#c4b5a8;
+  }
+}
+:root[data-theme="dark"] #pg-ob{
+  --bg:#151110; --card:#1d1815; --ink:#ece5df; --muted:#a89a8e; --line:#332b25;
+  --accent:#ef9463; --accent-ink:#2a1105; --wash:#33201573;
+  --hot:#ef9463; --hot-wash:#3a2213;
+  --code:#c4b5a8;
+}
+#pg-ob *{box-sizing:border-box}
+#pg-ob{background:var(--bg); color:var(--ink); margin:0;
+  font-family:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55; font-size:16.5px;}
+#pg-ob main{max-width:840px; margin:0 auto; padding:2.2rem 1.1rem 5rem;}
+#pg-ob h1, #pg-ob h2, #pg-ob h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",-apple-system,sans-serif; text-wrap:balance; line-height:1.15;}
+#pg-ob h1{font-size:2.35rem; font-weight:800; margin:.2rem 0 .4rem;}
+#pg-ob h2{font-size:1.35rem; font-weight:700; margin:2.6rem 0 .6rem;}
+#pg-ob p{margin:.55rem 0; max-width:68ch;}
+#pg-ob .sub{color:var(--muted); max-width:66ch;}
+#pg-ob .kicker{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:700;}
+#pg-ob .node-tag{display:inline-block; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.7rem;
+  letter-spacing:.12em; text-transform:uppercase; background:var(--wash); color:var(--accent);
+  border-radius:4px; padding:.14rem .5rem; font-weight:700; margin-right:.4rem; vertical-align:2px;}
+#pg-ob .thesis{border:1.5px solid var(--accent); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.6rem 0;}
+#pg-ob .thesis .kicker{display:block; margin-bottom:.35rem;}
+#pg-ob .thesis p{margin:.35rem 0;}
+#pg-ob .pocket{border:1px solid var(--line); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.2rem 0;}
+#pg-ob .pocket .kicker{display:block; margin-bottom:.4rem; color:var(--muted);}
+#pg-ob .pocket p{margin:.3rem 0;}
+#pg-ob .pocket b{font-weight:700;}
+#pg-ob ol.beats{counter-reset:beat; list-style:none; padding-left:0; margin:.8rem 0;}
+#pg-ob ol.beats li{counter-increment:beat; display:grid; grid-template-columns:2.1rem 1fr; gap:.15rem .7rem;
+  border:1px solid var(--line); border-radius:10px; background:var(--card); padding:.65rem .9rem; margin:.5rem 0;}
+#pg-ob ol.beats li::before{content:counter(beat); grid-row:1/span 2; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-weight:700; font-size:1.25rem; color:var(--accent); font-variant-numeric:tabular-nums; padding-top:.05rem;}
+#pg-ob ol.beats .b-name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700;}
+#pg-ob ol.beats .b-name .t{color:var(--muted); font-weight:400; font-size:.85rem; font-family:"Atkinson Hyperlegible",sans-serif;}
+#pg-ob ol.beats .b-what{color:var(--muted); font-size:.93rem;}
+#pg-ob table{border-collapse:collapse; width:100%; font-size:.92rem;}
+#pg-ob .scroll{overflow-x:auto;}
+#pg-ob th, #pg-ob td{text-align:left; padding:.45rem .6rem; border-top:1px solid var(--line); vertical-align:top;}
+#pg-ob th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); border-top:none;}
+#pg-ob td.obj, #pg-ob td .mv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; white-space:nowrap;}
+#pg-ob td.obj{color:var(--accent);}
+#pg-ob td .mv{color:var(--accent); font-size:.8rem;}
+#pg-ob td .n{font-variant-numeric:tabular-nums;}
+#pg-ob .picker{display:flex; gap:.45rem; flex-wrap:wrap; margin:1rem 0 .8rem; position:sticky; top:0;
+  background:var(--bg); padding:.6rem 0; z-index:5;}
+#pg-ob .picker button{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem;
+  letter-spacing:.05em; border:1.5px solid var(--line); background:var(--card); color:var(--muted);
+  border-radius:999px; padding:.32rem .75rem; cursor:pointer;}
+#pg-ob .picker button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+#pg-ob .picker button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+#pg-ob .playbook{border:1.5px solid var(--accent); border-radius:12px; background:var(--card); padding:.9rem 1.1rem; margin:.4rem 0 1.2rem;}
+#pg-ob .playbook .voice{font-style:italic; color:var(--muted); margin:0 0 .55rem;}
+#pg-ob .playbook .fire{display:grid; gap:.5rem;}
+#pg-ob .playbook .fire div{background:var(--hot-wash); border-radius:8px; padding:.5rem .7rem; font-size:.95rem;}
+#pg-ob .playbook .fire b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.08em; color:var(--hot); margin-right:.4rem;}
+#pg-ob .arsenal{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.6rem; margin:.8rem 0;}
+#pg-ob .move{border:1px solid var(--line); border-radius:10px; background:var(--card); padding:.65rem .8rem;}
+#pg-ob .move.hot{border-color:var(--hot); background:var(--hot-wash);}
+#pg-ob .move .m-head{display:flex; gap:.5rem; align-items:baseline;}
+#pg-ob .move .m-num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;}
+#pg-ob .move .m-name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700;}
+#pg-ob .move .m-def{color:var(--muted); font-size:.88rem; margin-top:.15rem;}
+#pg-ob .move .m-eg{font-size:.9rem; font-style:italic; margin-top:.3rem;}
+#pg-ob details{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.6rem 0;}
+#pg-ob summary{cursor:pointer; padding:.7rem .95rem; font-weight:700; font-family:"Bricolage Grotesque",sans-serif;}
+#pg-ob summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:10px;}
+#pg-ob details .body{padding:0 .95rem .8rem;}
+#pg-ob details p{margin:.45rem 0;}
+#pg-ob details .fv{font-style:italic; color:var(--muted);}
+#pg-ob details b.mv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.76rem; letter-spacing:.06em; color:var(--accent);}
+#pg-ob .mini{font-size:.92rem; color:var(--muted);}
+#pg-ob footer{margin-top:3rem; border-top:1px solid var(--line); padding-top:.9rem; color:var(--muted); font-size:.85rem; max-width:68ch;}
+
+/* ===== ecrite-a.html ===== */
+#pg-ea{
+  --bg:#f8f7fb; --card:#ffffff; --ink:#1e1a29; --muted:#645d76; --line:#dfdae9;
+  --accent:#5a43b5; --accent-ink:#ffffff; --wash:#edeaf8;
+  --thing:#5a43b5; --way:#a85f14; --save:#2467b5; --fall:#b13350; --stir:#0f7d64;
+  --thing-wash:#ebe7f9; --way-wash:#f6ecdd; --save-wash:#e3edf8; --fall-wash:#f8e4ea; --stir-wash:#e2f2ec;
+  --code:#4c4460;
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) #pg-ea{
+    --bg:#131019; --card:#1a1622; --ink:#e9e5f2; --muted:#a49bb8; --line:#2c2639;
+    --accent:#ab97f5; --accent-ink:#1c1040; --wash:#251d3f;
+    --thing:#ab97f5; --way:#e09a4e; --save:#6ea8e8; --fall:#e87d9c; --stir:#4cc2a4;
+    --thing-wash:#262046; --way-wash:#33261373; --save-wash:#152840; --fall-wash:#3a1826; --stir-wash:#123129;
+    --code:#b5abcb;
+  }
+}
+:root[data-theme="dark"] #pg-ea{
+  --bg:#131019; --card:#1a1622; --ink:#e9e5f2; --muted:#a49bb8; --line:#2c2639;
+  --accent:#ab97f5; --accent-ink:#1c1040; --wash:#251d3f;
+  --thing:#ab97f5; --way:#e09a4e; --save:#6ea8e8; --fall:#e87d9c; --stir:#4cc2a4;
+  --thing-wash:#262046; --way-wash:#33261373; --save-wash:#152840; --fall-wash:#3a1826; --stir-wash:#123129;
+  --code:#b5abcb;
+}
+#pg-ea *{box-sizing:border-box}
+#pg-ea{background:var(--bg); color:var(--ink); margin:0;
+  font-family:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55; font-size:16.5px;}
+#pg-ea main{max-width:840px; margin:0 auto; padding:2.2rem 1.1rem 5rem;}
+#pg-ea h1, #pg-ea h2, #pg-ea h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",-apple-system,sans-serif; text-wrap:balance; line-height:1.15;}
+#pg-ea h1{font-size:2.35rem; font-weight:800; margin:.2rem 0 .4rem;}
+#pg-ea h2{font-size:1.35rem; font-weight:700; margin:2.6rem 0 .6rem;}
+#pg-ea p{margin:.55rem 0; max-width:68ch;}
+#pg-ea .sub{color:var(--muted); max-width:66ch;}
+#pg-ea .kicker{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:700;}
+#pg-ea .node-tag{display:inline-block; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.7rem;
+  letter-spacing:.12em; text-transform:uppercase; background:var(--wash); color:var(--accent);
+  border-radius:4px; padding:.14rem .5rem; font-weight:700; margin-right:.4rem; vertical-align:2px;}
+#pg-ea .thesis{border:1.5px solid var(--accent); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.6rem 0;}
+#pg-ea .thesis .kicker{display:block; margin-bottom:.35rem;}
+#pg-ea .thesis p{margin:.35rem 0;}
+#pg-ea .pocket{border:1px solid var(--line); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.2rem 0;}
+#pg-ea .pocket .kicker{display:block; margin-bottom:.4rem; color:var(--muted);}
+#pg-ea .pocket p{margin:.3rem 0;}
+#pg-ea .pocket ol{margin:.3rem 0 0; padding-left:1.4rem;}
+#pg-ea .pocket li{margin:.12rem 0;}
+#pg-ea .pocket b{font-weight:700;}
+#pg-ea .pocket .t{color:var(--muted); font-size:.88rem;}
+#pg-ea /* debts */
+.debt-row{display:flex; gap:.75rem; align-items:baseline; padding:.6rem .2rem; border-top:1px solid var(--line); flex-wrap:wrap;}
+#pg-ea .debt-row:first-of-type{border-top:none;}
+#pg-ea .chip{flex:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem;
+  letter-spacing:.06em; border-radius:6px; padding:.14rem .55rem; color:var(--card);}
+#pg-ea .chip.thing{background:var(--thing)}
+#pg-ea .chip.way{background:var(--way)}
+#pg-ea .chip.save{background:var(--save)}
+#pg-ea .chip.fall{background:var(--fall)}
+#pg-ea .chip.stir{background:var(--stir)}
+#pg-ea .debt-row .def{flex:1 1 20ch; min-width:16ch;}
+#pg-ea .debt-row .n{color:var(--muted); font-size:.85rem; font-variant-numeric:tabular-nums; flex:none;}
+#pg-ea /* beat walker */
+.picker{display:flex; gap:.45rem; flex-wrap:wrap; margin:.9rem 0 1.1rem; position:sticky; top:0;
+  background:var(--bg); padding:.6rem 0; z-index:5;}
+#pg-ea .picker button{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.82rem;
+  letter-spacing:.05em; border:1.5px solid var(--line); background:var(--card); color:var(--muted);
+  border-radius:999px; padding:.32rem .8rem; cursor:pointer;}
+#pg-ea .picker button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+#pg-ea .picker button[aria-pressed="true"]{color:var(--card);}
+#pg-ea .picker button.thing[aria-pressed="true"]{background:var(--thing); border-color:var(--thing);}
+#pg-ea .picker button.way[aria-pressed="true"]{background:var(--way); border-color:var(--way);}
+#pg-ea .picker button.save[aria-pressed="true"]{background:var(--save); border-color:var(--save);}
+#pg-ea .picker button.fall[aria-pressed="true"]{background:var(--fall); border-color:var(--fall);}
+#pg-ea .picker button.stir[aria-pressed="true"]{background:var(--stir); border-color:var(--stir);}
+#pg-ea .beat{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.55rem 0;
+  padding:.7rem .95rem .75rem; display:grid; grid-template-columns:2.1rem 1fr; gap:.15rem .7rem;}
+#pg-ea .beat .num{grid-row:1/span 3; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700;
+  font-size:1.25rem; color:var(--accent); font-variant-numeric:tabular-nums; padding-top:.1rem;}
+#pg-ea .beat .name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:1.02rem;}
+#pg-ea .beat .name .t{color:var(--muted); font-weight:400; font-size:.85rem; font-family:"Atkinson Hyperlegible",sans-serif;}
+#pg-ea .beat .core{color:var(--muted); font-size:.9rem;}
+#pg-ea .beat .flavor{font-size:.95rem; margin-top:.3rem; border-radius:7px; padding:.42rem .6rem;}
+#pg-ea .beat .flavor b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.08em; margin-right:.35rem;}
+#pg-ea .flavor.thing{background:var(--thing-wash);}
+#pg-ea .flavor.thing b{color:var(--thing);}
+#pg-ea .flavor.way{background:var(--way-wash);}
+#pg-ea .flavor.way b{color:var(--way);}
+#pg-ea .flavor.save{background:var(--save-wash);}
+#pg-ea .flavor.save b{color:var(--save);}
+#pg-ea .flavor.fall{background:var(--fall-wash);}
+#pg-ea .flavor.fall b{color:var(--fall);}
+#pg-ea .flavor.stir{background:var(--stir-wash);}
+#pg-ea .flavor.stir b{color:var(--stir);}
+#pg-ea /* tables */
+table{border-collapse:collapse; width:100%; font-size:.92rem;}
+#pg-ea .scroll{overflow-x:auto;}
+#pg-ea th, #pg-ea td{text-align:left; padding:.45rem .6rem; border-top:1px solid var(--line); vertical-align:top;}
+#pg-ea th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); border-top:none;}
+#pg-ea td .beats-ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--accent); font-weight:700; white-space:nowrap;}
+#pg-ea td .mv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem; color:var(--accent);}
+#pg-ea td .n{font-variant-numeric:tabular-nums;}
+#pg-ea /* levers */
+.lever{border-left:3px solid var(--accent); padding:.15rem 0 .15rem .9rem; margin:.9rem 0;}
+#pg-ea .lever b{font-family:"Bricolage Grotesque",sans-serif;}
+#pg-ea .lever .eg{color:var(--muted); font-style:italic;}
+#pg-ea /* examples */
+details{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.6rem 0; padding:0;}
+#pg-ea summary{cursor:pointer; padding:.7rem .95rem; font-weight:700; font-family:"Bricolage Grotesque",sans-serif;}
+#pg-ea summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:10px;}
+#pg-ea details .body{padding:0 .95rem .8rem;}
+#pg-ea details ol{padding-left:1.3rem; margin:.3rem 0;}
+#pg-ea details li{margin:.28rem 0;}
+#pg-ea details li b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.06em; color:var(--accent);}
+#pg-ea details p{margin:.45rem 0;}
+#pg-ea .mini{font-size:.92rem; color:var(--muted);}
+#pg-ea footer{margin-top:3rem; border-top:1px solid var(--line); padding-top:.9rem; color:var(--muted); font-size:.85rem; max-width:68ch;}
+@media (prefers-reduced-motion:no-preference){
+#pg-ea .beat .flavor{transition:background .15s ease;}
+}
+
+/* ===== ecrite-b.html ===== */
+#pg-eb{
+  --bg:#faf7f9; --card:#ffffff; --ink:#281b24; --muted:#755e6d; --line:#eadce4;
+  --accent:#a13a8a; --accent-ink:#ffffff; --wash:#f7e6f3;
+  --hot:#a13a8a; --hot-wash:#f7e6f3;
+  --ban:#b23a48; --force:#9a6110; --doom:#2e6cb2; --creed:#12805c; --verdict:#a13a8a;
+  --ban-wash:#f9e7e9; --force-wash:#f6eddc; --doom-wash:#e5eef9; --creed-wash:#e2f2ec; --verdict-wash:#f7e6f3;
+  --code:#4f4762;
+}
+@media (prefers-color-scheme: dark){
+:root:not([data-theme="light"]) #pg-eb{
+    --bg:#191016; --card:#231721; --ink:#f0e4ec; --muted:#ba9cb0; --line:#3d2735;
+    --accent:#e07ec9; --accent-ink:#33082a; --wash:#371a30;
+    --hot:#e07ec9; --hot-wash:#3d2136;
+    --ban:#e8808c; --force:#dda44e; --doom:#79aceb; --creed:#4cc39e; --verdict:#e07ec9;
+    --ban-wash:#3a1a20; --force-wash:#332613; --doom-wash:#16283f; --creed-wash:#123129; --verdict-wash:#371a30;
+    --code:#c0b4d4;
+  }
+}
+:root[data-theme="dark"] #pg-eb{
+  --bg:#191016; --card:#231721; --ink:#f0e4ec; --muted:#ba9cb0; --line:#3d2735;
+  --accent:#e07ec9; --accent-ink:#33082a; --wash:#371a30;
+  --hot:#e07ec9; --hot-wash:#3d2136;
+  --ban:#e8808c; --force:#dda44e; --doom:#79aceb; --creed:#4cc39e; --verdict:#e07ec9;
+  --ban-wash:#3a1a20; --force-wash:#332613; --doom-wash:#16283f; --creed-wash:#123129; --verdict-wash:#371a30;
+  --code:#c0b4d4;
+}
+#pg-eb *{box-sizing:border-box}
+#pg-eb{background:var(--bg); color:var(--ink); margin:0;
+  font-family:"Atkinson Hyperlegible",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.55; font-size:16.5px;}
+#pg-eb main{max-width:840px; margin:0 auto; padding:2.2rem 1.1rem 5rem;}
+#pg-eb h1, #pg-eb h2, #pg-eb h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",-apple-system,sans-serif; text-wrap:balance; line-height:1.15;}
+#pg-eb h1{font-size:2.35rem; font-weight:800; margin:.2rem 0 .4rem;}
+#pg-eb h2{font-size:1.35rem; font-weight:700; margin:2.6rem 0 .6rem;}
+#pg-eb p{margin:.55rem 0; max-width:68ch;}
+#pg-eb .sub{color:var(--muted); max-width:66ch;}
+#pg-eb .kicker{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:700;}
+#pg-eb .node-tag{display:inline-block; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.7rem;
+  letter-spacing:.12em; text-transform:uppercase; background:var(--wash); color:var(--accent);
+  border-radius:4px; padding:.14rem .5rem; font-weight:700; margin-right:.4rem; vertical-align:2px;}
+#pg-eb .thesis{border:1.5px solid var(--accent); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.6rem 0;}
+#pg-eb .thesis .kicker{display:block; margin-bottom:.35rem;}
+#pg-eb .thesis p{margin:.35rem 0;}
+#pg-eb .pocket{border:1px solid var(--line); border-radius:12px; background:var(--card);
+  padding:1rem 1.2rem 1.1rem; margin:1.2rem 0;}
+#pg-eb .pocket .kicker{display:block; margin-bottom:.4rem; color:var(--muted);}
+#pg-eb .pocket p{margin:.3rem 0;}
+#pg-eb .pocket b{font-weight:700;}
+#pg-eb ol.beats{counter-reset:beat; list-style:none; padding-left:0; margin:.8rem 0;}
+#pg-eb ol.beats li{counter-increment:beat; display:grid; grid-template-columns:2.1rem 1fr; gap:.15rem .7rem;
+  border:1px solid var(--line); border-radius:10px; background:var(--card); padding:.65rem .9rem; margin:.5rem 0;}
+#pg-eb ol.beats li::before{content:counter(beat); grid-row:1/span 2; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-weight:700; font-size:1.25rem; color:var(--accent); font-variant-numeric:tabular-nums; padding-top:.05rem;}
+#pg-eb ol.beats .b-name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700;}
+#pg-eb ol.beats .b-name .t{color:var(--muted); font-weight:400; font-size:.85rem; font-family:"Atkinson Hyperlegible",sans-serif;}
+#pg-eb ol.beats .b-what{color:var(--muted); font-size:.93rem;}
+#pg-eb /* shapes */
+.shape-row{display:flex; gap:.75rem; align-items:baseline; padding:.6rem .2rem; border-top:1px solid var(--line); flex-wrap:wrap;}
+#pg-eb .shape-row:first-of-type{border-top:none;}
+#pg-eb .chip{flex:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem;
+  letter-spacing:.06em; border-radius:6px; padding:.14rem .55rem; color:var(--card);}
+#pg-eb .chip.ban{background:var(--ban)}
+#pg-eb .chip.force{background:var(--force)}
+#pg-eb .chip.doom{background:var(--doom)}
+#pg-eb .chip.creed{background:var(--creed)}
+#pg-eb .chip.verdict{background:var(--verdict)}
+#pg-eb .shape-row .def{flex:1 1 24ch; min-width:18ch;}
+#pg-eb .shape-row .def i{color:var(--muted);}
+#pg-eb .shape-row .n{color:var(--muted); font-size:.85rem; font-variant-numeric:tabular-nums; flex:none;}
+#pg-eb table{border-collapse:collapse; width:100%; font-size:.92rem;}
+#pg-eb .scroll{overflow-x:auto;}
+#pg-eb th, #pg-eb td{text-align:left; padding:.45rem .6rem; border-top:1px solid var(--line); vertical-align:top;}
+#pg-eb th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); border-top:none;}
+#pg-eb td .slots{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--accent); font-weight:700; white-space:nowrap;}
+#pg-eb td .n{font-variant-numeric:tabular-nums;}
+#pg-eb .picker{display:flex; gap:.45rem; flex-wrap:wrap; margin:1rem 0 .8rem; position:sticky; top:0;
+  background:var(--bg); padding:.6rem 0; z-index:5;}
+#pg-eb .picker button{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; font-size:.8rem;
+  letter-spacing:.05em; border:1.5px solid var(--line); background:var(--card); color:var(--muted);
+  border-radius:999px; padding:.32rem .75rem; cursor:pointer;}
+#pg-eb .picker button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+#pg-eb .picker button[aria-pressed="true"]{color:var(--card);}
+#pg-eb .picker button.ban[aria-pressed="true"]{background:var(--ban); border-color:var(--ban);}
+#pg-eb .picker button.force[aria-pressed="true"]{background:var(--force); border-color:var(--force);}
+#pg-eb .picker button.doom[aria-pressed="true"]{background:var(--doom); border-color:var(--doom);}
+#pg-eb .picker button.creed[aria-pressed="true"]{background:var(--creed); border-color:var(--creed);}
+#pg-eb .picker button.verdict[aria-pressed="true"]{background:var(--verdict); border-color:var(--verdict);}
+#pg-eb .playbook{border:1.5px solid var(--accent); border-radius:12px; background:var(--card); padding:.9rem 1.1rem; margin:.4rem 0 1.2rem;}
+#pg-eb .playbook .voice{font-style:italic; color:var(--muted); margin:0 0 .3rem;}
+#pg-eb .playbook .stance{margin:.2rem 0 .55rem;}
+#pg-eb .playbook .stance b{font-family:"Bricolage Grotesque",sans-serif;}
+#pg-eb .playbook .fire{display:grid; gap:.5rem;}
+#pg-eb .playbook .fire div{background:var(--hot-wash); border-radius:8px; padding:.5rem .7rem; font-size:.95rem;}
+#pg-eb .playbook .fire b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.74rem; letter-spacing:.08em; color:var(--hot); margin-right:.4rem;}
+#pg-eb .arsenal{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.6rem; margin:.8rem 0;}
+#pg-eb .move{border:1px solid var(--line); border-radius:10px; background:var(--card); padding:.65rem .8rem;}
+#pg-eb .move.hot{border-color:var(--hot); background:var(--hot-wash);}
+#pg-eb .move .m-head{display:flex; gap:.5rem; align-items:baseline;}
+#pg-eb .move .m-num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;}
+#pg-eb .move .m-name{font-family:"Bricolage Grotesque",sans-serif; font-weight:700;}
+#pg-eb .move .m-def{color:var(--muted); font-size:.88rem; margin-top:.15rem;}
+#pg-eb .move .m-eg{font-size:.9rem; font-style:italic; margin-top:.3rem;}
+#pg-eb .lever{border-left:3px solid var(--accent); padding:.15rem 0 .15rem .9rem; margin:.9rem 0;}
+#pg-eb .lever b{font-family:"Bricolage Grotesque",sans-serif;}
+#pg-eb .lever .eg{color:var(--muted); font-style:italic;}
+#pg-eb details{border:1px solid var(--line); border-radius:10px; background:var(--card); margin:.6rem 0;}
+#pg-eb summary{cursor:pointer; padding:.7rem .95rem; font-weight:700; font-family:"Bricolage Grotesque",sans-serif;}
+#pg-eb summary:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:10px;}
+#pg-eb details .body{padding:0 .95rem .8rem;}
+#pg-eb details p{margin:.45rem 0;}
+#pg-eb details .fv{font-style:italic; color:var(--muted);}
+#pg-eb details b.mv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.76rem; letter-spacing:.06em; color:var(--accent);}
+#pg-eb .mini{font-size:.92rem; color:var(--muted);}
+#pg-eb footer{margin-top:3rem; border-top:1px solid var(--line); padding-top:.9rem; color:var(--muted); font-size:.85rem; max-width:68ch;}
+@media (prefers-reduced-motion:no-preference){
+#pg-eb .move{transition:background .15s ease, border-color .15s ease;}
+}
+
+/* shell overrides: pickers sit below the tab bar */
+#pg-oa .picker,#pg-ob .picker,#pg-ea .picker,#pg-eb .picker{top:3.1rem;}
+</style>
+</head>
+<body>
+<nav class="tabbar" aria-label="Choose a tree">
+<button data-tab="oa" aria-pressed="false"><span class="dot" style="--dl:#0b7a6b;--dd:#3cbfab"></span>Oral A<span class="tn">Ten Slots</span></button>
+<button data-tab="ob" aria-pressed="false"><span class="dot" style="--dl:#b04416;--dd:#ef9463"></span>Oral B<span class="tn">Ten Moves</span></button>
+<button data-tab="ea" aria-pressed="false"><span class="dot" style="--dl:#5a43b5;--dd:#ab97f5"></span>Written A<span class="tn">Six Beats</span></button>
+<button data-tab="eb" aria-pressed="false"><span class="dot" style="--dl:#a13a8a;--dd:#e07ec9"></span>Written B<span class="tn">Ten Lenses</span></button>
+</nav>
+<section class="tab-page" id="pg-oa"><main>
+<span class="kicker">TEF · Expression orale · Section A</span>
+<h1>The Ten Slots</h1>
+<p class="sub">Read the ad. Pick its shape. Then ask the same ten kinds of questions, in the same order, every time.
+Each slot is one kind of question. Ten slots give you the "around ten questions" the exam asks for.
+This plan was tested on all 78 practice ads. It works for every one.
+This page tells you what to ask. <b>sheet_A</b> tells you how to say it in French.</p>
+
+<div class="pocket">
+<span class="kicker">Pocket card — the whole plan</span>
+<p style="margin:.2rem 0 .4rem"><b>1.</b> Pick the shape. Ask yourself: who moves? Which way does the money go? → GO · COME · TAKE · FAR · FLIP<br>
+<b>2.</b> Go through the ten slots in order. Spend about 30 seconds on each. Skip the two that fit this ad least:</p>
+<ol>
+<li><b>WHAT</b> exactly? (ask about every vague line in the ad)</li>
+<li><b>FOR WHOM</b>? (age · level · group · licence)</li>
+<li><b>WHEN</b>? (days · season · how long · how often)</li>
+<li><b>WHERE</b>? (place · how to get there · area served)</li>
+<li><b>WITH WHOM</b>? (staff · training · people per teacher)</li>
+<li><b>HOW MUCH</b>? (price · what it includes · discounts · deposit)</li>
+<li><b>WITH WHAT</b>? (what they provide · what I bring or send)</li>
+<li><b>WHAT IF</b>? (weather · cancel · damage · refund)</li>
+<li><b>HOW DO I START</b>? (steps · how far ahead · trial · papers)</li>
+<li><b>WHAT ELSE</b>? (food · a place to stay · extras · gifts)</li>
+</ol>
+<p style="margin:.5rem 0 0"><b>3.</b> Mind blank? Point at a line in the ad · repeat a fact and ask for more · invent one detail about yourself.</p>
+</div>
+
+<h2><span class="node-tag">Node 1</span>Pick the shape</h2>
+<p>This step takes two seconds. Ask yourself one question: <b>who moves, and which way does the money go?</b>
+Some ads mix two shapes — guitar lessons at your home, or a boat rental with a guide you can add.
+Pick the shape that fits most of the ad. The ten slots will cover the rest.</p>
+
+<div>
+<div class="shape-row"><span class="chip go">GO</span><span class="def">I go to them and do / see / learn something</span><span class="n">47 of 78 · 60%</span></div>
+<div class="shape-row"><span class="chip come">COME</span><span class="def">They come to me, or do it for me</span><span class="n">13 of 78 · 17%</span></div>
+<div class="shape-row"><span class="chip take">TAKE</span><span class="def">I rent a thing and use it myself</span><span class="n">7 of 78 · 9%</span></div>
+<div class="shape-row"><span class="chip flip">FLIP</span><span class="def">They pay me, or no money changes hands</span><span class="n">6 of 78 · 8%</span></div>
+<div class="shape-row"><span class="chip far">FAR</span><span class="def">I order from far away; it ships to me or happens online</span><span class="n">5 of 78 · 6%</span></div>
+</div>
+
+<h2><span class="node-tag">Node 2</span>The ten slots, in order</h2>
+<p>Use the same order for every ad, with no exceptions. A fixed order means you never
+have to wonder what comes next. Each slot is a <em>kind</em> of question, not exact words —
+you make up the real question on the spot. Tap a shape button below.
+The example line in each slot will change to match that shape.</p>
+
+<div class="picker" role="group" aria-label="Choose ad shape">
+<button class="go" aria-pressed="true" data-shape="go">GO</button>
+<button class="come" aria-pressed="false" data-shape="come">COME</button>
+<button class="take" aria-pressed="false" data-shape="take">TAKE</button>
+<button class="far" aria-pressed="false" data-shape="far">FAR</button>
+<button class="flip" aria-pressed="false" data-shape="flip">FLIP</button>
+</div>
+
+<div id="oa-slots">
+<div class="slot"><div class="num">1</div><div class="name">WHAT exactly?</div>
+<div class="core">Ask what the offer really includes. Every vague line in the ad gives you one easy question.</div>
+<div class="flavor" data-go="How does one session go, from start to finish? The ad says «varied activities» or «numerous tours» — what are they, exactly?"
+     data-come="What exactly does the service cover? What is in each package — and what is NOT included?"
+     data-take="Which models, sizes, and types do you have? What is the difference between them?"
+     data-far="How does the whole process work, step by step? What do you have in the catalogue?"
+     data-flip="What would I really be doing? The ad says «varied missions» — what are they, exactly?"></div></div>
+
+<div class="slot"><div class="num">2</div><div class="name">FOR WHOM?</div>
+<div class="core">Ask if it works for you: your age, your level, your experience, your group size, a licence, your fitness.</div>
+<div class="flavor" data-go="Is it okay for a complete beginner? Is there an age limit? Do I need to be fit? Can I come alone, or with kids?"
+     data-come="Does it work for my situation — an old car, a big dog, twenty guests, a small garden?"
+     data-take="Do I need a licence or permit? Is there a minimum age? How many people does it hold?"
+     data-far="Do I need anything to order — a prescription, proof of address, a minimum amount?"
+     data-flip="What do you ask for? Do I need experience? Who can apply or join?"></div></div>
+
+<div class="slot"><div class="num">3</div><div class="name">WHEN?</div>
+<div class="core">Ask about days, hours, the season, how long it lasts, how often it runs, and deadlines.</div>
+<div class="flavor" data-go="Which days and what hours? What season? How long does it last? How often does it run?"
+     data-come="What time slots do you have? How fast can you come? How long does the job take?"
+     data-take="How long can I rent it — half a day, a full day? Can I keep it longer? What are the pickup and return times?"
+     data-far="How long does delivery take? How long do you need to handle my order? When would it start?"
+     data-flip="How often are there missions? Do I choose when I work? Do you work around my schedule?"></div></div>
+
+<div class="slot"><div class="num">4</div><div class="name">WHERE?</div>
+<div class="core">Ask about the address, how to get there, parking, the area they serve, and indoors or outdoors.</div>
+<div class="flavor" data-go="Where is it, exactly? Can I get there by bus or train? Is there parking? Is it indoors or outdoors?"
+     data-come="Do you serve my area? Do I need to be home while you work?"
+     data-take="Where do I pick it up? Where am I allowed to take it — a lake, a river, the sea?"
+     data-far="Which areas do you deliver to? Where do I send my things?"
+     data-flip="Where are the missions or activities? Are they really close to my home?"></div></div>
+
+<div class="slot"><div class="num">5</div><div class="name">WITH WHOM?</div>
+<div class="core">Ask who runs it and who shows up: their training, their experience, people per teacher, and whether it is the same person each time.</div>
+<div class="flavor" data-go="Are the instructors trained and experienced? How many people are there per instructor?"
+     data-come="Who exactly comes to my home? Do you check your workers? Is it always the same person?"
+     data-take="Can I also get a guide or a driver? Does someone show me how it works first?"
+     data-far="Can I talk to a real person if I need help? Who takes care of my order?"
+     data-flip="Who gives out the work and checks it? Who do I report to?"></div></div>
+
+<div class="slot"><div class="num">6</div><div class="name">HOW MUCH?</div>
+<div class="core">Ask the price, what it includes, discounts, the deposit, and how to pay.</div>
+<div class="flavor" data-go="What are the prices, and what do they include? Are there discounts for groups, families, or students?"
+     data-come="How do you work out the price? Is there a travel fee? When and how do I pay?"
+     data-take="Is the price per hour or per day? Is there a deposit? Is insurance included?"
+     data-far="What is the total cost with delivery? Is paying online safe? Are there any hidden fees?"
+     data-flip="How much do I earn, and when am I paid? Do you pay me back for my costs? Does it cost anything to join?"></div></div>
+
+<div class="slot"><div class="num">7</div><div class="name">WITH WHAT?</div>
+<div class="core">Ask about equipment. Do they provide it, or do I bring, wear, or send something?</div>
+<div class="flavor" data-go="Is all the equipment provided? What should I wear or bring?"
+     data-come="Do you bring your own tools, products, and parts? Do I need to supply anything?"
+     data-take="What comes with it — a helmet, safety gear, a GPS? Is fuel or a full charge included?"
+     data-far="What do I need to send you — a prescription, documents, photos?"
+     data-flip="Do you provide training or materials? Do I pay for things with my own money first?"></div></div>
+
+<div class="slot"><div class="num">8</div><div class="name">WHAT IF?</div>
+<div class="core">Ask about problems: safety, bad weather, cancelling, refunds, damage, and guarantees.</div>
+<div class="flavor" data-go="What happens if it rains? What if I cancel or miss a session? Am I insured? How safe is it?"
+     data-come="What if something gets damaged, or I am not happy with the work? Is there a guarantee? Can I change the date?"
+     data-take="What if I damage it, or bring it back late? What if it breaks down while I am using it?"
+     data-far="What if it does not fit, or I am not happy with it? How long do I have to ask for a refund? What if the parcel gets lost?"
+     data-flip="What if I cannot do a mission, or I want to stop? Is there a contract, or a notice period?"></div></div>
+
+<div class="slot"><div class="num">9</div><div class="name">HOW DO I START?</div>
+<div class="core">Ask how to sign up: the steps, how far ahead, a trial, a visit, and the papers you need.</div>
+<div class="flavor" data-go="How do I sign up or book, and how far ahead? Can I try one session first?"
+     data-come="Do you visit my home or send a price first? How far ahead do I need to book?"
+     data-take="How do I reserve it? What papers do you need — my ID, my licence? Can I see it first?"
+     data-far="What are the exact steps to place the order or open the account?"
+     data-flip="How do I sign up? Is there an interview? When could I start?"></div></div>
+
+<div class="slot"><div class="num">10</div><div class="name">WHAT ELSE?</div>
+<div class="core">Ask about extras: food, a place to stay, a shop, photos, private bookings, pets, and gifts.</div>
+<div class="flavor" data-go="Can I eat there? Is there a shop? Do you sell photos of the activity? Can a group book it privately? Is there a place to stay nearby?"
+     data-come="Can you add extras, like decoration or one more service? Do you sell gift cards?"
+     data-take="Are there extras — a child seat, a driver, a cleaning service? Can you deliver it to me?"
+     data-far="Can you email me the catalogue or a price? Is there a deal for loyal customers, or for bringing a friend?"
+     data-flip="Are there any perks — gifts, keeping the products, meeting the hosts? Do I get a certificate or a reference at the end?"></div></div>
+</div>
+
+<p class="mini">The math: the call lasts about 5 minutes. That is about 10 questions, or 30 seconds per slot.
+On a short ad, slots 5 and 7 are usually the ones to skip. Slots 1, 3, 6, 8, 9, and 10 work for every one of
+the 78 ads. Skip two slots, ask one extra follow-up question in each of your two best slots, and you still
+reach ten questions.</p>
+
+<h2><span class="node-tag">Node 3</span>Trigger words</h2>
+<p>Some words in an ad tell you to add extra questions in certain slots. Watch for these words while you read:</p>
+<div class="scroll"><table>
+<tr><th>Word in the ad</th><th>Slots</th><th>Extra questions to add</th></tr>
+<tr><td>Thrill words — «sensations», speed, jumping</td><td class="slots">8 · 2</td><td>safety gear and insurance · minimum age and fitness</td></tr>
+<tr><td>Outdoors, nature, season</td><td class="slots">3 · 8</td><td>season and hours · plan for rain</td></tr>
+<tr><td>Kids, family</td><td class="slots">2 · 5 · 10</td><td>from what age · who watches the kids · birthday and group deals</td></tr>
+<tr><td>«Packages», «options», «formulas»</td><td class="slots">1 · 6</td><td>what each one contains · what each one costs</td></tr>
+<tr><td>«Reservation recommended / required»</td><td class="slots">9 · 8</td><td>how far ahead · rules for cancelling</td></tr>
+<tr><td>Course, club, anything that repeats</td><td class="slots">3 · 9 · 8</td><td>schedule and how often · a trial, joining mid-year · a missed session</td></tr>
+<tr><td>One-time event with dates</td><td class="slots">3 · 6 · 10</td><td>exact dates and hours · types of passes · food and parking</td></tr>
+<tr><td>«At home», delivery</td><td class="slots">4 · 5 · 3</td><td>area they serve · who comes · time slots</td></tr>
+<tr><td>Stay, accommodation</td><td class="slots">10 · 6</td><td>rooms and meals · what the stay includes</td></tr>
+<tr><td>Rental</td><td class="slots">6 · 8 · 3</td><td>deposit · damage · how long you can rent</td></tr>
+<tr><td>Free, swap, volunteer</td><td class="slots">6 · 8</td><td>is it really free, and what do I get? · any contract</td></tr>
+<tr><td>Big vague claims — «unbeatable prices», «special offer»</td><td class="slots">6</td><td>so what is the real price, and until when does the offer last?</td></tr>
+</table></div>
+
+<h2>When your mind goes blank</h2>
+<p>Sometimes a slot feels empty and you freeze. These three tricks work on every one of the 78 ads:</p>
+<div class="lever"><b>1 · Point at a line in the ad.</b> Read a vague line back to them. Then ask what it means, exactly.
+<div class="eg">"The ad says 'varied missions' — what kind of missions, exactly?" Every ad has 3 to 6 vague lines. Each one gives you a free question.</div></div>
+<div class="lever"><b>2 · Repeat a fact, then ask for more.</b> Say a fact from the ad back to them. Then ask a question about it.
+<div class="eg">"The ad says with or without a guide — what does the guide add, and how much extra does it cost?"</div></div>
+<div class="lever"><b>3 · Invent one detail about yourself.</b> Before you call, make up ONE fact about your life: two kids, total beginner, free only on Saturdays, no car. Use that fact in slots 2, 3, and 4.
+<div class="eg">"I would come with my two children, aged six and nine — is that possible?"</div></div>
+
+<h2>Full examples</h2>
+<p class="mini">Tap a title to open the example.</p>
+
+<details><summary>Paragliding intro (rank 1) — GO</summary><div class="body"><ol>
+<li><b>WHAT</b> The ad lists ground training, trials, and mini-flights. How does the day go, and how many flights do I get?</li>
+<li><b>FOR WHOM</b> Is it okay for a complete beginner? Are there age or weight limits?</li>
+<li><b>WHEN</b> Which days does it run, and how long does the whole course last?</li>
+<li><b>WHERE</b> Where exactly is the site? Can I get there without a car?</li>
+<li><b>WITH WHOM</b> Are the instructors certified? How many students are there per instructor?</li>
+<li><b>HOW MUCH</b> The ad says "exceptional rates". What is the real price, and what does it include?</li>
+<li><b>WITH WHAT</b> Is all the equipment provided? What should I wear?</li>
+<li><b>WHAT IF</b> If the weather is bad, is it moved to another day, or refunded? Am I insured?</li>
+<li><b>START</b> How far ahead do I book, and how do I confirm?</li>
+<li><b>ELSE</b> Can someone come along to watch? Do you sell photos or videos of the flight?</li>
+</ol></div></details>
+
+<details><summary>Mystery shopper (rank 10) — FLIP</summary><div class="body"><ol>
+<li><b>WHAT</b> What are the "varied missions" — shops, restaurants, the cinema?</li>
+<li><b>FOR WHOM</b> What do you ask for — an age, experience, a report to write?</li>
+<li><b>WHEN</b> How many missions are there per month? Do I choose when I work?</li>
+<li><b>WHERE</b> Are the missions really near my home? In which areas?</li>
+<li><b>WITH WHOM</b> Who gives out the missions, and who do I send my reports to?</li>
+<li><b>HOW MUCH</b> How is the pay set for each mission, and when am I paid?</li>
+<li><b>WITH WHAT</b> Do I pay for the purchases with my own money first? Do you pay me back? Is there training?</li>
+<li><b>WHAT IF</b> What if I cannot do a mission I said yes to? Is there a contract?</li>
+<li><b>START</b> How do I sign up? Is there an interview? When could I start?</li>
+<li><b>ELSE</b> Do I keep the products? Is there a bonus for regular shoppers?</li>
+</ol></div></details>
+
+<details><summary>The three hardest ads, in short notes</summary><div class="body">
+<p><b>Apartment (rank 21) — TAKE:</b> WHAT which floor, what size, how many rooms · FOR WHOM do I need a guarantor, what papers ·
+WHEN free from what date, how long is the lease · WHERE the neighbourhood, transport nearby · WITH WHOM an agency or the owner ·
+HOW MUCH rent plus charges plus deposit · WITH WHAT is it furnished, are there appliances · WHAT IF repairs, notice before leaving ·
+START a visit, the papers · ELSE pets, parking, a cellar.</p>
+<p><b>Personalized song (rank 18) — COME:</b> WHAT the styles, the length, the packages · FOR WHOM does it work for any event or audience ·
+WHEN how long it takes to make, can it be rushed · WHERE how it is delivered · WITH WHOM who writes and sings — professionals? ·
+HOW MUCH the price of each package · WITH WHAT what I tell you about the person · WHAT IF I do not like it —
+changes or a refund? · START the steps to order · ELSE a video version? can it be sung live?</p>
+<p><b>Jewellery buyback (rank 44) — FAR:</b> WHAT which jewellery you accept · FOR WHOM any conditions ·
+WHEN how fast I get an offer · WHERE where I ship it · WITH WHOM who judges the value — an expert? ·
+HOW MUCH how the price is set, paid how and when · WITH WHAT what I send — photos, certificates? ·
+WHAT IF the parcel is lost — is it insured? if I say no — is it returned free? how does "satisfied or refunded in 48 h" work? ·
+START the exact steps · ELSE can I get a price with no promise to sell?</p>
+</div></details>
+
+<h2>Proof — every ad was counted</h2>
+<p class="mini">Each number is one ad's rank in the practice list. All 78 ads were checked. None were skipped.</p>
+<div class="scroll"><table>
+<tr><th>Shape</th><th>Count</th><th>Ranks</th></tr>
+<tr><td><span class="chip go">GO</span></td><td>47</td><td>1 2 3 6 7 8 11 19 20 22 23 24 26 27 28 29 35 36 37 39 40 41 42 45 46 47 49 50 51 52 53 54 57 58 59 60 61 62 63 64 65 66 67 69 70 74 78</td></tr>
+<tr><td><span class="chip come">COME</span></td><td>13</td><td>4 9 13 16 18 25 30 38 43 48 55 75 76</td></tr>
+<tr><td><span class="chip take">TAKE</span></td><td>7</td><td>5 17 21 34 68 73 77</td></tr>
+<tr><td><span class="chip flip">FLIP</span></td><td>6</td><td>10 15 32 33 56 71</td></tr>
+<tr><td><span class="chip far">FAR</span></td><td>5</td><td>12 14 31 44 72</td></tr>
+</table></div>
+
+<footer>This page only tells you what to ask. To say each question in French, use the five question
+families from sheet_A (A001–A018). Open the call with A059–A061. Close it with A062–A064. Try to use a
+different family for each slot — this shows the examiner more of your grammar.
+Source: the 78 Section A ads from the practice list, written out in English.</footer>
+</main></section>
+<section class="tab-page" id="pg-ob"><main>
+<span class="kicker">TEF · Expression orale · Section B</span>
+<h1>The Ten Moves</h1>
+<p class="sub">In Section B you call a friend about an ad and try to get them to join.
+The friend will object. Listen to each objection, decide which of the 8 types it is,
+and answer it with one of the 10 moves on this page. The page uses all 81 Section B
+practice prompts, each counted the same. It is the partner page of <b>The Ten Slots</b>:
+there you ask a stranger questions, here you talk a friend into coming.</p>
+
+<div class="thesis">
+<span class="kicker">The reframe — read this first</span>
+<p><b>Why do we want to say "then don't do it"?</b> Because we do not care about the answer.
+If a friend says no, and their no costs you nothing, "okay, then don't" is the natural reply.
+So before you speak, decide why you care.</p>
+<p>In Section B, you need the friend to say yes. Pick your reason during the 20-second prep.
+There are three to choose from: you want company, you think this will help them, or the group
+needs people. Once you have a reason, their "no" is no longer just their business.
+It is a problem you want to solve. The moves below show you how to solve it.</p>
+<p>One more thing: each objection helps you. It tells you which move to use next.
+A friend who said yes right away would leave you with nothing to say for nine minutes.</p>
+</div>
+
+<div class="pocket">
+<span class="kicker">Pocket card — the whole plan</span>
+<p><b>Prep (20 seconds):</b> TRAIT (find the friend's need in the task line) → STAKE (pick your reason: with me / for you / for it) → AMMO (pick 3 lines from the ad that answer objections before they come).</p>
+<p><b>The call (5 beats):</b> HOOK → SHOW the ad → MATCH it to their need → VOLLEY their objections → LOCK the next step.</p>
+<p><b>The VOLLEY loop:</b> hear the objection → name its type (TIME · MONEY · ABILITY · FEAR · TRUST · EFFORT · WANT · BOND) → answer with 2 moves → ask a short question back. Never use 4 moves in a row. That is talking at them without listening.</p>
+</div>
+
+<h2><span class="node-tag">Node 0</span>Prep — 20 seconds before you speak</h2>
+<ol class="beats">
+<li><div class="b-name">TRAIT</div><div class="b-what">In 78 of the 81 prompts, the task line tells you what the friend needs ("loves animals", "needs money", "very shy", "always on screens"). This is what you aim your pitch at. If the prompt does not give one, or it does not fit, pick one yourself and say it in your first line.</div></li>
+<li><div class="b-name">STAKE</div><div class="b-what">Ask yourself: why do <em>I</em> want them to come? Pick one of three reasons: <b>WITH ME</b> (I want to go, but not alone) · <b>FOR YOU</b> (I think this will help you) · <b>FOR IT</b> (the group or cause needs people).</div></li>
+<li><div class="b-name">AMMO</div><div class="b-what">Pick 3 lines from the ad that already answer likely objections: "beginners accepted", "free trial", "maximum safety", "flexible hours", "2,000 volunteers". Almost every ad has lines like these. They are ready-made answers.</div></li>
+</ol>
+
+<h2><span class="node-tag">Skeleton</span>The call — 5 beats, 10 minutes</h2>
+<ol class="beats">
+<li><div class="b-name">HOOK <span class="t">· 30 s</span></div><div class="b-what">Say hello, give your reason, and name their need: "I saw an ad and thought of you right away — you said you wanted…"</div></li>
+<li><div class="b-name">SHOW <span class="t">· 1–2 min</span></div><div class="b-what">Tell them what the ad says: what it is, when, where, and how much it costs. These are slots 1 / 3 / 4 / 6 from The Ten Slots, but now you tell instead of ask.</div></li>
+<li><div class="b-name">MATCH <span class="t">· 1 min</span></div><div class="b-what">Give two or three reasons this fits them. Talk about their need, not just how good the offer is.</div></li>
+<li><div class="b-name">VOLLEY <span class="t">· 5–6 min</span></div><div class="b-what">They object. Name the type (one of 8). Answer with 2 moves. Then ask a short question back ("qu'est-ce que t'en dis ?"). This repeats 3 to 5 times.</div></li>
+<li><div class="b-name">LOCK <span class="t">· 30 s</span></div><div class="b-what">End with a clear next step and a date: "I will send you the link tonight. We sign up on Saturday."</div></li>
+</ol>
+
+<h2><span class="node-tag">Node 1</span>Classify — the 8 types of objection</h2>
+<p>Tap an objection type. You will see what to say back, and the right moves light up below.</p>
+
+<div class="picker" role="group" aria-label="Choose objection type">
+<button data-obj="time" aria-pressed="true">TIME</button>
+<button data-obj="money" aria-pressed="false">MONEY</button>
+<button data-obj="ability" aria-pressed="false">ABILITY</button>
+<button data-obj="fear" aria-pressed="false">FEAR</button>
+<button data-obj="trust" aria-pressed="false">TRUST</button>
+<button data-obj="effort" aria-pressed="false">EFFORT</button>
+<button data-obj="want" aria-pressed="false">WANT</button>
+<button data-obj="bond" aria-pressed="false">BOND</button>
+</div>
+
+<div class="playbook" id="ob-playbook" aria-live="polite"></div>
+
+<h2><span class="node-tag">Node 2</span>Answer — the 10 moves</h2>
+<div class="arsenal" id="ob-arsenal">
+<div class="move" data-move="shrink"><div class="m-head"><span class="m-num">1</span><span class="m-name">SHRINK</span></div>
+<div class="m-def">Show how small the cost really is.</div><div class="m-eg">"It's two hours, once a month."</div></div>
+<div class="move" data-move="adsays"><div class="m-head"><span class="m-num">2</span><span class="m-name">AD SAYS</span></div>
+<div class="m-def">Point to the line in the ad that answers them.</div><div class="m-eg">"Look: 'beginners accepted, training provided.'"</div></div>
+<div class="move" data-move="flip"><div class="m-head"><span class="m-num">3</span><span class="m-name">FLIP</span></div>
+<div class="m-def">Turn their objection into the reason to go.</div><div class="m-eg">"You're stressed — this is the thing that fixes that."</div></div>
+<div class="move" data-move="paint"><div class="m-head"><span class="m-num">4</span><span class="m-name">PAINT</span></div>
+<div class="m-def">Describe the scene so they can picture themselves in it.</div><div class="m-eg">"Picture us on the water at sunrise…"</div></div>
+<div class="move" data-move="together"><div class="m-head"><span class="m-num">5</span><span class="m-name">TOGETHER</span></div>
+<div class="m-def">Promise to do it with them.</div><div class="m-eg">"I'm signing up too. We do it together."</div></div>
+<div class="move" data-move="exit"><div class="m-head"><span class="m-num">6</span><span class="m-name">EXIT DOOR</span></div>
+<div class="m-def">Make it feel safe to try: free trial, refund, quit anytime.</div><div class="m-eg">"The first session is free. If you don't like it, we stop."</div></div>
+<div class="move" data-move="proof"><div class="m-head"><span class="m-num">7</span><span class="m-name">PROOF</span></div>
+<div class="m-def">Give numbers, experts, or studies.</div><div class="m-eg">"2,000 volunteers already. The instructors are certified."</div></div>
+<div class="move" data-move="versus"><div class="m-head"><span class="m-num">8</span><span class="m-name">VERSUS</span></div>
+<div class="m-def">Compare it to what they do now, or to something worse.</div><div class="m-eg">"It costs less than one dinner out."</div></div>
+<div class="move" data-move="yourwords"><div class="m-head"><span class="m-num">9</span><span class="m-name">YOUR WORDS</span></div>
+<div class="m-def">Remind them of something they said they wanted.</div><div class="m-eg">"You told me last week you wanted to earn extra money."</div></div>
+<div class="move" data-move="givetake"><div class="m-head"><span class="m-num">10</span><span class="m-name">GIVE &amp; TAKE</span></div>
+<div class="m-def">Agree with part of it, show the good side is bigger, then end with a small ask.</div><div class="m-eg">"True, a tent is not a hotel — but it's one week, and we'll remember it for years."</div></div>
+</div>
+<p class="mini">French notes: the one-word form of FLIP is <b>justement</b> — you take their objection and give it back as your reason.
+GIVE &amp; TAKE starts with <b>certes… mais</b>. Say every move with connectors from the B2+ list. No slang.</p>
+
+<h2>Family → likely objections</h2>
+<p class="mini">You can guess the objections before the call starts. The counts cover all 81 ads. The families come from the practice list.</p>
+<div class="scroll"><table>
+<tr><th>Family</th><th>Ads</th><th>Signature objections</th></tr>
+<tr><td>Volunteering / solidarity</td><td class="n">10</td><td><span class="mv">MONEY</span> "work for no pay?" · <span class="mv">TIME</span> · <span class="mv">BOND</span></td></tr>
+<tr><td>Earn-money</td><td class="n">9</td><td><span class="mv">TRUST</span> "is it a scam?" · <span class="mv">EFFORT</span> "is the pay real?" · <span class="mv">TIME</span></td></tr>
+<tr><td>Travel / getaway</td><td class="n">8</td><td><span class="mv">MONEY</span> · <span class="mv">TIME</span> "no vacation days" · <span class="mv">EFFORT</span> "not comfortable"</td></tr>
+<tr><td>Resale / sharing economy</td><td class="n">7</td><td><span class="mv">TRUST</span> "strangers, bad quality" · <span class="mv">EFFORT</span> "too much work"</td></tr>
+<tr><td>Creative workshop</td><td class="n">7</td><td><span class="mv">ABILITY</span> "no talent" · <span class="mv">FEAR</span> "people watching me" · <span class="mv">TIME</span></td></tr>
+<tr><td>Adventure / sport getaway</td><td class="n">6</td><td><span class="mv">FEAR</span> "too dangerous" · <span class="mv">ABILITY</span> "not fit enough" · <span class="mv">MONEY</span></td></tr>
+<tr><td>Civic / cultural role</td><td class="n">5</td><td><span class="mv">TIME</span> · <span class="mv">BOND</span> "a whole year!" · <span class="mv">ABILITY</span></td></tr>
+<tr><td>Learn-a-skill course</td><td class="n">4</td><td><span class="mv">MONEY</span> · <span class="mv">BOND</span> · <span class="mv">TRUST</span> "is an online course any good?"</td></tr>
+<tr><td>Chef / caterer service</td><td class="n">3</td><td><span class="mv">MONEY</span> "too fancy!" · <span class="mv">TRUST</span> "a stranger in my kitchen" · <span class="mv">WANT</span> "I can cook myself"</td></tr>
+<tr><td>Charity event</td><td class="n">3</td><td><span class="mv">TIME</span> · <span class="mv">WANT</span> · <span class="mv">ABILITY</span> "135 km!"</td></tr>
+<tr><td>Travel-for-free</td><td class="n">3</td><td><span class="mv">TRUST</span> "too good to be true" · <span class="mv">BOND</span> "the duties"</td></tr>
+<tr><td>Cook-and-share</td><td class="n">2</td><td><span class="mv">FEAR</span> "eating with strangers" · <span class="mv">EFFORT</span></td></tr>
+<tr><td>Community DIY workshop</td><td class="n">2</td><td><span class="mv">ABILITY</span> "I'm no mechanic" · <span class="mv">TRUST</span></td></tr>
+<tr><td>Wellness / health</td><td class="n">2</td><td><span class="mv">TRUST</span> "is there proof?" · <span class="mv">BOND</span> "a pet is forever"</td></tr>
+<tr><td>Online convenience service</td><td class="n">2</td><td><span class="mv">TRUST</span> "medicine online?!" · <span class="mv">WANT</span></td></tr>
+<tr><td>Heritage restoration stay</td><td class="n">2</td><td><span class="mv">EFFORT</span> "hard work on holiday?!" · <span class="mv">MONEY</span></td></tr>
+<tr><td>Cultural / social event</td><td class="n">2</td><td><span class="mv">TIME</span> · <span class="mv">WANT</span> "with strangers?" · <span class="mv">EFFORT</span></td></tr>
+<tr><td>City tours</td><td class="n">2</td><td><span class="mv">MONEY</span> · <span class="mv">WANT</span> "I already know the city" · <span class="mv">EFFORT</span></td></tr>
+<tr><td>Novelty restaurant</td><td class="n">1</td><td><span class="mv">WANT</span> "that sounds gross" · <span class="mv">TRUST</span></td></tr>
+<tr><td>Leisure club</td><td class="n">1</td><td><span class="mv">WANT</span> "sounds boring" · <span class="mv">BOND</span> "a yearly fee"</td></tr>
+</table></div>
+
+<h2>Three full examples</h2>
+
+<details><summary>Skydiving (rank 6) — FEAR</summary><div class="body">
+<p class="fv">"A parachute jump? That's crazy — it's dangerous."</p>
+<p><b class="mv">PROOF</b> "An instructor guides your first jump. The ad promises maximum safety. Keeping people safe is their job."<br>
+<b class="mv">EXIT DOOR</b> "You can do a tandem jump, attached to a pro. You don't have to do anything yourself." — <em>then ask a short question.</em></p>
+<p class="fv">"I would still panic."</p>
+<p><b class="mv">TOGETHER</b> "I'll jump first. You watch me land, then you decide."<br>
+<b class="mv">GIVE &amp; TAKE</b> "Yes, it's scary. But it's thirty seconds of fear, and you'll tell the story for years."</p>
+</div></details>
+
+<details><summary>Paid surveys (rank 2) — TRUST</summary><div class="body">
+<p class="fv">"They pay you to click? That's a scam."</p>
+<p><b class="mv">AD SAYS</b> "The ad says signing up is free and your data stays private."<br>
+<b class="mv">EXIT DOOR</b> "You risk nothing. There's no fee, and you can stop anytime. Just try three surveys." — <em>then ask a short question.</em></p>
+<p class="fv">"It will barely pay anything."</p>
+<p><b class="mv">SHRINK + VERSUS</b> "You already spend that time on your phone. Same sofa, but now you earn a little money instead of nothing."<br>
+<b class="mv">YOUR WORDS</b> "You said you wanted extra money without a second job. This is the easiest way to get that."</p>
+</div></details>
+
+<details><summary>Animal shelter (rank 1) — MONEY ("work for no pay?")</summary><div class="body">
+<p class="fv">"So I work and nobody pays me?"</p>
+<p><b class="mv">FLIP</b> "You pay money for the gym to feel good. Here you feel good for free, and you get to spend time with dogs."<br>
+<b class="mv">YOUR WORDS</b> "You love dogs — you say so every time you see one. And two thousand people already decided it's worth their Saturday." — <em>then ask a short question.</em></p>
+<p class="fv">"But cleaning the cages…"</p>
+<p><b class="mv">GIVE &amp; TAKE</b> "Yes, some of the work is dirty. But one hour of cleaning means two hours of playing with the dogs. And we can pick the tasks where we keep the animals company."<br>
+<b class="mv">TOGETHER</b> "I'll do the paperwork shift with you."</p>
+</div></details>
+
+<footer>This page covers what to say, not the French itself. Say the moves with connectors
+from the B2+ list (certes… mais, en revanche, d'autant plus que, justement). No slang.
+Source: the 81 Section B prompts from the practice-order list, written out in English.
+Partner page: The Ten Slots (Section A).</footer>
+</main></section>
+<section class="tab-page" id="pg-ea"><main>
+<span class="kicker">TEF · Expression écrite · Section A</span>
+<h1>The Six Beats</h1>
+<p class="sub">You get the start of a short news story. You must continue it in 100–200 words.
+This page gives you one method. First, decide what the last line promised. Then write the same
+six beats, in the same order, every time. Each beat uses one French verb form the exam grades.
+The method works on all 72 openers. This page covers only what to write — the French itself is up to you.
+It is the partner of <b>The Ten Slots</b> and <b>The Ten Moves</b>: those pages are for speaking, this one is for writing.</p>
+
+<div class="thesis">
+<span class="kicker">The main idea — read this first</span>
+<p><b>The last line of every opener promises something.</b> "He discovered something extraordinary…" —
+"she found an original solution…" — "but on his return…". The story stops right before the good part.
+Think of that promise as a debt. Your story must pay it back.</p>
+<p>So you never start from nothing. The prompt already made the hardest choice for you.
+Your job is simple: <b>name the debt, then pay it in Beat 4</b>, and build the other five beats
+around it. That is the whole task. There is no blank page, because the story is already started.</p>
+</div>
+
+<div class="pocket">
+<span class="kicker">Pocket card — the whole method</span>
+<p><b>1 · Pick the debt:</b> danger? → SAVE · someone doing wrong? → FALL · an "original way" promised? → WAY · a hidden thing to name? → THING · none of these → STIR. Take the first one that fits.</p>
+<p><b>2 · Write the six beats,</b> 1–2 sentences each, about 25 words:</p>
+<ol>
+<li><b>PICK UP</b> — continue from the last word, move one step ahead <span class="t">· passé composé</span></li>
+<li><b>FREEZE</b> — describe that moment: place, time, faces <span class="t">· imparfait</span></li>
+<li><b>REWIND</b> — tell what had happened before <span class="t">· plus-que-parfait</span></li>
+<li><b>PAY THE DEBT</b> — give what the last line promised <span class="t">· PC + direct speech</span></li>
+<li><b>RIPPLE</b> — show how people react: witnesses, police, news <span class="t">· passive</span></li>
+<li><b>SETTLE</b> — end the story, add one last line <span class="t">· conditionnel passé + subjonctif passé</span></li>
+</ol>
+<p><b>3 ·</b> Paragraphs: 1+2 | 3+4 | 5 | 6. Short on time? Write beats 1+4+5+6 only — about 100 words. Never skip Beat 4.</p>
+<p><b>4 ·</b> Stuck? Pick from the four answers (money · animal · paper · a face from the past) · add a witness · reuse the opener's details.</p>
+</div>
+
+<h2><span class="node-tag">Node 1</span>Name the debt</h2>
+<p>Ask one question: <b>what did the last line promise?</b> Check the five types in this order.
+Take the first one that fits. If you pick the wrong debt, it costs you little — the six beats
+stay the same. Only what you write in Beat 4 changes.</p>
+
+<div>
+<div class="debt-row"><span class="chip save">SAVE</span><span class="def">Someone is in danger → write the rescue</span><span class="n">8 of 72 · 11%</span></div>
+<div class="debt-row"><span class="chip fall">FALL</span><span class="def">Someone is doing wrong → write how they get caught</span><span class="n">10 of 72 · 14%</span></div>
+<div class="debt-row"><span class="chip way">WAY</span><span class="def">An "original solution / idea / reaction" is promised → invent the clever plan</span><span class="n">15 of 72 · 21%</span></div>
+<div class="debt-row"><span class="chip thing">THING</span><span class="def">Something hidden — an object, secret, person, or cause → say exactly what it is</span><span class="n">27 of 72 · 38%</span></div>
+<div class="debt-row"><span class="chip stir">STIR</span><span class="def">None of the above — a wild scene is going on → show how it calms down</span><span class="n">12 of 72 · 17%</span></div>
+</div>
+
+<h2><span class="node-tag">Node 2</span>Write the six beats</h2>
+<p>Write the beats in this order every time, for every opener. The fixed order means you never
+have to think about structure. Each beat holds one <em>kind</em> of content and has one main tense.
+Together, the six tenses cover every form the exam grades.
+Tap a debt type below. The six beats will change to match it:</p>
+
+<div class="picker" role="group" aria-label="Choose the opener's debt">
+<button class="thing" aria-pressed="true" data-debt="thing">THING</button>
+<button class="way" aria-pressed="false" data-debt="way">WAY</button>
+<button class="save" aria-pressed="false" data-debt="save">SAVE</button>
+<button class="fall" aria-pressed="false" data-debt="fall">FALL</button>
+<button class="stir" aria-pressed="false" data-debt="stir">STIR</button>
+</div>
+
+<div id="ea-beats">
+<div class="beat"><div class="num">1</div><div class="name">PICK UP <span class="t">· passé composé</span></div>
+<div class="core">Start where the opener's last word stopped. Push the action one step forward. Do not restart the story or repeat the prompt.</div>
+<div class="flavor" data-thing="Get close to the discovery — hands open the lining, eyes go wide — but do NOT name the thing yet."
+     data-way="Say plainly what the person needed, and why the normal way was closed."
+     data-save="Make the danger a little worse — the water pulls, the door stays shut. Time is short."
+     data-fall="Show the wrongdoer at work one last time — or the exact moment someone gets suspicious."
+     data-stir="Let the chaos go one step further — the monkey clears one more aisle."></div></div>
+
+<div class="beat"><div class="num">2</div><div class="name">FREEZE <span class="t">· imparfait</span></div>
+<div class="core">Describe that exact moment: the place, the time, the faces, the weather.</div>
+<div class="flavor" data-thing="Show how normal the scene looked: a quiet street, midnight, a sleeping town."
+     data-way="Show the problem: nothing was working, and everyone had given up."
+     data-save="Show the danger: the water rising, a helpless crowd, the panther pacing."
+     data-fall="Show how normal the scene of the crime looked — that was the whole trick."
+     data-stir="Show the faces in the crowd: panic, laughter, phones already out."></div></div>
+
+<div class="beat"><div class="num">3</div><div class="name">REWIND <span class="t">· plus-que-parfait</span></div>
+<div class="core">Tell the backstory: what had happened before this moment.</div>
+<div class="flavor" data-thing="Tell where the thing had come from, how long it had been there, and who had touched it last."
+     data-way="Tell what they had already tried, or how long they had prepared this plan."
+     data-save="Tell how the danger had started — the moment no one was watching."
+     data-fall="Tell how long the scheme had gone on, and what he had already got away with."
+     data-stir="Tell how the troublemaker had got there in the first place."></div></div>
+
+<div class="beat"><div class="num">4</div><div class="name">PAY THE DEBT <span class="t">· passé composé + direct speech</span></div>
+<div class="core">Give exactly what the last line promised. This is the most important beat.</div>
+<div class="flavor" data-thing="Name the thing. Use a real noun and one exact number — 50 000 €, a letter from 1914, a two-metre boa."
+     data-way="Give the plan in two or three steps. Then show it in action — it works, or it almost works."
+     data-save="Show the rescue second by second: who moved first, and the exact move that worked."
+     data-fall="Show the moment he is caught: the mistake, someone recognizing him, the trap closing."
+     data-stir="Show the turning point: whatever finally ends the chaos — a capture, a confession, applause."></div></div>
+
+<div class="beat"><div class="num">5</div><div class="name">RIPPLE <span class="t">· passive</span></div>
+<div class="core">Show how others react: witnesses, family, police, the news.</div>
+<div class="flavor" data-thing="The police were called. An expert was brought in. The owner was looked for. The object was examined."
+     data-way="Witnesses were amazed. The idea was applauded, filmed, and copied by half the town."
+     data-save="Help arrived. The rescued person was taken to the hospital. The family was in tears."
+     data-fall="He was arrested and charged. An investigation was opened. The victims finally spoke."
+     data-stir="Order was restored. The damage was counted. The video went viral by evening."></div></div>
+
+<div class="beat"><div class="num">6</div><div class="name">SETTLE <span class="t">· conditionnel passé + subjonctif passé</span></div>
+<div class="core">End the story. Give the outcome, then add one last line: a quote, a lesson, or a small twist.</div>
+<div class="flavor" data-thing="Say where the thing is now. Add the hero's last line: « il aurait pu la jeter… »"
+     data-way="Say if the plan won or failed. Add the lesson: « il aurait mieux fait de… » / « sans son idée, il aurait raté… »"
+     data-save="Everyone is safe now. Add the praise: « sans lui, ça aurait pu tourner au drame. »"
+     data-fall="Give the punishment. Add the twist: « bien qu'il ait tout planifié… »"
+     data-stir="Life goes back to normal. Add the funny detail the town will tell for years."></div></div>
+</div>
+
+<p class="mini">The task sheet asks for 100–200 words (at least 80) in 3–4 paragraphs.
+Six beats at 20–30 words each gives 120–180 words. That fits with room to spare.
+Paragraphs: 1+2 | 3+4 | 5 | 6. You can also join the last two and make 3 paragraphs.
+If you run out of time, write beats 1+4+5+6 only. That is about 100 words and still a complete story.
+Never skip Beat 4. Skip at most one of Beats 2 and 3 — they carry the imparfait and the plus-que-parfait.
+Put a linking word where one beat ends and the next starts: <em>en réalité</em> before 3,
+<em>c'est alors que</em> before 4, <em>aussitôt / par la suite</em> before 5,
+<em>finalement / néanmoins</em> before 6.</p>
+
+<h2><span class="node-tag">Node 3</span>Clues in the opener</h2>
+<p>As you read the opener, some details tell you what to put in certain beats:</p>
+<div class="scroll"><table>
+<tr><th>Detail in the opener</th><th>Beat</th><th>What to do</th></tr>
+<tr><td>«Fortunately», «arrived in time»</td><td class="beats-ref">6</td><td>the ending must be happy: relief and praise</td></tr>
+<tr><td>«Unfortunately», «nothing went as planned»</td><td class="beats-ref">4 · 6</td><td>Beat 4 must end in failure · give the cost, plus «il aurait mieux fait de…»</td></tr>
+<tr><td>Named person + age — «Walid, aged 13»</td><td class="beats-ref">1 · 5</td><td>use the name and age again · let school, family, or boss react</td></tr>
+<tr><td>Dateline «(Auckland, New Zealand)» or media mentioned</td><td class="beats-ref">5 · 6</td><td>write like a news report; the story spreads · end with a quote to the press</td></tr>
+<tr><td>Police / firefighters already present</td><td class="beats-ref">5 · 6</td><td>use police words: investigation, charge · end with a charge, a release, or thanks</td></tr>
+<tr><td>Direct speech in the opener — « I know! »</td><td class="beats-ref">6</td><td>answer it with a quote of your own</td></tr>
+<tr><td>Numbers — 3 million, 24 000 letters, 210 km/h, 105 years</td><td class="beats-ref">4</td><td>repeat one number, then invent one more exact number of your own — these stories run on numbers</td></tr>
+<tr><td>Present-tense opener (ranks 28, 59)</td><td class="beats-ref">1–6</td><td>do not copy the present tense — keep your beats in past tenses</td></tr>
+<tr><td>Second character named — the daughter, the agent</td><td class="beats-ref">5 · 6</td><td>let that person react, or give them the final quote</td></tr>
+</table></div>
+
+<h2>If you get stuck</h2>
+<p>Sometimes no idea comes and you freeze. These three helpers work on every one of the 72 openers:</p>
+<div class="lever"><b>1 · The four answers: MONEY · ANIMAL · PAPER · A FACE FROM THE PAST.</b> Every debt in all 72 openers can be paid with one of these four.
+<div class="eg">Sofa → banknotes. Bottle in the Congo river → a letter. Visitor on the balcony → a peacock. Veterans' meeting → the friend they thought was dead. Coffee-machine box → a snake. Do not try to be original. Pick one of the four and make it exact.</div></div>
+<div class="lever"><b>2 · Add a witness.</b> If a paragraph stalls, add a person who saw it — a neighbor, a passer-by, a security guard. Let them do exactly one thing: gasp, film it, call someone, or say one line.
+<div class="eg">This fills Beat 5, and it gives you a free passive: «la scène a été filmée par un voisin.»</div></div>
+<div class="lever"><b>3 · Reuse the opener.</b> Every name, age, place, and number in the prompt gives you a free sentence. Repeat it, describe it more, or show its opposite.
+<div class="eg">«À 13 ans, Walid…» — the opener gives you a third of your material, and the examiner already approved it.</div></div>
+
+<h2>Worked examples</h2>
+
+<details><summary>Sofa treasure (rank 1) — THING</summary><div class="body"><ol>
+<li><b>PICK UP</b> He cut the lining open — and stopped cold.</li>
+<li><b>FREEZE</b> It was Sunday morning, in a quiet kitchen. The dog watched from the doorway.</li>
+<li><b>REWIND</b> He had bought the sofa the day before for 30 €. The old dealer had seemed strangely rushed.</li>
+<li><b>PAY THE DEBT</b> Inside were bundles wrapped in plastic: 50 000 € in old bills, and an envelope with a woman's name on it.</li>
+<li><b>RIPPLE</b> The police were called. The money was examined. The dealer was found. The story was printed in the local paper.</li>
+<li><b>SETTLE</b> The money went back to the dealer's mother. She had hidden it before a move. The retiree got a reward. He said he never would have guessed a sofa could hold so much.</li>
+</ol></div></details>
+
+<details><summary>Prison escape (rank 9) — WAY, with «unfortunately» in the opener</summary><div class="body"><ol>
+<li><b>PICK UP</b> At the end of visiting hours, one extra visitor walked toward the exit.</li>
+<li><b>FREEZE</b> The visiting room was crowded. The guards were half asleep. The cameras pointed the other way.</li>
+<li><b>REWIND</b> For weeks, his daughter had brought in a woman's outfit, piece by piece: a wig, a dress, glasses.</li>
+<li><b>PAY THE DEBT</b> The plan was simple: change clothes in the toilets and walk out dressed as her. It worked — until the gate.</li>
+<li><b>RIPPLE</b> He was recognized by the newest guard — the high heels gave away his walk. The alarm was raised. The daughter was questioned.</li>
+<li><b>SETTLE</b> He got three extra months, and visits are now behind glass. Bien qu'il ait tout préparé, il aurait mieux fait d'attendre sa libération — it was only six weeks away.</li>
+</ol></div></details>
+
+<details><summary>Hard cases — the strangest openers, in short form</summary><div class="body">
+<p><b>Posthumous gala, «Madam,» (rank 18) — THING:</b> the only opener written as a letter. The debt is the
+untold story behind the late honor. FREEZE the gala. REWIND what Phillips had done without any reward —
+this is perfect for the plus-que-parfait. PAY THE DEBT by naming the injustice. RIPPLE with the public's
+reaction. SETTLE with what the minister promised. Keep one letter phrase («Madame, vous devez savoir que…»)
+and write the six beats as usual.</p>
+<p><b>Police raid, a small voice: « I know! » (rank 64) — THING:</b> the hardest of the 72. The opener never
+says what the police were looking for. So build the case backward from the child's words. Think through
+REWIND in your head first, then write. The debt is what the child knew.</p>
+<p><b>Nap in the car, thief drives off (rank 59) — FALL:</b> watch the tenses. The opener slips into the
+present («he wakes up»). Keep your beats in past tenses. The debt is FALL, not THING, because FALL comes
+earlier in the check order.</p>
+<p><b>Navy rescue, «did not expect their reaction» (rank 45) — SAVE:</b> this opener has two debts — a rescue
+AND an unknown reaction. The check order says SAVE comes first. The reaction then becomes the surprise
+inside Beat 4.</p>
+<p><b>The two flight-diversion openers (ranks 22 vs 67):</b> almost the same story, but different debts.
+Rank 22 promises an «unusual event» to name, so it is THING. Rank 67 states the emergency directly, so it
+is SAVE. This shows the choice depends on the last line, not the topic. The six beats are the same either way.</p>
+</div></details>
+
+<h2>Family → debt</h2>
+<p class="mini">The 72 openers fall into 18 story families. All 72 are listed here.
+In 13 of the 18 families, every opener has the same debt. So you often know the debt before you
+finish reading. The Travel mishap family is mixed: read its last line, not its topic.</p>
+<div class="scroll"><table>
+<tr><th>Family</th><th>Openers</th><th>Debts (ranks)</th></tr>
+<tr><td>Surprising discovery</td><td class="n">9</td><td><span class="mv">THING</span> all — 1 19 33 44 54 61 63 65 66</td></tr>
+<tr><td>Rescue / hero</td><td class="n">7</td><td><span class="mv">SAVE</span> 2 20 34 45 55 62 · <span class="mv">THING</span> 64</td></tr>
+<tr><td>Crime uncovered</td><td class="n">6</td><td><span class="mv">FALL</span> all — 3 21 35 46 56 68</td></tr>
+<tr><td>Travel mishap</td><td class="n">6</td><td><span class="mv">THING</span> 22 47 · <span class="mv">STIR</span> 36 57 · <span class="mv">WAY</span> 4 · <span class="mv">SAVE</span> 67</td></tr>
+<tr><td>Animal antics</td><td class="n">5</td><td><span class="mv">STIR</span> 5 23 · <span class="mv">THING</span> 37 58 · <span class="mv">SAVE</span> 48</td></tr>
+<tr><td>Poetic justice</td><td class="n">5</td><td><span class="mv">FALL</span> 24 49 59 · <span class="mv">WAY</span> 6 · <span class="mv">THING</span> 38</td></tr>
+<tr><td>Quirky spectacle</td><td class="n">5</td><td><span class="mv">STIR</span> 7 25 39 50 · <span class="mv">THING</span> 60</td></tr>
+<tr><td>Ingenious solution</td><td class="n">4</td><td><span class="mv">WAY</span> all — 8 26 40 51</td></tr>
+<tr><td>Clever ruse</td><td class="n">4</td><td><span class="mv">WAY</span> 9 27 52 · <span class="mv">FALL</span> 41</td></tr>
+<tr><td>Reunion / encounter</td><td class="n">4</td><td><span class="mv">THING</span> all — 10 28 42 53</td></tr>
+<tr><td>Trapped / locked-in</td><td class="n">3</td><td><span class="mv">WAY</span> all — 11 29 72</td></tr>
+<tr><td>Feel-good generosity</td><td class="n">3</td><td><span class="mv">WAY</span> all — 12 30 70</td></tr>
+<tr><td>Prize / lottery twist</td><td class="n">3</td><td><span class="mv">THING</span> all — 13 43 69</td></tr>
+<tr><td>Found valuables</td><td class="n">2</td><td><span class="mv">THING</span> all — 14 31</td></tr>
+<tr><td>Mistaken identity</td><td class="n">2</td><td><span class="mv">STIR</span> all — 15 32</td></tr>
+<tr><td>Child calls police</td><td class="n">2</td><td><span class="mv">STIR</span> all — 16 71</td></tr>
+<tr><td>Human-interest secret</td><td class="n">1</td><td><span class="mv">THING</span> 17</td></tr>
+<tr><td>Posthumous recognition</td><td class="n">1</td><td><span class="mv">THING</span> 18</td></tr>
+</table></div>
+
+<h2>Coverage — all 72 openers</h2>
+<p class="mini">The numbers are the ranks from the smart-practice-order list. Every opener is counted,
+none skipped. 27 + 15 + 12 + 10 + 8 = 72.</p>
+<div class="scroll"><table>
+<tr><th>Debt</th><th>Count</th><th>Ranks</th></tr>
+<tr><td><span class="chip thing">THING</span></td><td>27</td><td>1 10 13 14 17 18 19 22 28 31 33 37 38 42 43 44 47 53 54 58 60 61 63 64 65 66 69</td></tr>
+<tr><td><span class="chip way">WAY</span></td><td>15</td><td>4 6 8 9 11 12 26 27 29 30 40 51 52 70 72</td></tr>
+<tr><td><span class="chip stir">STIR</span></td><td>12</td><td>5 7 15 16 23 25 32 36 39 50 57 71</td></tr>
+<tr><td><span class="chip fall">FALL</span></td><td>10</td><td>3 21 24 35 41 46 49 56 59 68</td></tr>
+<tr><td><span class="chip save">SAVE</span></td><td>8</td><td>2 20 34 45 48 55 62 67</td></tr>
+</table></div>
+
+<footer>This page covers content only. The tenses are what the task sheet grades. Each beat has one
+main form (PC · imparfait · PQP · PC + direct speech · passive · conditionnel passé + subjonctif passé).
+Add one linking word between beats. Together, that meets the "variety of tenses and forms" rule on its own.
+Source: the 72 written Section A openers from the smart-practice-order list, written out in English.
+Partner pages: The Ten Slots (oral A) · The Ten Moves (oral B).</footer>
+</main></section>
+<section class="tab-page" id="pg-eb"><main>
+<span class="kicker">TEF · Expression écrite · Section B</span>
+<h1>The Ten Lenses</h1>
+<p class="sub">You get one claim. First, name its shape — one of 5. Then write the same six-beat
+letter every time, about 200 words. Your three arguments come from a fixed list of ten lenses.
+This system was built from all 73 Section B claims, each counted equally. It is the partner of
+<b>The Ten Slots</b> and <b>The Ten Moves</b> — those pages are for speaking. This page plays the
+same game on paper.</p>
+
+<div class="thesis">
+<span class="kicker">The big idea — read this first</span>
+<p><b>You do not need an opinion.</b> You never write what you really believe. Almost every claim
+in the pool says too much on purpose. Look for extreme words: "destroying", "no more", "only",
+"all", "banned", "impossible".</p>
+<p>Your letter does one simple job. Find the small part of the claim that is true. Agree with it.
+Then reject the extreme part. Do not ask "what do I think about zoos?" Ask <b>"where does this
+claim say too much?"</b> On 69 of the 73 claims, your position is the same: <b>OUI, MAIS</b>.
+Yes to the true part. No to the extreme part.</p>
+<p>The extreme words help you. Each one shows you the exact word your letter will attack.
+And agreeing with the true part ("certes…") gives you your first argument for free.</p>
+</div>
+
+<div class="pocket">
+<span class="kicker">Pocket card — the whole system</span>
+<p><b>Prep (60 s):</b> CIRCLE the extreme word → CALL the shape (FORCE · DOOM · VERDICT · BAN · CREED) → MINE the lenses: go down the list 1–10 and keep 3.</p>
+<p><b>Letter (6 beats, about 200 words):</b> FRAME 25 → STAND 15 → YES-BUT 45 → STRIKE 45 → BUILD 45 → SEAL 25.</p>
+<p><b>Every argument:</b> CLAIM · BECAUSE · SHOW — three sentences, about 45 words.</p>
+<p><b>Stuck?</b> Write one true sentence for the claim first · make up one plain study · zoom in to one person, or out to all of society.</p>
+</div>
+
+<h2><span class="node-tag">Node 0</span>Prep — 60 seconds before you write a word</h2>
+<ol class="beats">
+<li><div class="b-name">CIRCLE</div><div class="b-what">Circle the extreme word — «plus personne», «tous», «interdire», «inutile». That word runs your whole letter. Quote it in your STAND sentence. Aim your YES-BUT at it.</div></li>
+<li><div class="b-name">CALL</div><div class="b-what">Name the shape of the claim — one of the 5 below. Each shape comes with a ready-made sentence that states your position. If the claim has two parts (a problem plus a fix), use the shape of the fix. Read "eliminate X" or "only X" as a BAN.</div></li>
+<li><div class="b-name">MINE</div><div class="b-what">Go through the ten lenses in order, 1 to 10. Keep the first 3 that give you an idea, and note one more as a spare. Most claims give you 5 or 6 ideas. You only need 3.</div></li>
+</ol>
+
+<h2><span class="node-tag">Skeleton</span>The letter — 6 beats, about 200 words</h2>
+<ol class="beats">
+<li><div class="b-name">FRAME <span class="t">· ~25 w</span></div><div class="b-what">Greet the reader. Say where you read the claim. Then restate the claim. (The task says you must state the claim you are answering.)</div></li>
+<li><div class="b-name">STAND <span class="t">· ~15 w</span></div><div class="b-what">Your position in one sentence. Use the shape's ready-made sentence. Aim it at the word you circled.</div></li>
+<li><div class="b-name">YES-BUT <span class="t">· ~45 w</span></div><div class="b-what">Argument 1. One honest sentence <em>for</em> the claim (certes…). Then the turn (mais…). This costs you nothing, and it makes you sound fair.</div></li>
+<li><div class="b-name">STRIKE <span class="t">· ~45 w</span></div><div class="b-what">Argument 2. Use your strongest lens.</div></li>
+<li><div class="b-name">BUILD <span class="t">· ~45 w</span></div><div class="b-what">Argument 3. Use your second lens — or use BETTER TOOL, so you end by proposing a fix.</div></li>
+<li><div class="b-name">SEAL <span class="t">· ~25 w</span></div><div class="b-what">Conclusion. Restate your "yes, but" position. Then a formal sign-off.</div></li>
+</ol>
+<p class="mini">Word math: 25 + 15 + 45 + 45 + 45 + 25 = 200. This page counts words, not minutes.
+Whatever your time limit, split it about 20% prep, 70% writing, 10% rereading. In a 30-minute
+window, that is 6 / 21 / 3.</p>
+
+<h2><span class="node-tag">Node 1</span>The shape call — what does the claim DO?</h2>
+<p>Ask one question about the claim: what does it do? The answer is one of five shapes. Each shape comes with a ready-made sentence that states your position. You never have to invent a position.</p>
+
+<div>
+<div class="shape-row"><span class="chip force">FORCE</span><span class="def">Forces a rule on everyone, or gives everyone a right — <i>"Encourage, don't impose."</i></span><span class="n">18 of 73 · 25%</span></div>
+<div class="shape-row"><span class="chip doom">DOOM</span><span class="def">Says something is dying or getting worse — <i>"A change, not a death."</i></span><span class="n">16 of 73 · 22%</span></div>
+<div class="shape-row"><span class="chip verdict">VERDICT</span><span class="def">Judges something as good, bad, or useless — <i>"The judgment is too broad: which X, for whom?"</i></span><span class="n">16 of 73 · 22%</span></div>
+<div class="shape-row"><span class="chip ban">BAN</span><span class="def">Wants to forbid, end, or limit something — <i>"The goal, yes — the ban, no."</i></span><span class="n">14 of 73 · 19%</span></div>
+<div class="shape-row"><span class="chip creed">CREED</span><span class="def">States a rule for how to live — <i>"A path, not a law."</i></span><span class="n">9 of 73 · 12%</span></div>
+</div>
+
+<p style="margin-top:1rem">Tap a shape button. Its plan appears under the buttons, and the best lenses for that shape light up in the lens list below.</p>
+
+<div class="picker" role="group" aria-label="Choose claim shape">
+<button class="force" data-shape="force" aria-pressed="true">FORCE</button>
+<button class="doom" data-shape="doom" aria-pressed="false">DOOM</button>
+<button class="verdict" data-shape="verdict" aria-pressed="false">VERDICT</button>
+<button class="ban" data-shape="ban" aria-pressed="false">BAN</button>
+<button class="creed" data-shape="creed" aria-pressed="false">CREED</button>
+</div>
+
+<div class="playbook" id="eb-playbook" aria-live="polite"></div>
+
+<h2><span class="node-tag">Node 2</span>Mine — the ten lenses, in a fixed order</h2>
+<p>A lens is one angle to look at the claim from. Look through it and an argument appears. Pick 3 lenses and build one argument from each. Always go down the list in the same order, 1 to 10.</p>
+<div class="arsenal" id="eb-arsenal">
+<div class="move" data-move="freedom"><div class="m-head"><span class="m-num">1</span><span class="m-name">FREEDOM</span></div>
+<div class="m-def">Who decides? Free choice versus being forced. The rights of the people the claim targets.</div><div class="m-eg">"A rule for everyone treats every adult like a child who cannot choose."</div></div>
+<div class="move" data-move="fairness"><div class="m-head"><span class="m-num">2</span><span class="m-name">FAIRNESS</span></div>
+<div class="m-def">The claim hits groups unequally: rich and poor, young and old, city and country.</div><div class="m-eg">"Why pick on this group? Who cannot follow the rule?"</div></div>
+<div class="move" data-move="health"><div class="m-head"><span class="m-num">3</span><span class="m-name">HEALTH</span></div>
+<div class="m-def">Body and mind: stress, addiction, well-being, pressure.</div><div class="m-eg">"What does it do to sleep, stress, and self-esteem?"</div></div>
+<div class="move" data-move="bond"><div class="m-head"><span class="m-num">4</span><span class="m-name">BOND</span></div>
+<div class="m-def">Does it connect people, or does it leave them alone?</div><div class="m-eg">"Family meals, teams, neighbours — does the link grow or break?"</div></div>
+<div class="move" data-move="money"><div class="m-head"><span class="m-num">5</span><span class="m-name">MONEY</span></div>
+<div class="m-def">Cost, jobs, who pays, and what it does to the economy.</div><div class="m-eg">"A nice idea — but who pays, and what jobs depend on it?"</div></div>
+<div class="move" data-move="planet"><div class="m-head"><span class="m-num">6</span><span class="m-name">PLANET</span></div>
+<div class="m-def">Good or bad for the environment. This works far beyond the ecology claims.</div><div class="m-eg">"Telework, food, clothes — the environment angle is almost always there."</div></div>
+<div class="move" data-move="backfire"><div class="m-head"><span class="m-num">7</span><span class="m-name">BACKFIRE</span></div>
+<div class="m-def">Would the plan even work? Side effects, ways around it, or the opposite result.</div><div class="m-eg">"A ban does not end the habit. It hides it."</div></div>
+<div class="move" data-move="elsewhere"><div class="m-head"><span class="m-num">8</span><span class="m-name">ELSEWHERE</span></div>
+<div class="m-def">Another country, or another time. What happened before? Which predictions failed?</div><div class="m-eg">"TV was supposed to kill cinema. It did not."</div></div>
+<div class="move" data-move="better"><div class="m-head"><span class="m-num">9</span><span class="m-name">BETTER TOOL</span></div>
+<div class="m-def">Propose a better fix: teach, tax, adjust, or run a small test program.</div><div class="m-eg">"A precise fix instead of a total one."</div></div>
+<div class="move" data-move="oneface"><div class="m-head"><span class="m-num">10</span><span class="m-name">ONE FACE</span></div>
+<div class="m-def">One real example: my cousin, my office, my street.</div><div class="m-eg">"My niece reads on her phone AND collects paperbacks."</div></div>
+</div>
+<p class="mini">Note: OUI, MAIS works on 69 of the 73 claims. Ranks 1, 61, 63 are different — they are
+nice and vague, so there is nothing to reject. For those, switch to <b>OUI, ET</b>: give three reasons
+or three concrete steps, built from the same lenses. Rank 65 is the only claim that is already
+balanced: agree with it and say where the line is.
+French connectors: YES-BUT uses <b>certes… mais</b>; STRIKE uses <b>en revanche / par ailleurs</b>;
+BUILD uses <b>c'est pourquoi</b>; SEAL uses <b>en somme</b>.</p>
+
+<h2><span class="node-tag">Node 3</span>Feature scan</h2>
+<p>As you read the claim, watch for these features. Each one gives you extra material:</p>
+<div class="scroll"><table>
+<tr><th>Feature in the claim</th><th>Helps</th><th>How</th></tr>
+<tr><td>Extreme word — «all», «only», «no more», «never», «impossible»</td><td class="slots">STAND · YES-BUT</td><td>quote the word; aim your YES-BUT at it</td></tr>
+<tr><td>Two-part claim (a problem plus a fix) — ranks 2, 24, 38, 54, 62</td><td class="slots">YES-BUT</td><td>agree the problem is real (a free certes); argue against the fix</td></tr>
+<tr><td>Dated prediction — «in 20 / 50 years», «soon»</td><td class="slots">ELSEWHERE</td><td>point to past predictions that failed; a trend is not a sure future</td></tr>
+<tr><td>Names a target group — minors, the elderly, teenagers, people over 50</td><td class="slots">FAIRNESS · ONE FACE</td><td>ask why this group is singled out; give one real person from that group</td></tr>
+<tr><td>Question-form claim — «A solution for the rich?»</td><td class="slots">STAND</td><td>answer the question first, then treat the claim as a VERDICT</td></tr>
+<tr><td>Nice and vague — improve / promote / help (ranks 1, 61, 63)</td><td class="slots">LANE</td><td>switch to OUI, ET: give three reasons or three steps</td></tr>
+<tr><td>Harsh word — «irresponsible», «failed», «useless», «waste»</td><td class="slots">VERDICT</td><td>the harsh word helps you; defend the thing being judged</td></tr>
+<tr><td>Already balanced — «sometimes», «it depends» (rank 65 only)</td><td class="slots">LANE</td><td>nothing to argue against; agree and say where the line is</td></tr>
+</table></div>
+
+<h2>When you get stuck</h2>
+<p>Sometimes the page stays blank. These three tricks work on every one of the 73 claims:</p>
+<div class="lever"><b>1 · Start with the other side.</b> Can't find your position? Write the "certes" sentence first — one honest sentence FOR the claim.
+<div class="eg">The "mais" will come to you while you write it. "Certes, les écrans fatiguent les yeux… mais" — and your letter has already started.</div></div>
+<div class="lever"><b>2 · Make up one plain study.</b> The exam grades your French, not your facts. Use at most one invented study per letter, and keep it dull.
+<div class="eg">"Une étude récente estime que…" + a dull, believable number — or "En Suède, un programme similaire…"</div></div>
+<div class="lever"><b>3 · Zoom in or out.</b> Stuck talking about all of society? Zoom in to one person (ONE FACE). Stuck on one small story? Zoom out to a whole country.
+<div class="eg">Every claim works at both levels: my street, and then the whole of France.</div></div>
+
+<h2>Worked examples</h2>
+
+<details><summary>Grades should be abolished (rank 2) — BAN, two-part</summary><div class="body">
+<p class="fv">"The school system is too competitive; grades should be abolished."</p>
+<p><b class="mv">PREP</b> Circle «abolished». This is a two-part claim: agree the problem is real, then argue against the fix.</p>
+<p><b class="mv">STAND</b> The problem is real, but the fix is wrong. Change how we grade — do not abolish grades.</p>
+<p><b class="mv">YES-BUT</b> Certes, the pressure of ranking is real — stress, tears over small decimals. Mais removing grades destroys information that students and parents need.</p>
+<p><b class="mv">STRIKE · BACKFIRE</b> Without grades, selection does not go away. It moves to hidden criteria — recommendation letters, interviews — and those favor students with connections.</p>
+<p><b class="mv">BUILD · BETTER TOOL</b> Grade in a better way: marks that track progress, comments next to the numbers, no public rankings. A nearby school tried this: stress went down and results held (a plain invented study).</p>
+<p><b class="mv">SEAL</b> Keep grades as a guide. Drop the public ranking.</p>
+</div></details>
+
+<details><summary>No more books in 20 years (rank 4) — DOOM, dated prediction</summary><div class="body">
+<p class="fv">"In 20 years, there will be no more books."</p>
+<p><b class="mv">PREP</b> Circle «no more». This is a dated prediction, so the ELSEWHERE lens is ready to use.</p>
+<p><b class="mv">STAND</b> Reading is changing. Books are not dying.</p>
+<p><b class="mv">YES-BUT</b> Certes, screens take up reading time, and e-book sales are rising. Mais when a format shrinks, the thing itself does not die.</p>
+<p><b class="mv">STRIKE · ELSEWHERE</b> People have predicted this before. Cinema was supposed to kill theatre. TV was supposed to kill cinema. Radio was supposed to kill newspapers. In each case, both still exist.</p>
+<p><b class="mv">BUILD · BOND + ONE FACE</b> Paper books do things a file cannot. You can give one as a gift, put it on a shelf, pass it down. My niece reads on her phone AND collects paperbacks.</p>
+<p><b class="mv">SEAL</b> In 20 years there may be fewer books. But not zero.</p>
+</div></details>
+
+<details><summary>The oddest claims — still covered</summary><div class="body">
+<p><b>Acceptable lies (rank 65) — VERDICT, already balanced:</b> the only claim with "sometimes /
+it depends" built in. It does not exaggerate, so OUI, MAIS has nothing to push against. Switch
+lanes: agree, and use your three arguments to say where the line is — BOND (small white lies
+protect feelings) · BACKFIRE (lying as a habit destroys trust) · ONE FACE. The lenses still work.
+Only your position changes.</p>
+<p><b>Life is short (rank 66) — CREED, about life itself:</b> no law, no target group — fewer
+lenses work here than on any other claim. But enough still do: CERTES (we cannot do everything) ·
+HEALTH (chasing every dream leads to burnout; choosing gives life meaning) · ONE FACE (the
+grandfather who chased one dream and did it well).</p>
+<p><b>Telework for the rich? (rank 21) — VERDICT in question form:</b> the claim already uses
+FAIRNESS, so your best lens is taken. In STAND, answer the question: "partly true — so open
+telework to more people instead of rejecting it." Then use the other nine lenses: HEALTH (less
+commuting, more family time) · BETTER TOOL (help pay for equipment, shared work spaces, a right
+to ask for telework).</p>
+<p><b>Also covered:</b> rank 7 (the one claim that pushes the other way — FAIRNESS still works,
+just in reverse: an age wall is an age wall) · rank 37 (the wording is messy; read "eliminate X"
+as a BAN on X and the usual three lenses work) · rank 73 (the same words as rank 16 — same letter,
+one free practice rep).</p>
+</div></details>
+
+<h2>Coverage — all 73, accounted for</h2>
+<p class="mini">The numbers are the practice-order ranks. Every claim is counted. None is skipped.
+The shape counts add up: 18+16+16+14+9 = 73. The family counts add up: 11+11+9+7+7+6+5+5+4+4+4 = 73.</p>
+<div class="scroll"><table>
+<tr><th>Shape</th><th>Count</th><th>Ranks</th></tr>
+<tr><td><span class="chip force">FORCE</span></td><td>18</td><td>1 19 20 23 24 26 29 30 32 35 39 41 42 46 59 60 61 63</td></tr>
+<tr><td><span class="chip doom">DOOM</span></td><td>16</td><td>3 4 5 6 14 15 22 25 33 34 36 43 44 56 71 72</td></tr>
+<tr><td><span class="chip verdict">VERDICT</span></td><td>16</td><td>7 9 11 12 13 21 31 47 51 53 55 57 64 65 69 70</td></tr>
+<tr><td><span class="chip ban">BAN</span></td><td>14</td><td>2 8 27 37 38 45 48 49 50 52 54 58 67 68</td></tr>
+<tr><td><span class="chip creed">CREED</span></td><td>9</td><td>10 16 17 18 28 40 62 66 73</td></tr>
+</table></div>
+
+<h3 style="margin-top:1.6rem; font-family:'Bricolage Grotesque',sans-serif;">The 11 topic families — a second way to sort the same 73</h3>
+<div class="scroll"><table>
+<tr><th>Family</th><th>Count</th><th>Ranks</th><th>What usually works</th></tr>
+<tr><td>Ecology &amp; pollution</td><td class="n">11</td><td>1 12 23 34 45 50 54 57 60 62 68</td><td>many BAN claims; PLANET gives you the certes; BACKFIRE and BETTER TOOL do most of the work</td></tr>
+<tr><td>Education &amp; school</td><td class="n">11</td><td>2 13 24 35 46 51 55 58 61 63 64</td><td>FORCE and BAN claims about school rules; ONE FACE always works</td></tr>
+<tr><td>Technology &amp; social media</td><td class="n">9</td><td>3 14 25 36 47 52 56 59 69</td><td>DOOM and BAN claims; BOND works for both sides; ELSEWHERE (past panics about new media)</td></tr>
+<tr><td>Books, reading &amp; writing</td><td class="n">7</td><td>4 15 26 37 70 71 72</td><td>DOOM claims about the death of print; use ELSEWHERE and show old and new living together</td></tr>
+<tr><td>Health, food &amp; diet</td><td class="n">7</td><td>5 16 27 38 48 53 73</td><td>BAN against FREEDOM; HEALTH can argue both sides</td></tr>
+<tr><td>Society, values &amp; relationships</td><td class="n">6</td><td>6 17 28 39 65 66</td><td>CREED and VERDICT claims; holds the two unusual ethics claims (ranks 65 and 66)</td></tr>
+<tr><td>Aging &amp; generations</td><td class="n">5</td><td>7 18 29 40 49</td><td>FAIRNESS — age limits, in both directions</td></tr>
+<tr><td>Freedom, rules &amp; rights</td><td class="n">5</td><td>8 19 30 41 67</td><td>FREEDOM's home ground: safety versus liberty</td></tr>
+<tr><td>Arts &amp; culture</td><td class="n">4</td><td>9 20 31 42</td><td>VERDICT claims; defend the arts with MONEY, HEALTH, and BOND</td></tr>
+<tr><td>Work &amp; telework</td><td class="n">4</td><td>10 21 32 43</td><td>FORCE and VERDICT claims; HEALTH (stress, work-life balance)</td></tr>
+<tr><td>Fame, money &amp; media</td><td class="n">4</td><td>11 22 33 44</td><td>DOOM and VERDICT claims about merit and show business; ELSEWHERE</td></tr>
+</table></div>
+
+<footer>This page covers content only. Write the beats with the B2+ connectors (certes… mais,
+en revanche, par ailleurs, c'est pourquoi, en somme) and the formal letter phrases the task grades
+(Madame, Monsieur — veuillez agréer…). Source: the 73 Section B claims from the écrite
+practice-order list, in English. Partner pages: The Ten Slots (oral A) · The Ten Moves (oral B).</footer>
+</main></section>
+<script>
+(function(){
+  var btns = document.querySelectorAll('.tabbar button');
+  function setTab(k){
+    btns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.tab===k)); });
+    ['oa','ob','ea','eb'].forEach(function(p){
+      document.getElementById('pg-'+p).classList.toggle('active', p===k);
+    });
+    try{ localStorage.setItem('treesTab', k); }catch(e){}
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){ setTab(b.dataset.tab); }); });
+  var initial = 'oa';
+  try{ var s = localStorage.getItem('treesTab'); if(s && document.getElementById('pg-'+s)) initial = s; }catch(e){}
+  setTab(initial);
+})();
+</script>
+<script>
+
+(function(){
+  var SECT=document.getElementById('pg-oa');
+  var buttons = SECT.querySelectorAll('.picker button');
+  var flavors = SECT.querySelectorAll('.flavor');
+  var LABELS = {go:'GO', come:'COME', take:'TAKE', far:'FAR', flip:'FLIP'};
+  function setShape(s){
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.shape===s)); });
+    flavors.forEach(function(f){
+      f.className = 'flavor ' + s;
+      f.innerHTML = '<b>' + LABELS[s] + '</b>' + f.dataset[s];
+    });
+    try{ localStorage.setItem('tenSlotsShape', s); }catch(e){}
+  }
+  buttons.forEach(function(b){ b.addEventListener('click', function(){ setShape(b.dataset.shape); }); });
+  var initial = 'go';
+  try{ var saved = localStorage.getItem('tenSlotsShape'); if(saved && LABELS[saved]) initial = saved; }catch(e){}
+  setShape(initial);
+})();
+
+
+(function(){
+  var SECT=document.getElementById('pg-ob');
+  var DATA = {
+    time:{voice:'"I\'m so busy. I don\'t have time for that."', fire:[
+      ['SHRINK','"It\'s two hours, once a month. You spend more than that on your phone."'],
+      ['AD SAYS','"Look at the ad: \'flexible hours, based on your availability.\' It\'s made for busy people."'],
+      ['GIVE & TAKE','"True, you\'re busy. That\'s why this one fits: nothing to prepare, you just show up and leave when you need to."']],
+      hot:['shrink','adsays','givetake']},
+    money:{voice:'"That must cost a lot." / "Wait — they don\'t pay you?"', fire:[
+      ['VERSUS','"It costs less than one dinner out, and it lasts a whole weekend."'],
+      ['AD SAYS','"There\'s a discount, and signing up is free. It\'s written right here in the ad."'],
+      ['SHRINK','"If we split it between us, it costs about as much as a coffee."']],
+      hot:['versus','adsays','shrink']},
+    ability:{voice:'"I\'ve never done that. I\'d be bad at it. I\'m too old."', fire:[
+      ['AD SAYS','"The ad says \'beginners accepted, training provided.\' They expect people just like us."'],
+      ['FLIP','"You don\'t know how? That\'s exactly what the lessons are for. Beginner classes are made for people who can\'t do it yet."'],
+      ['TOGETHER','"I don\'t know how either. We\'ll learn it together, step by step."']],
+      hot:['adsays','flip','together']},
+    fear:{voice:'"That\'s dangerous." / "In front of people? No way." / "With strangers?"', fire:[
+      ['PROOF','"Trained professionals run it. Keeping people safe is their job."'],
+      ['EXIT DOOR','"You can start small: a guided first time, or a free first session. And you can stop at any time."'],
+      ['TOGETHER','"I\'ll go first. You watch me do it, then you decide."']],
+      hot:['proof','exit','together']},
+    trust:{voice:'"It sounds like a scam." / "Online? I don\'t trust that." / "How do I know it\'s any good?"', fire:[
+      ['PROOF','"It has two thousand members, studies behind it, and certified staff. This is a real organization."'],
+      ['EXIT DOOR','"There\'s a free trial, and you can get your money back within 48 hours. You risk nothing by trying."'],
+      ['AD SAYS','"The ad says signing up is free and your data stays private. Read it with me."']],
+      hot:['proof','exit','adsays']},
+    effort:{voice:'"That sounds tiring." / "It\'s so far away." / "A tent, really?"', fire:[
+      ['PAINT','"Yes, we\'d be biking — but through the prettiest villages in the region, with a picnic at noon."'],
+      ['SHRINK','"It\'s twenty minutes from home, and they plan everything for us."'],
+      ['GIVE & TAKE','"True, it\'s tiring. But it\'s the good kind of tired, and you\'ll sleep better than you have in weeks."']],
+      hot:['paint','shrink','givetake']},
+    want:{voice:'"It\'s not my thing." / "It sounds boring." / "Eating insects? Gross."', fire:[
+      ['YOUR WORDS','"You told me you were bored every weekend. This would change that."'],
+      ['PAINT','"Give me thirty seconds. Imagine us there…"'],
+      ['FLIP','"You said \'not my thing\' about sushi too. Now you love it."']],
+      hot:['yourwords','paint','flip']},
+    bond:{voice:'"Ten months?!" / "A membership for a whole year?" / "What if I want to stop?"', fire:[
+      ['EXIT DOOR','"You can quit at any time. Nothing in the ad ties you down."'],
+      ['SHRINK','"It\'s seven rehearsals in total. That\'s all."'],
+      ['GIVE & TAKE','"True, a year sounds long. But it\'s one evening a month — twelve evenings, and you get a whole new group of friends."']],
+      hot:['exit','shrink','givetake']}
+  };
+  var buttons = SECT.querySelectorAll('.picker button');
+  var playbook = document.getElementById('ob-playbook');
+  var moves = SECT.querySelectorAll('#ob-arsenal .move');
+  function setObj(k){
+    var d = DATA[k]; if(!d) return;
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.obj===k)); });
+    var html = '<p class="voice">Friend: ' + d.voice + '</p><div class="fire">';
+    d.fire.forEach(function(f){ html += '<div><b>' + f[0] + '</b>' + f[1] + '</div>'; });
+    html += '</div>';
+    playbook.innerHTML = html;
+    moves.forEach(function(m){ m.classList.toggle('hot', d.hot.indexOf(m.dataset.move) !== -1); });
+    try{ localStorage.setItem('tenMovesObj', k); }catch(e){}
+  }
+  buttons.forEach(function(b){ b.addEventListener('click', function(){ setObj(b.dataset.obj); }); });
+  var initial = 'time';
+  try{ var saved = localStorage.getItem('tenMovesObj'); if(saved && DATA[saved]) initial = saved; }catch(e){}
+  setObj(initial);
+})();
+
+
+(function(){
+  var SECT=document.getElementById('pg-ea');
+  var buttons = SECT.querySelectorAll('.picker button');
+  var flavors = SECT.querySelectorAll('.flavor');
+  var LABELS = {thing:'THING', way:'WAY', save:'SAVE', fall:'FALL', stir:'STIR'};
+  function setDebt(d){
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.debt===d)); });
+    flavors.forEach(function(f){
+      f.className = 'flavor ' + d;
+      f.innerHTML = '<b>' + LABELS[d] + '</b>' + f.dataset[d];
+    });
+    try{ localStorage.setItem('sixBeatsDebt', d); }catch(e){}
+  }
+  buttons.forEach(function(b){ b.addEventListener('click', function(){ setDebt(b.dataset.debt); }); });
+  var initial = 'thing';
+  try{ var saved = localStorage.getItem('sixBeatsDebt'); if(saved && LABELS[saved]) initial = saved; }catch(e){}
+  setDebt(initial);
+})();
+
+
+(function(){
+  var SECT=document.getElementById('pg-eb');
+  var DATA = {
+    force:{voice:'"All X must… / X should be required for everyone / X should be allowed for everyone."',
+      stance:'Encourage, don\'t impose. Good for many people, wrong as a rule for everyone.', fire:[
+      ['FREEDOM','A rule for everyone ignores each person\'s situation. One size does not fit all.'],
+      ['FAIRNESS','Who cannot follow the rule? There is always a group for whom it is a burden, not a help.'],
+      ['BETTER TOOL','Keep the goal, but use a softer tool: rewards, options, or a small test program instead of an order.']],
+      hot:['freedom','fairness','better']},
+    doom:{voice:'"X is disappearing / X is destroying Y / in 20 years, no more X."',
+      stance:'A change, not a death. The trend is real, but new forms add to the old ones. They do not replace them.', fire:[
+      ['ELSEWHERE','People have predicted this death before. TV was supposed to kill cinema. It did not.'],
+      ['ONE FACE','Show one person who does both — my niece reads on her phone AND collects paperbacks.'],
+      ['BOND','Say what only the old thing gives people — a gift, a habit, a shelf at home. That is why it survives.']],
+      hot:['elsewhere','oneface','bond']},
+    verdict:{voice:'"X is useless / a luxury / irresponsible / better than Y."',
+      stance:'The judgment is too broad. Split it first: which X, for whom, for what?', fire:[
+      ['HEALTH','What does this thing do for body and mind? Art can calm people. Work can cause stress.'],
+      ['BOND','What does it do between people? Shared culture, shared meals, teams. Judgments forget how things connect us.'],
+      ['MONEY','What money does it bring in? Think of the jobs, businesses, and savings the judgment ignored.']],
+      hot:['health','bond','money']},
+    ban:{voice:'"X should be banned / abolished / limited to one hour."',
+      stance:'The goal, yes — the ban, no. A ban is too blunt. Offer a finer tool.', fire:[
+      ['FREEDOM','A total ban treats every adult like a child who cannot choose. Who decides for whom?'],
+      ['BACKFIRE','A ban rarely ends the habit. It hides it. The harm carries on in secret, where no one can measure it.'],
+      ['BETTER TOOL','Teach, tax, adjust, or run a small test program. Offer a precise fix, not a total one.']],
+      hot:['freedom','backfire','better']},
+    creed:{voice:'"To be happy you must X / X is the best age / if you have not done X by 40, you have failed."',
+      stance:'A path, not a law. It works for some people. There is more than one way to live.', fire:[
+      ['ONE FACE','One happy person who breaks the rule proves it wrong — the aunt who did it her own way.'],
+      ['FAIRNESS','This rule for life assumes money, health, and the right place to live. A rule only lucky people can follow is not a rule.'],
+      ['HEALTH','A single recipe for happiness creates pressure. Being told how to be happy makes people anxious.']],
+      hot:['oneface','fairness','health']}
+  };
+  var buttons = SECT.querySelectorAll('.picker button');
+  var playbook = document.getElementById('eb-playbook');
+  var moves = SECT.querySelectorAll('#eb-arsenal .move');
+  function setShape(k){
+    var d = DATA[k]; if(!d) return;
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.shape===k)); });
+    var html = '<p class="voice">The claim sounds like: ' + d.voice + '</p>' +
+      '<p class="stance"><b>Your position:</b> ' + d.stance + '</p><div class="fire">';
+    d.fire.forEach(function(f){ html += '<div><b>' + f[0] + '</b>' + f[1] + '</div>'; });
+    html += '</div>';
+    playbook.innerHTML = html;
+    moves.forEach(function(m){ m.classList.toggle('hot', d.hot.indexOf(m.dataset.move) !== -1); });
+    try{ localStorage.setItem('tenLensesShape', k); }catch(e){}
+  }
+  buttons.forEach(function(b){ b.addEventListener('click', function(){ setShape(b.dataset.shape); }); });
+  var initial = 'force';
+  try{ var saved = localStorage.getItem('tenLensesShape'); if(saved && DATA[saved]) initial = saved; }catch(e){}
+  setShape(initial);
+})();
+
+</script>
+</body>
+</html>
