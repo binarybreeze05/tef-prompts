@@ -284,57 +284,72 @@ var TEF_CLUSTERS = {
 
 /* Study-plan orderings — the 7-day interleaves and the tree-derived clusters
    from nativized/study_or/study_plan.html and study_plan_ecrite.html
-   (extracted 2026-09-01, within-cluster threads computed 2026-09-01).
+   (regenerated 2026-09-02 from study_plan_data.json; within-cluster threads
+   audited pair by pair on 2026-09-02).
    Ids are the same practice-order badge numbers each page prints.
    SP1 = the plan's day-by-day interleave (oral re-runs are ads already
-   carded before the plan started). SP2 = the plan's cluster partition;
-   within every cluster the members are THREADED by response similarity —
-   Section A by the deviation questions the caller must ask, Section B by
-   the objections the friend will raise, écrite A by the continuation's
-   story beats, écrite B by the argument bank — so adjacent items drill
-   near-identically. SP2 is the view every list opens on. */
+   carded before the plan started). SP2 = the plan's cluster partition,
+   taken verbatim from the decision trees — Section A by tree_A NODE-1 shape,
+   Section B by tree_B's « Family → expected objections » table (all 20
+   families), écrite A by tree_ecrite_A's five Debts, écrite B by
+   tree_ecrite_B's five claim shapes. Within every cluster the members are
+   THREADED by response similarity — Section A by the deviation questions the
+   caller must ask, Section B by the objections the friend will raise, écrite
+   A by the continuation's story beats, écrite B by the argument bank — so
+   adjacent items drill near-identically. SP2 is the view every list opens on. */
 (function(){
   TEF_CLUSTERS.A.methods.unshift(
-    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes / families touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
       clusters:[
-      ["Day 1",[6,11,19,20,22,23,26,4,25,17,15,44],"12 new — the grind starts"],
-      ["Day 2",[27,28,29,35,37,39,41,30,38,34,32],"11 new"],
-      ["Day 3",[42,45,46,47,49,50,55,75,68,33,72],"11 new"],
-      ["Day 4",[51,52,54,57,58,59,60,9,76,73,56],"10 new · 1 re-run"],
-      ["Day 5",[61,62,63,64,65,66,67,13,16,77,12],"8 new · 3 re-runs"],
-      ["Day 6",[1,2,3,7,69,74,78,18,5,71,14],"4 new · 7 re-runs — taper"],
-      ["Day 7",[8,24,36,40,53,70,43,48,21,10,31],"11 re-runs — last day, all review"]
+      ["Day 1",[22,29,42,45,78,11,74,30,75,68,71,44],"12 new — the grind starts"],
+      ["Day 2",[52,35,57,65,63,60,69,76,4,77,32],"11 new"],
+      ["Day 3",[67,58,50,27,54,62,38,25,73,33,72],"11 new"],
+      ["Day 4",[59,19,64,39,23,61,66,9,55,34,15],"10 new · 1 re-run"],
+      ["Day 5",[49,26,6,37,47,28,51,43,13,17,12],"8 new · 3 re-runs"],
+      ["Day 6",[1,70,7,40,20,41,46,16,5,56,31],"4 new · 7 re-runs — taper"],
+      ["Day 7",[53,2,3,24,8,36,18,48,21,10,14],"11 re-runs — last day, all review"]
     ]},
     { id:"SP2", name:"Study plan · shape clusters", desc:"The 5 clusters the study plan drills from (tree_A NODE-1 shapes, one flavor column each). Within a cluster the ads are threaded by the questions they make you ask: neighbours call for near-identical deviation questions, so drill them back to back.",
       clusters:[
-      ["GO — I go to them",[22,29,42,45,11,78,74,52,1,70,35,57,65,63,60,69,67,58,50,7,40,27,54,59,62,19,53,64,2,39,23,61,66,49,26,6,37,3,47,24,41,36,46,28,8,51,20],"session start-to-finish · beginner-fit · schedule · gear provided · food & extras — theme of day 6"],
-      ["COME — they come to me",[9,30,43,75,13,16,76,4,38,25,18,48,55],"exact coverage · who enters my home · quote & travel fees · guarantee — theme of day 1"],
-      ["TAKE — I rent a thing",[68,5,77,73,34,17,21],"models & sizes · deposit · duration & return · damage · what comes with it — theme of day 6"],
-      ["FLIP — money flows my way",[10,32,71,33,15,56],"what would I do · requirements · pay & expenses · commitment · perks — theme of day 7"],
-      ["FAR — I order remotely",[12,44,31,14,72],"process steps · delivery time · secure payment · refund window — theme of day 5"]
+      ["GO — I go to them",[22,29,42,45,78,11,74,52,1,70,35,57,65,63,60,69,67,58,50,7,27,40,54,62,59,19,53,64,2,39,23,61,66,49,26,6,37,3,47,24,28,8,51,20,41,36,46],"session start-to-finish · beginner-fit · schedule · gear provided · food & extras"],
+      ["COME — they come to me",[9,30,43,75,13,16,76,4,38,25,18,48,55],"exact coverage · who enters my home · quote & travel fees · guarantee"],
+      ["TAKE — I rent a thing",[68,77,5,73,34,17,21],"models & sizes · deposit · duration & return · damage · what comes with it"],
+      ["FLIP — money flows my way",[10,71,32,33,15,56],"what would I do · requirements · pay & expenses · commitment · perks"],
+      ["FAR — I order remotely",[12,44,31,14,72],"process steps · delivery time · secure payment · refund window"]
     ]});
   TEF_CLUSTERS.B.methods.unshift(
-    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes/kits touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
+    { id:"SP1", name:"Study plan · 7-day order", desc:"The study plan's interleave: 7 days to the exam, each day slices every cluster (all shapes / families touched daily), new items before re-runs. Drill a day top to bottom, cluster block by cluster block.",
       clusters:[
-      ["Day 1",[34,41,18,8,22,35,15,24,6,25,17,16],"12 new — the grind starts"],
-      ["Day 2",[53,36,43,75,48,54,37,44,12,45,69,72],"12 new"],
-      ["Day 3",[62,63,3,55,81,59,65,56,39,51,73,20],"11 new · 1 re-run"],
-      ["Day 4",[1,23,9,2,78,4,14,46,57,64,7,10],"4 new · 8 re-runs"],
-      ["Day 5",[21,47,49,61,28,11,32,52,76,27,19],"2 new · 9 re-runs"],
-      ["Day 6",[58,70,29,31,42,50,67,26,66,5,30],"11 re-runs — taper"],
-      ["Day 7",[60,80,77,68,79,74,13,38,33,40,71],"11 re-runs — last day, all review"]
+      ["Day 1",[53,63,48,36,37,51,39,72,81,75,73,78],"12 new — the grind starts"],
+      ["Day 2",[62,34,22,54,55,56,45,46,69,8,29,30],"10 new · 2 re-runs"],
+      ["Day 3",[41,59,43,24,64,52,7,28,11,12,76,32],"8 new · 4 re-runs"],
+      ["Day 4",[58,1,35,61,44,57,6,27,15,16,17,18],"8 new · 4 re-runs"],
+      ["Day 5",[21,65,3,50,25,26,40,77,9,10,31],"2 new · 9 re-runs — taper"],
+      ["Day 6",[60,42,68,49,23,4,5,66,74,13,14],"11 re-runs"],
+      ["Day 7",[47,2,70,67,38,79,71,33,80,19,20],"1 new · 10 re-runs — last day"]
     ]},
-    { id:"SP2", name:"Study plan · objection kits", desc:"The 9 kits the study plan drills from (tree_B families merged when the same 3-move kit answers them). Within a kit the ads are threaded by the objections the friend will actually raise: neighbours draw the same pushback, so rehearse them back to back.",
+    { id:"SP2", name:"Study plan · family clusters", desc:"The 20 families of tree_B's « Family → expected objections » table, verbatim and in the tree's order — each with its signature objections and the matching-matrix moves for its lead sound. Within a family the ads are threaded by the objections the friend will actually raise: neighbours draw the same pushback, so rehearse them back to back.",
       clusters:[
-      ["« Unpaid?! »",[1,58,53,60,62,63,21,34,47,41],"MONEY-flip · TIME · BOND — fire FLIP · YOUR WORDS · GIVE & TAKE"],
-      ["« Costs a fortune » (trips)",[80,18,3,70,55,23,43,49,36,61],"MONEY · TIME · EFFORT — fire VERSUS · SHRINK · PAINT"],
-      ["« Is it worth it? » (services)",[9,75,29,77,81,8,28],"MONEY · TRUST · BOND — fire VERSUS · AD SAYS · EXIT DOOR"],
-      ["« Too good to be true »",[2,65,35,42,48,54,22,59,68,78,31,11],"TRUST · EFFORT · BOND — fire PROOF · EXIT DOOR · AD SAYS"],
-      ["« Can I trust the platform? »",[67,56,24,44,4,37,50,79,15,32,14],"TRUST · EFFORT · WANT — fire PROOF · EXIT DOOR · AD SAYS"],
-      ["« That's dangerous »",[66,6,26,39,46,52,74,12],"FEAR · ABILITY · EFFORT — fire PROOF · EXIT DOOR · TOGETHER"],
-      ["« I'd be useless »",[64,5,45,51,38,57,25,76,13],"ABILITY · FEAR · TRUST — fire AD SAYS · FLIP · TOGETHER"],
-      ["« I'm swamped »",[7,72,27,40,69,17,10,73,30,33],"TIME · BOND · WANT — fire SHRINK · AD SAYS · GIVE & TAKE"],
-      ["« Not my thing »",[19,20,16,71],"WANT · EFFORT — fire PAINT · YOUR WORDS · GIVE & TAKE"]
+      ["Volunteering/solidarity",[58,1,53,21,63,62,60,34,47,41],"expect MONEY (work for free?) · TIME · BOND — lead fire: VERSUS · AD SAYS · SHRINK"],
+      ["Earn-money",[42,48,22,54,68,59,35,2,65],"expect TRUST (scam) · EFFORT (real pay for that?) · TIME — lead fire: PROOF · EXIT DOOR · AD SAYS"],
+      ["Travel/getaway",[36,61,3,49,55,23,70,43],"expect MONEY · TIME (holidays) · EFFORT (comfort) — lead fire: VERSUS · AD SAYS · SHRINK"],
+      ["Resale/sharing-economy",[50,37,4,67,56,24,44],"expect TRUST (strangers, quality) · EFFORT (hassle) — lead fire: PROOF · EXIT DOOR · AD SAYS"],
+      ["Creative-workshop",[51,45,5,64,38,57,25],"expect ABILITY (no talent) · FEAR (audience) · TIME — lead fire: AD SAYS · FLIP · TOGETHER"],
+      ["Adventure/sport-getaway",[39,46,52,26,6,66],"expect FEAR (danger) · ABILITY (fitness) · MONEY — lead fire: PROOF · EXIT DOOR · TOGETHER"],
+      ["Civic/cultural-role",[72,7,27,40,69],"expect TIME · BOND (a year!) · ABILITY — lead fire: SHRINK · AD SAYS · GIVE & TAKE"],
+      ["Learn-a-skill-course",[28,81,8,77],"expect MONEY · BOND · TRUST (online quality) — lead fire: VERSUS · AD SAYS · SHRINK"],
+      ["Chef/caterer-service",[29,75,9],"expect MONEY (luxury!) · TRUST (stranger in my kitchen) · WANT (I can cook) — lead fire: VERSUS · AD SAYS · SHRINK"],
+      ["Charity-event",[30,73,10],"expect TIME · WANT · ABILITY (135 km!) — lead fire: SHRINK · AD SAYS · GIVE & TAKE"],
+      ["Travel-for-free",[11,31,78],"expect TRUST (too good to be true) · BOND (duties) — lead fire: PROOF · EXIT DOOR · AD SAYS"],
+      ["Cook-and-share",[74,12],"expect FEAR (strangers) · EFFORT — lead fire: PROOF · EXIT DOOR · TOGETHER"],
+      ["Community-DIY-workshop",[76,13],"expect ABILITY (I'm no mechanic) · TRUST — lead fire: AD SAYS · FLIP · TOGETHER"],
+      ["Wellness/health",[32,14],"expect TRUST (studies?) · BOND (a pet is forever) — lead fire: PROOF · EXIT DOOR · AD SAYS"],
+      ["Online-convenience-service",[15,79],"expect TRUST (meds online?!) · WANT — lead fire: PROOF · EXIT DOOR · AD SAYS"],
+      ["Heritage-restoration-stay",[71,16],"expect EFFORT (manual labour on holiday?!) · MONEY — lead fire: PAINT · SHRINK · GIVE & TAKE"],
+      ["Cultural/social-event",[33,17],"expect TIME · WANT (strangers) · EFFORT — lead fire: SHRINK · AD SAYS · GIVE & TAKE"],
+      ["City-tours",[18,80],"expect MONEY · WANT (I know the city) · EFFORT — lead fire: VERSUS · AD SAYS · SHRINK"],
+      ["Novelty-restaurant",[19],"expect WANT (disgust) · TRUST — lead fire: YOUR WORDS · PAINT · FLIP"],
+      ["Leisure-club",[20],"expect WANT (boring) · BOND (annual fee) — lead fire: YOUR WORDS · PAINT · FLIP"]
     ]});
   TEF_CLUSTERS.EA = {
     total: 72,
@@ -342,21 +357,21 @@ var TEF_CLUSTERS = {
     methods: [
     { id:"SP1", name:"Study plan · 7-day order", desc:"The écrite study plan's 7-day deal: every prompt drilled once, each day a proportional slice of every formula cluster, blocked by cluster within the day.",
       clusters:[
-      ["Day 1",[2,3,21,4,6,1,10,13,14,5,7]],
-      ["Day 2",[20,24,35,8,9,17,18,19,22,15,16]],
-      ["Day 3",[34,41,11,12,28,31,33,37,23,25]],
-      ["Day 4",[45,46,26,27,38,42,43,44,32,36]],
-      ["Day 5",[48,55,49,29,30,47,53,54,58,39]],
-      ["Day 6",[62,56,59,40,51,52,60,61,63,50]],
-      ["Day 7",[67,68,70,72,64,65,66,69,57,71]]
+      ["Day 1",[20,49,59,4,26,33,65,64,60,36,57]],
+      ["Day 2",[67,24,41,8,6,22,47,58,37,5,23]],
+      ["Day 3",[55,46,52,9,44,63,54,61,50,39]],
+      ["Day 4",[45,68,11,29,19,31,14,1,25,7]],
+      ["Day 5",[2,56,72,27,12,13,69,43,53,32]],
+      ["Day 6",[62,34,35,3,30,70,42,10,28,15]],
+      ["Day 7",[48,21,51,40,66,17,38,18,16,71]]
     ]},
     { id:"SP2", name:"Study plan · story formulas", desc:"The 5 formula clusters from tree_ecrite_A. Within a cluster the prompts are threaded by the continuation they demand: neighbours share the same story beats and vocabulary field, so write them back to back.",
       clusters:[
-      ["Save",[2,45,55,67,20,62,34,48],"Check: someone is in danger. Pay with the rescue: peril → intervention → relief. · 8 prompts"],
-      ["Fall",[49,59,24,41,46,68,56,35,3,21],"Check: a wrongdoer is loose. Pay with justice: scheme → the slip → consequence. · 10 prompts"],
-      ["Way",[8,26,4,6,52,9,11,29,72,27,12,30,70,51,40],"Check: an original solution / idea / reaction is promised. Pay with the clever plan: steps → execution → outcome. · 15 prompts"],
-      ["Thing",[33,65,64,60,22,47,58,37,19,61,54,63,44,1,14,31,13,69,43,53,42,10,28,66,17,38,18],"Check: a hidden unknown must be named (object, secret, person, cause). Pay by naming it, concrete, with one precise figure. · 27 prompts"],
-      ["Stir",[36,57,5,23,50,39,25,7,15,32,16,71],"Check: none of the above — a scene is boiling. Ride the chaos to its peak, then back to calm. · 12 prompts"]
+      ["Save",[20,67,55,45,2,62,34,48],"Check: someone is in danger. Pay with the rescue: peril → intervention → relief."],
+      ["Fall",[49,59,24,41,46,68,56,35,3,21],"Check: a wrongdoer is loose. Pay with justice: scheme → the slip → consequence."],
+      ["Way",[4,26,8,6,52,9,11,29,72,27,12,30,70,51,40],"Check: an original solution / idea / reaction is promised. Pay with the clever plan: steps → execution → outcome."],
+      ["Thing",[33,65,64,60,22,47,58,37,44,63,54,61,19,31,14,1,13,69,43,53,42,10,28,66,17,38,18],"Check: a hidden unknown must be named (object, secret, person, cause). Pay by naming it, concrete, with one precise figure."],
+      ["Stir",[36,57,5,23,50,39,25,7,32,15,16,71],"Check: none of the above — a scene is boiling. Ride the chaos to its peak, then back to calm."]
     ]}
     ]
   };
@@ -366,21 +381,21 @@ var TEF_CLUSTERS = {
     methods: [
     { id:"SP1", name:"Study plan · 7-day order", desc:"The écrite study plan's 7-day deal: every prompt drilled once, each day a proportional slice of every formula cluster, blocked by cluster within the day.",
       clusters:[
-      ["Day 1",[1,19,20,3,4,5,7,9,2,8,10]],
-      ["Day 2",[23,24,26,6,14,11,12,13,27,37,16]],
-      ["Day 3",[29,30,32,15,22,21,31,38,45,17,18]],
-      ["Day 4",[35,39,41,25,33,47,51,48,49,28]],
-      ["Day 5",[42,46,34,36,43,53,55,50,52,40]],
-      ["Day 6",[59,60,44,56,57,64,65,54,58,62]],
-      ["Day 7",[61,63,71,72,69,70,67,68,66,73]]
+      ["Day 1",[1,23,60,44,33,22,9,70,58,2,10]],
+      ["Day 2",[32,59,29,36,25,31,55,51,8,67,28]],
+      ["Day 3",[39,41,30,14,3,64,7,52,37,40,18]],
+      ["Day 4",[19,24,35,6,43,21,13,49,27,17]],
+      ["Day 5",[46,61,5,34,56,47,69,38,48,66]],
+      ["Day 6",[63,26,15,72,11,57,12,54,45,62]],
+      ["Day 7",[42,20,71,4,53,65,50,68,16,73]]
     ]},
     { id:"SP2", name:"Study plan · argument formulas", desc:"The 5 formula clusters from tree_ecrite_B. Within a cluster the prompts are threaded by the argument bank they draw on: neighbours share theses, examples and vocabulary, so plan them back to back.",
       clusters:[
-      ["FORCE",[1,23,60,39,29,59,32,41,30,19,24,35,46,61,63,26,42,20],"Encourage, don't impose — good for many, wrong as a universal rule; fire FREEDOM · FAIRNESS · BETTER TOOL. · 18 prompts"],
-      ["DOOM",[44,33,22,36,25,14,3,6,43,5,34,56,15,72,71,4],"A change, not a death — the trend is real, formats stack; fire ELSEWHERE · ONE FACE · BOND. · 16 prompts"],
-      ["VERDICT",[9,31,55,51,64,7,21,13,47,69,70,11,57,12,53,65],"Appeal the verdict — split it (which X, for whom, for what?), then rehabilitate via HEALTH · BOND · MONEY. · 16 prompts"],
-      ["BAN",[2,58,8,67,52,37,49,27,38,48,54,45,50,68],"The goal, yes — the ban, no; propose the finer tool: fire FREEDOM · BACKFIRE · BETTER TOOL. · 14 prompts"],
-      ["CREED",[10,28,40,18,17,66,62,16,73],"A path, not a law — works for some, several recipes; fire ONE FACE · FAIRNESS · HEALTH. · 9 prompts"]
+      ["FORCE",[1,23,60,32,59,29,39,41,30,19,24,35,46,61,63,26,42,20],"Encourage, don't impose — good for many, wrong as a universal rule; fire FREEDOM · FAIRNESS · BETTER TOOL."],
+      ["DOOM",[44,33,22,36,25,14,3,6,43,5,34,56,15,72,71,4],"A change, not a death — the trend is real, formats stack; fire ELSEWHERE · ONE FACE · BOND."],
+      ["VERDICT",[9,70,31,55,51,64,7,21,13,47,69,11,57,12,53,65],"Appeal the verdict — split it (which X, for whom, for what?), then rehabilitate via HEALTH · BOND · MONEY."],
+      ["BAN",[58,2,8,67,52,37,49,27,38,48,54,45,50,68],"The goal, yes — the ban, no; propose the finer tool: fire FREEDOM · BACKFIRE · BETTER TOOL."],
+      ["CREED",[10,28,40,18,17,66,62,16,73],"A path, not a law — works for some, several recipes; fire ONE FACE · FAIRNESS · HEALTH."]
     ]}
     ]
   };
