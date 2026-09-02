@@ -522,7 +522,7 @@ if (typeof document !== "undefined") (function(){
       A: [1,2,3,5,7,8,9,10,12,13,14,16,18,21,24,31,36,40,43,48,53,70],
       B: [1,2,3,4,5,7,9,10,11,13,14,19,21,23,26,27,28,29,30,31,32,33,38,40,42,47,49,50,58,60,61,66,67,68,70,71,74,77,79,80]
     };
-    var PRESEED_VER = "2026-08-28.v1";
+    var PRESEED_VER = "2026-09-02.v2";
     if (setKey && PRESEED_DRILLED[setKey]){
       var preseedKey = storeKey + ":preseed";
       if (read(preseedKey) !== PRESEED_VER){
