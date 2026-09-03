@@ -632,6 +632,26 @@ if (typeof document !== "undefined") (function(){
           : nums.length + " " + (nums.length === 1 ? unitOne : unit);
       });
 
+      var boxesAll = wrap.querySelectorAll(".tef-box"), boxesDone = 0;
+      for (var bi = 0; bi < boxesAll.length; bi++){
+        var bx = boxesAll[bi], bsecs = bx.querySelectorAll("section.topic"), ball = bsecs.length > 0;
+        for (var bj = 0; bj < bsecs.length; bj++){ if (!bsecs[bj].classList.contains("tef-is-done")){ ball = false; break; } }
+        bx.classList.toggle("tef-box-alldone", ball);
+        if (ball) boxesDone++;
+        var bcores = bx.querySelectorAll(".tef-core");
+        for (var bc = 0; bc < bcores.length; bc++){
+          var cs = bcores[bc].querySelectorAll("section.topic"), cd = cs.length > 0;
+          for (var bk = 0; bk < cs.length; bk++){ if (!cs[bk].classList.contains("tef-is-done")){ cd = false; break; } }
+          bcores[bc].classList.toggle("tef-core-alldone", cd);
+        }
+        var seams = bx.querySelectorAll(".tef-seam");
+        for (var bs = 0; bs < seams.length; bs++){
+          var pv = seams[bs].previousElementSibling, nx = seams[bs].nextElementSibling;
+          seams[bs].classList.toggle("tef-seam-hidden",
+            !!((pv && pv.classList.contains("tef-core-alldone")) || (nx && nx.classList.contains("tef-core-alldone"))));
+        }
+      }
+
       document.body.classList.toggle("tef-hide-done", !!state.hideDone);
       ui.hideCb.checked = !!state.hideDone;
       ui.progFill.style.width = total ? Math.round(ndone / total * 100) + "%" : "0%";
@@ -645,6 +665,12 @@ if (typeof document !== "undefined") (function(){
         b.textContent = left + " left";
         ui.progText.appendChild(document.createTextNode(ndone + " of " + total + " done · "));
         ui.progText.appendChild(b);
+      }
+      if (boxesAll.length){
+        var bd = document.createElement("span");
+        bd.className = "tef-prog-boxes";
+        bd.textContent = " · " + boxesDone + "/" + boxesAll.length + " boxes done";
+        ui.progText.appendChild(bd);
       }
       ui.progReset.style.visibility = ndone ? "" : "hidden";
     }
@@ -676,6 +702,7 @@ if (typeof document !== "undefined") (function(){
       if (state.methodId === "coverage" && !window.TEF_COVERAGE) loadCoverage(render);
       else if (state.methodId === "coverage_df" && !window.TEF_COVERAGE) loadCoverage(render);
       else if (state.methodId === "similarity" && !window.TEF_SIMILARITY) loadSimilarity(render);
+      else if (state.methodId === "boxes" && !window.TEF_BOXES) loadBoxes(render);
       else render();
     });
 
@@ -721,6 +748,13 @@ if (typeof document !== "undefined") (function(){
       });
     }
 
+    function loadBoxes(done){
+      loadData("tef-boxes.js", "TEF_BOXES", "Loading the answer-box data…", function(){
+        if (!window.TEF_BOXES) state.boxesFailed = true;
+        done();
+      });
+    }
+
     // Default view: the study-plan clusters (SP2) — the partition the drilling
     // follows, with each cluster threaded so neighbouring items elicit
     // near-identical responses. The SP data ships in this file, so first paint
@@ -728,10 +762,28 @@ if (typeof document !== "undefined") (function(){
     // serve the coverage / similarity options when the reader picks them.
     // Lists without an SP2 method (shouldn't exist any more) stay on the
     // practice order they painted in.
+    // Default view: answer boxes. The box data is a separate small file, so the
+    // list first paints on the study-plan clusters (SP2, shipped in this file)
+    // and reflows into boxes the moment tef-boxes.js lands; if that file cannot
+    // load, the SP2 view simply stays.
     if (pack.methods.some(function(m){ return m.id === "SP2"; })){
       state.methodId = "SP2";
       ui.select.value = "SP2";
       render();
+    }
+    if (setKey){
+      state.methodId = "boxes";
+      ui.select.value = "boxes";
+      loadBoxes(function(){
+        if (!window.TEF_BOXES || !window.TEF_BOXES[setKey]){
+          state.methodId = pack.methods.some(function(m){ return m.id === "SP2"; }) ? "SP2" : "default";
+          ui.select.value = state.methodId;
+          render();
+          ui.desc.textContent = "Answer boxes could not be loaded — " + (state.methodId === "SP2" ? "study-plan clusters" : "practice order") + " shown.";
+          return;
+        }
+        if (state.methodId === "boxes") render();   // unless the reader already switched
+      });
     }
 
     function currentMethod(){
@@ -768,10 +820,12 @@ if (typeof document !== "undefined") (function(){
 
     function paint(){
       wrap.querySelectorAll(".tef-cluster-head").forEach(function(h){ h.remove(); });
+      clearBoxes();
       if (state.methodId !== "coverage") clearCoverage();
       if (state.methodId !== "similarity") clearSimilarity();
 
       if (state.methodId === "coverage"){ renderCoverage(); return; }
+      if (state.methodId === "boxes"){ renderBoxes(); return; }
       if (state.methodId === "coverage_df"){ renderCoverageDrilledFirst(); return; }
       if (state.methodId === "similarity"){ renderSimilarity(); return; }
 
@@ -831,6 +885,87 @@ if (typeof document !== "undefined") (function(){
       ui.summary.textContent = m.name + " · " + m.clusters.length + " clusters · " + pack.total + " " + unit
         + (state.filter ? "  (filtered)" : "");
       buildChips(m);
+    }
+
+    // Answer boxes: items that call for the same prepared response (90% or
+    // better) are wrapped together in one numbered box; every item keeps its
+    // own card, canonical number, rank and Done tick. Inside a box, cores of
+    // word-for-word-equivalent items are separated by a dashed "≈" seam.
+    // Boxes sit where their lowest-numbered member sits in practice order.
+    // Every other mode dissolves the boxes first (clearBoxes in paint), and
+    // the live badge renumbering walks sections in document order, so it
+    // counts through boxes naturally.
+    function clearBoxes(){
+      document.body.classList.remove("tef-mode-boxes");
+      wrap.querySelectorAll(".tef-box").forEach(function(b){
+        b.querySelectorAll("section.topic").forEach(function(s){ wrap.appendChild(s); });
+        b.remove();
+      });
+    }
+
+    function renderBoxes(){
+      var pk = window.TEF_BOXES && setKey ? window.TEF_BOXES[setKey] : null;
+      if (!pk){
+        ui.desc.textContent = state.boxesFailed
+          ? "Could not load tef-boxes.js — the other orderings still work."
+          : "No answer-box data for this list.";
+        ui.summary.textContent = "Answer boxes unavailable";
+        return;
+      }
+      document.body.classList.add("tef-mode-cluster");     // parks the day-bars
+      document.body.classList.add("tef-mode-boxes");
+      sections.forEach(function(s){ s.style.display = ""; });
+
+      var firstOf = {}, inBox = {};
+      pk.boxes.forEach(function(b){
+        firstOf[b.members[0]] = b;
+        b.members.forEach(function(m){ inBox[m] = b.n; });
+      });
+      var placedBoxes = 0;
+      for (var num = 1; num <= pk.total; num++){
+        var s = byNum[num];
+        if (!s) continue;
+        if (inBox[num] && !firstOf[num]) continue;          // placed with its box
+        if (!firstOf[num]){ wrap.appendChild(s); continue; } // a single
+        var b = firstOf[num];
+        var box = document.createElement("div");
+        box.className = "tef-box";
+        box.id = "box-" + setKey + "-" + b.n;
+        box.setAttribute("data-box", String(b.n));
+        var head = document.createElement("div");
+        head.className = "tef-box-head";
+        head.innerHTML = '<span class="tef-box-badge"></span><span class="tef-box-tag">Same answer</span>'
+                       + '<span class="tef-box-n"></span><span class="tef-box-hint"></span>';
+        head.querySelector(".tef-box-badge").textContent = "Box " + b.n;
+        head.querySelector(".tef-box-n").textContent = b.members.length + " " + unit;
+        head.querySelector(".tef-box-hint").textContent = (b.cores.length === 1)
+          ? "one preparation covers the whole box"
+          : b.cores.length + " close variants separated by ≈ — same plan, adjust to the item";
+        box.appendChild(head);
+        b.cores.forEach(function(core, ci){
+          if (ci){
+            var seam = document.createElement("div");
+            seam.className = "tef-seam"; seam.setAttribute("aria-hidden", "true");
+            seam.innerHTML = "<span>≈ close variant</span>";
+            box.appendChild(seam);
+          }
+          var cd = document.createElement("div");
+          cd.className = "tef-core";
+          core.forEach(function(m){ if (byNum[m]) cd.appendChild(byNum[m]); });
+          box.appendChild(cd);
+        });
+        wrap.appendChild(box);
+        placedBoxes++;
+      }
+      daybars.forEach(function(d){ wrap.appendChild(d); });
+
+      ui.desc.textContent = "Items that call for the same prepared response (90% or better) share a numbered box; "
+        + "each item keeps its own number, rank and Done tick. Inside a box, close variants that need small "
+        + "adjustments are separated by a dashed ≈ line. Boxes + singles = the number of answers to prepare. "
+        + "From a two-pass near-duplicate audit (2026-09-03); ordered by practice number.";
+      ui.summary.textContent = "Answer boxes · " + pk.boxes.length + " boxes + " + pk.singles + " singles = "
+        + pk.answers + " answers to prepare · " + pk.total + " " + unit;
+      ui.chips.innerHTML = "";
     }
 
     // Coverage order: a flat sort like difficulty, but each item also carries
@@ -1182,7 +1317,7 @@ if (typeof document !== "undefined") (function(){
       var otherMethods = pack.methods.filter(function(m){ return m.id.indexOf("SP") !== 0; });
       spMethods.forEach(function(m){
         var o = document.createElement("option"); o.value=m.id;
-        o.textContent = m.name + (m.id === "SP2" ? " (default)" : "");
+        o.textContent = m.name;
         sel.appendChild(o);
       });
       if (setKey){
@@ -1190,6 +1325,10 @@ if (typeof document !== "undefined") (function(){
         optSim.value = "similarity";
         optSim.textContent = "Similarity order (each one next to its nearest twin)";
         sel.appendChild(optSim);
+        var optBox = document.createElement("option");
+        optBox.value = "boxes";
+        optBox.textContent = "Answer boxes (default · one prepared answer per box)";
+        sel.appendChild(optBox);
         var optCov = document.createElement("option");
         optCov.value = "coverage";
         optCov.textContent = "Coverage order (most score per hour)";
@@ -1277,6 +1416,21 @@ if (typeof document !== "undefined") (function(){
       + ".tef-ch-count{font-weight:500;font-size:.8rem;opacity:.9;white-space:nowrap}"
       + ".tef-ch-sub{flex:1 1 100%;font-weight:400;font-size:.78rem;opacity:.85;line-height:1.45}"
       + ".tef-mode-cluster .daybar{display:none}"
+
+      // --- answer boxes ---------------------------------------------------
+      + ".tef-box{border:2px solid #c7d7f7;border-radius:16px;padding:.55rem .6rem .6rem;margin:.8rem 0;background:#f6f9ff}"
+      + ".tef-box-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.15rem .45rem .5rem;font-size:.8rem;color:#344054}"
+      + ".tef-box-badge{background:#111827;color:#fff;border-radius:999px;padding:.12rem .7rem;font-weight:800;font-size:.82rem;letter-spacing:.03em;white-space:nowrap}"
+      + ".tef-box-tag{background:var(--accent,#2563eb);color:#fff;border-radius:999px;padding:.12rem .6rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}"
+      + ".tef-box-n{font-weight:700;color:var(--ink,#1f2328)}"
+      + ".tef-box-hint{color:var(--muted,#5b6470)}"
+      + ".tef-box .tef-core>section.topic{margin:.35rem 0;box-shadow:none;border-color:#dbe4f3}"
+      + ".tef-seam{display:flex;align-items:center;gap:.55rem;margin:.45rem .2rem}"
+      + ".tef-seam::before,.tef-seam::after{content:'';flex:1 1 0;border-top:1px dashed #9db4e3}"
+      + ".tef-seam span{font-size:.74rem;color:#3b5bb0;background:#eef4ff;border:1px dashed #9db4e3;border-radius:999px;padding:.1rem .65rem;white-space:nowrap}"
+      + "body.tef-hide-done .tef-box-alldone{display:none!important}"
+      + "body.tef-hide-done .tef-seam-hidden{display:none}"
+      + ".tef-prog-boxes{margin-left:.35rem;color:#111827}"
 
       // --- coverage order -------------------------------------------------
       + ".tef-covrank{margin-left:auto;flex:none;display:inline-flex;align-items:baseline;gap:.3rem;"
