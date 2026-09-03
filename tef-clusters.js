@@ -583,18 +583,27 @@ if (typeof document !== "undefined") (function(){
         if (!refs || !refs.length) return;
         var head = it.el.querySelector(".topic-head");
         if (!head) return;
+        // One thin row under the prompt, never inside the flex head row (a pill
+        // in that row steals width from the prompt text on narrow screens).
+        var row = document.createElement("div");
+        row.className = "tef-xref-row";
+        var lab = document.createElement("span");
+        lab.className = "tef-xref-lab";
+        lab.textContent = "Also in TCF";
+        row.appendChild(lab);
         refs.slice(0, 3).forEach(function(r){
           var sec = SEC[r.s]; if (!sec) return;
           var a = document.createElement("a");
           a.className = "tef-xref " + (r.t === "c" ? "tef-xref-c" : "tef-xref-a");
           a.href = base + sec[1] + (fr ? "" : "-EN") + ".html";
           a.target = "_blank"; a.rel = "noopener";
-          a.textContent = (r.t === "c" ? "Also in TCF · " : "≈ TCF · ") + sec[0];
+          a.textContent = (r.t === "c" ? "" : "≈ ") + sec[0];
           a.title = "TCF " + sec[0] + " · prompt" + (r.n.length === 1 ? " " : "s ") + "#" + r.n.slice(0, 12).join(", #")
                   + (r.n.length > 12 ? ", … (" + r.n.length + " in all)" : "")
                   + (r.t === "c" ? " — same prepared answer" : " — close, adjust the answer");
-          headAdd(head, a);
+          row.appendChild(a);
         });
+        head.parentNode.insertBefore(row, head.nextSibling);
       });
     })();
 
@@ -1467,11 +1476,14 @@ if (typeof document !== "undefined") (function(){
       + ".tef-prog-boxes{margin-left:.35rem;color:#111827}"
 
       // --- cross-exam chips ---------------------------------------------------
-      + ".tef-xref{flex:none;display:inline-flex;align-items:center;font-size:.72rem;line-height:1.4;"
-      + "border-radius:999px;padding:.1rem .55rem;margin-left:.35rem;text-decoration:none;white-space:nowrap}"
+      + ".tef-xref-row{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;margin:.1rem 0 .1rem 2.6rem;"
+      + "font-size:.7rem;line-height:1.3}"
+      + ".tef-xref-lab{color:#6d5a8a;letter-spacing:.02em}"
+      + ".tef-xref{display:inline-block;border-radius:999px;padding:.02rem .45rem;text-decoration:none;white-space:nowrap}"
       + ".tef-xref-c{background:#f3e8ff;color:#5b21b6;border:1px solid #d8b4fe;font-weight:600}"
       + ".tef-xref-a{background:#faf5ff;color:#7c3aed;border:1px dashed #d8b4fe}"
       + ".tef-xref:hover{border-color:#7c3aed}"
+      + "@media (max-width:520px){.tef-xref-row{margin-left:0}}"
 
       // --- coverage order -------------------------------------------------
       + ".tef-covrank{margin-left:auto;flex:none;display:inline-flex;align-items:baseline;gap:.3rem;"
