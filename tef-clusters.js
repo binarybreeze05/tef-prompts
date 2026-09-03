@@ -564,6 +564,40 @@ if (typeof document !== "undefined") (function(){
       if (d) head.insertBefore(node, d); else head.appendChild(node);
     }
 
+    // Cross-exam chips: an item that shares an answer-box with a TCF prompt
+    // (same prepared response, task format aside) carries "Also in TCF · <section>"
+    // — solid when at least one audit pass called it certain, dashed "≈" when
+    // only arguable. Data ships in tef-xref.js (loaded before this file); the
+    // chip is permanent, so it survives every ordering. Links go to the TCF
+    // section page in the same language as this page; the tooltip lists the
+    // counterpart prompt numbers over there.
+    (function(){
+      var X = window.TEF_XREF && setKey ? window.TEF_XREF[setKey] : null;
+      if (!X) return;
+      var fr = /-FR/.test(location.pathname);
+      var SEC = { EO_T2:["Speaking T2","eo-t2"], EO_T3:["Speaking T3","eo-t3"],
+                  EE_T1:["Writing T1","ee-t1"], EE_T2:["Writing T2","ee-t2"], EE_T3:["Writing T3","ee-t3"] };
+      var base = "https://binarybreeze05.github.io/tcf-prompts/";
+      numbered.forEach(function(it){
+        var refs = X[String(it.num)];
+        if (!refs || !refs.length) return;
+        var head = it.el.querySelector(".topic-head");
+        if (!head) return;
+        refs.slice(0, 3).forEach(function(r){
+          var sec = SEC[r.s]; if (!sec) return;
+          var a = document.createElement("a");
+          a.className = "tef-xref " + (r.t === "c" ? "tef-xref-c" : "tef-xref-a");
+          a.href = base + sec[1] + (fr ? "" : "-EN") + ".html";
+          a.target = "_blank"; a.rel = "noopener";
+          a.textContent = (r.t === "c" ? "Also in TCF · " : "≈ TCF · ") + sec[0];
+          a.title = "TCF " + sec[0] + " · prompt" + (r.n.length === 1 ? " " : "s ") + "#" + r.n.slice(0, 12).join(", #")
+                  + (r.n.length > 12 ? ", … (" + r.n.length + " in all)" : "")
+                  + (r.t === "c" ? " — same prepared answer" : " — close, adjust the answer");
+          headAdd(head, a);
+        });
+      });
+    })();
+
     // Single source of truth for everything the ticks affect. Called after
     // every render and after every tick, so no caller has to remember which
     // parts of the page depend on what is done.
@@ -1431,6 +1465,13 @@ if (typeof document !== "undefined") (function(){
       + "body.tef-hide-done .tef-box-alldone{display:none!important}"
       + "body.tef-hide-done .tef-seam-hidden{display:none}"
       + ".tef-prog-boxes{margin-left:.35rem;color:#111827}"
+
+      // --- cross-exam chips ---------------------------------------------------
+      + ".tef-xref{flex:none;display:inline-flex;align-items:center;font-size:.72rem;line-height:1.4;"
+      + "border-radius:999px;padding:.1rem .55rem;margin-left:.35rem;text-decoration:none;white-space:nowrap}"
+      + ".tef-xref-c{background:#f3e8ff;color:#5b21b6;border:1px solid #d8b4fe;font-weight:600}"
+      + ".tef-xref-a{background:#faf5ff;color:#7c3aed;border:1px dashed #d8b4fe}"
+      + ".tef-xref:hover{border-color:#7c3aed}"
 
       // --- coverage order -------------------------------------------------
       + ".tef-covrank{margin-left:auto;flex:none;display:inline-flex;align-items:baseline;gap:.3rem;"
