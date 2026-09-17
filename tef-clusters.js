@@ -401,6 +401,57 @@ var TEF_CLUSTERS = {
   };
 })();
 
+/* Tree filters — the two ways trees.html sorts each pool, offered as two
+   filter dropdowns on top of the Answer-boxes view (boxes stay; members that
+   fail a filter are hidden, and a box with nothing left steps aside).
+   One axis per pool is already the SP2 method above and is read from there;
+   the other is below. Écrite families are the rank lists printed in
+   trees.html («Family → debt», «The 11 topic families»); ranks there are the
+   same canonical numbers the badges carry. Section A's second axis is the
+   practice list's question-set families (A10); Section B's is the 8 objection
+   types, matched through each family's signature objections in tree_B. */
+var TEF_TREE_FILTERS = {
+  A:  [ { label:"Shape",  all:"All shapes",   from:"SP2", short:true },
+        { label:"Family", all:"All families", from:"A10" } ],
+  B:  [ { label:"Family", all:"All families", from:"SP2" },
+        { label:"Likely objection", all:"All objections", objections:["TIME","MONEY","ABILITY","FEAR","TRUST","EFFORT","WANT","BOND"] } ],
+  EA: [ { label:"Debt",   all:"All debts",    from:"SP2", upper:true },
+        { label:"Story family", all:"All story families", clusters:[
+        ["Surprising discovery",[1,19,33,44,54,61,63,65,66]],
+        ["Rescue / hero",[2,20,34,45,55,62,64]],
+        ["Crime uncovered",[3,21,35,46,56,68]],
+        ["Travel mishap",[22,47,36,57,4,67]],
+        ["Animal antics",[5,23,37,58,48]],
+        ["Poetic justice",[24,49,59,6,38]],
+        ["Quirky spectacle",[7,25,39,50,60]],
+        ["Ingenious solution",[8,26,40,51]],
+        ["Clever ruse",[9,27,52,41]],
+        ["Reunion / encounter",[10,28,42,53]],
+        ["Trapped / locked-in",[11,29,72]],
+        ["Feel-good generosity",[12,30,70]],
+        ["Prize / lottery twist",[13,43,69]],
+        ["Found valuables",[14,31]],
+        ["Mistaken identity",[15,32]],
+        ["Child calls police",[16,71]],
+        ["Human-interest secret",[17]],
+        ["Posthumous recognition",[18]]
+      ] } ],
+  EB: [ { label:"Shape",  all:"All shapes",   from:"SP2" },
+        { label:"Topic family", all:"All topic families", clusters:[
+        ["Ecology & pollution",[1,12,23,34,45,50,54,57,60,62,68]],
+        ["Education & school",[2,13,24,35,46,51,55,58,61,63,64]],
+        ["Technology & social media",[3,14,25,36,47,52,56,59,69]],
+        ["Books, reading & writing",[4,15,26,37,70,71,72]],
+        ["Health, food & diet",[5,16,27,38,48,53,73]],
+        ["Society, values & relationships",[6,17,28,39,65,66]],
+        ["Aging & generations",[7,18,29,40,49]],
+        ["Freedom, rules & rights",[8,19,30,41,67]],
+        ["Arts & culture",[9,20,31,42]],
+        ["Work & telework",[10,21,32,43]],
+        ["Fame, money & media",[11,22,33,44]]
+      ] } ]
+};
+
 if (typeof module !== "undefined" && module.exports) { module.exports = TEF_CLUSTERS; }
 
 if (typeof document !== "undefined") (function(){
@@ -476,10 +527,11 @@ if (typeof document !== "undefined") (function(){
     var original = flow.slice();
 
     injectStyle();
+    var treeAxes = [];
     var ui = buildToolbar();
     parent.insertBefore(ui.bar, wrap);
 
-    var state = { methodId: "default", filter: null, hideDone: false };
+    var state = { methodId: "default", filter: null, hideDone: false, tf: [null, null] };
 
     // --- done-marking -----------------------------------------------------
     // Ticks are stored per content SET, not per page, so an ad you tick off on
@@ -629,7 +681,7 @@ if (typeof document !== "undefined") (function(){
       wrap.querySelectorAll("section.topic").forEach(function(s){
         var b = s.querySelector(".badge");
         if (!b) return;
-        if (s.style.display === "none" ||
+        if (s.style.display === "none" || s.classList.contains("tef-tf-out") ||
             (state.hideDone && s.classList.contains("tef-is-done"))) return;
         b.textContent = String(++pos);
       });
@@ -675,7 +727,7 @@ if (typeof document !== "undefined") (function(){
           : nums.length + " " + (nums.length === 1 ? unitOne : unit);
       });
 
-      var boxesAll = wrap.querySelectorAll(".tef-box"), boxesDone = 0;
+      var boxesAll = wrap.querySelectorAll(".tef-box:not(.tef-tf-empty)"), boxesDone = 0;
       for (var bi = 0; bi < boxesAll.length; bi++){
         var bx = boxesAll[bi], bsecs = bx.querySelectorAll("section.topic"), ball = bsecs.length > 0;
         for (var bj = 0; bj < bsecs.length; bj++){ if (!bsecs[bj].classList.contains("tef-is-done")){ ball = false; break; } }
@@ -940,6 +992,7 @@ if (typeof document !== "undefined") (function(){
     // counts through boxes naturally.
     function clearBoxes(){
       document.body.classList.remove("tef-mode-boxes");
+      sections.forEach(function(s){ s.classList.remove("tef-tf-out"); });
       wrap.querySelectorAll(".tef-box").forEach(function(b){
         b.querySelectorAll("section.topic").forEach(function(s){ wrap.appendChild(s); });
         b.remove();
@@ -1009,6 +1062,90 @@ if (typeof document !== "undefined") (function(){
       ui.summary.textContent = "Answer boxes · " + pk.boxes.length + " boxes + " + pk.singles + " singles = "
         + pk.answers + " answers to prepare · " + pk.total + " " + unit;
       ui.chips.innerHTML = "";
+      applyTreeFilters();
+    }
+
+    // Tree filters: two dropdowns that narrow the Answer-boxes view by the two
+    // groupings trees.html teaches for this pool. The boxes themselves are
+    // untouched — a member that fails a filter is hidden, a core or box with
+    // nothing left steps aside, and the box head says how many of its members
+    // are on show. Two filters together mean "both".
+    function buildTreeAxes(){
+      var defs = (setKey && TEF_TREE_FILTERS[setKey]) || [];
+      return defs.map(function(d){
+        var opts = [];
+        function add(name, nums){
+          var set = {}, c = 0;
+          nums.forEach(function(n){ if (byNum[n] && !set[n]){ set[n] = true; c++; } });
+          opts.push({ name:name, set:set, count:c });
+        }
+        var src = null;
+        if (d.from) pack.methods.forEach(function(m){ if (m.id === d.from) src = m.clusters; });
+        if (d.clusters) src = d.clusters;
+        if (src) src.forEach(function(cl){
+          var name = cl[0];
+          if (d.short) name = name.split(" — ")[0];
+          if (d.upper) name = name.toUpperCase();
+          add(name, cl[1]);
+        });
+        if (d.objections){
+          var fam = [];
+          pack.methods.forEach(function(m){ if (m.id === "SP2") fam = m.clusters; });
+          d.objections.forEach(function(ob){
+            var re = new RegExp("\\b" + ob + "\\b"), nums = [];
+            fam.forEach(function(cl){
+              if (re.test(String(cl[2] || "").split(" — lead fire")[0])) nums = nums.concat(cl[1]);
+            });
+            add(ob, nums);
+          });
+        }
+        return { label:d.label, all:d.all, options:opts };
+      });
+    }
+
+    function applyTreeFilters(){
+      var active = [];
+      treeAxes.forEach(function(ax, i){
+        var o = null;
+        ax.options.forEach(function(x){ if (x.name === state.tf[i]) o = x; });
+        if (o) active.push(o);
+      });
+      var shown = 0;
+      numbered.forEach(function(it){
+        var out = active.some(function(o){ return !o.set[it.num]; });
+        it.el.classList.toggle("tef-tf-out", out);
+        if (!out) shown++;
+      });
+      function live(el){ return el.querySelectorAll("section.topic:not(.tef-tf-out)").length; }
+      var boxesShown = 0;
+      wrap.querySelectorAll(".tef-box").forEach(function(bx){
+        var all = bx.querySelectorAll("section.topic").length, n = live(bx);
+        bx.classList.toggle("tef-tf-empty", n === 0);
+        if (n) boxesShown++;
+        bx.querySelector(".tef-box-n").textContent = (n < all && n > 0)
+          ? n + " of " + all + " " + unit + " match"
+          : all + " " + unit;
+        bx.querySelectorAll(".tef-core").forEach(function(c){
+          c.classList.toggle("tef-tf-empty", live(c) === 0);
+        });
+        bx.querySelectorAll(".tef-seam").forEach(function(sm){
+          var pv = sm.previousElementSibling, nx = sm.nextElementSibling;
+          sm.classList.toggle("tef-tf-empty",
+            !!((pv && pv.classList.contains("tef-tf-empty")) || (nx && nx.classList.contains("tef-tf-empty"))));
+        });
+      });
+      if (ui.tfClear) ui.tfClear.style.visibility = active.length ? "" : "hidden";
+      if (ui.tfCount) ui.tfCount.textContent = "";
+      if (!active.length) return;
+      var singles = 0;
+      numbered.forEach(function(it){
+        if (it.el.parentNode === wrap && !it.el.classList.contains("tef-tf-out")) singles++;
+      });
+      var names = active.map(function(o){ return o.name; }).join(" + ");
+      ui.tfCount.textContent = shown ? "" : "nothing matches both filters";
+      ui.summary.textContent = "Answer boxes · " + names + " · " + shown + " of " + pack.total + " " + unit
+        + " · " + boxesShown + (boxesShown === 1 ? " box + " : " boxes + ")
+        + singles + (singles === 1 ? " single" : " singles");
     }
 
     // Coverage order: a flat sort like difficulty, but each item also carries
@@ -1424,9 +1561,46 @@ if (typeof document !== "undefined") (function(){
 
       var desc = document.createElement("div"); desc.className="tef-desc";
       var chips = document.createElement("div"); chips.className="tef-chips";
-      bar.appendChild(row); bar.appendChild(prog); bar.appendChild(desc); bar.appendChild(chips);
+
+      // Tree-filter row: only on show in Answer-boxes mode (CSS), one select
+      // per axis of trees.html for this pool.
+      var tfRow = document.createElement("div"); tfRow.className = "tef-row tef-tfrow";
+      var tfLab = document.createElement("span"); tfLab.className = "tef-lab";
+      tfLab.textContent = "Filter boxes by";
+      tfRow.appendChild(tfLab);
+      var tfSelects = [];
+      treeAxes = buildTreeAxes();
+      treeAxes.forEach(function(ax, i){
+        var s = document.createElement("select"); s.className = "tef-select tef-tfsel";
+        s.setAttribute("aria-label", ax.label);
+        var o0 = document.createElement("option"); o0.value = "";
+        o0.textContent = ax.label + ": " + ax.all.replace(/^All /, "all ");
+        s.appendChild(o0);
+        ax.options.forEach(function(op){
+          var o = document.createElement("option"); o.value = op.name;
+          o.textContent = op.name + " (" + op.count + ")";
+          s.appendChild(o);
+        });
+        s.addEventListener("change", function(){ state.tf[i] = s.value || null; render(); });
+        tfSelects.push(s); tfRow.appendChild(s);
+      });
+      var tfClear = document.createElement("button");
+      tfClear.type = "button"; tfClear.className = "tef-prog-reset"; tfClear.textContent = "Clear filters";
+      tfClear.style.visibility = "hidden";
+      tfClear.addEventListener("click", function(){
+        state.tf = [null, null];
+        tfSelects.forEach(function(s){ s.value = ""; });
+        render();
+      });
+      var tfCount = document.createElement("span"); tfCount.className = "tef-summary";
+      tfRow.appendChild(tfClear); tfRow.appendChild(tfCount);
+
+      bar.appendChild(row);
+      if (treeAxes.length) bar.appendChild(tfRow);
+      bar.appendChild(prog); bar.appendChild(desc); bar.appendChild(chips);
       return { bar:bar, select:sel, summary:summary, desc:desc, chips:chips,
-               progFill:pfill, progText:ptext, progReset:reset, hideCb:hideCb };
+               progFill:pfill, progText:ptext, progReset:reset, hideCb:hideCb,
+               tfClear:tfClear, tfCount:tfCount };
     }
 
     function injectStyle(){
@@ -1472,6 +1646,9 @@ if (typeof document !== "undefined") (function(){
       + ".tef-seam::before,.tef-seam::after{content:'';flex:1 1 0;border-top:1px dashed #9db4e3}"
       + ".tef-seam span{font-size:.74rem;color:#3b5bb0;background:#eef4ff;border:1px dashed #9db4e3;border-radius:999px;padding:.1rem .65rem;white-space:nowrap}"
       + "body.tef-hide-done .tef-box-alldone{display:none!important}"
+      + ".tef-tfrow{display:none;margin-top:.4rem}body.tef-mode-boxes .tef-tfrow{display:flex}"
+      + ".tef-tfsel{max-width:16rem}"
+      + ".tef-tf-out,.tef-tf-empty{display:none!important}"
       + "body.tef-hide-done .tef-seam-hidden{display:none}"
       + ".tef-prog-boxes{margin-left:.35rem;color:#111827}"
 
