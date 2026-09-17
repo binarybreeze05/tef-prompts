@@ -413,8 +413,8 @@ var TEF_CLUSTERS = {
 var TEF_TREE_FILTERS = {
   A:  [ { label:"Shape",  all:"All shapes",   from:"SP2", short:true },
         { label:"Family", all:"All families", from:"A10" } ],
-  B:  [ { label:"Family", all:"All families", from:"SP2" },
-        { label:"Likely objection", all:"All objections", objections:["TIME","MONEY","ABILITY","FEAR","TRUST","EFFORT","WANT","BOND"] } ],
+  B:  [ { label:"Likely objection", all:"All objections", objections:["TIME","MONEY","ABILITY","FEAR","TRUST","EFFORT","WANT","BOND"] },
+        { label:"Family", all:"All families", from:"SP2" } ],
   EA: [ { label:"Debt",   all:"All debts",    from:"SP2", upper:true },
         { label:"Story family", all:"All story families", clusters:[
         ["Surprising discovery",[1,19,33,44,54,61,63,65,66]],
