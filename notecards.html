@@ -19,7 +19,7 @@ main{padding:16px 24px;max-width:1100px;width:100%;margin:0 auto;justify-self:ce
 .card h2{font-size:17px;margin:0}.rank{background:var(--acc);color:#fff;border-radius:999px;padding:1px 8px;font-size:12px}
 .prev{color:var(--mute);font-size:12px;margin-left:auto}.tog{color:var(--mute);font-size:14px}
 .nc{border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin:0 0 10px;background:#fcfbf8}.ncbar{cursor:pointer;user-select:none;font-size:12px;color:var(--mute);letter-spacing:.04em;text-transform:uppercase}.ncbar .tog{display:inline-block;color:var(--mute)}.nc.collapsed .cues{display:none}.nc.collapsed .tog{transform:rotate(-90deg)}.nc .cues{margin-top:6px}
-.cbody{margin-top:10px}
+.cbody{margin-top:10px}.card.fold .nc,.card.fold table.say{display:none}.card.fold img.ad{margin-bottom:0}
 img.ad{display:block;max-width:100%;max-height:360px;object-fit:contain;border:1px solid var(--line);border-radius:6px;background:#fff;margin:0 auto 12px;cursor:pointer}
 .cues{columns:2;column-gap:24px;font-size:13.5px;margin-bottom:8px}.cues .kv{break-inside:avoid}.k{font-weight:700;letter-spacing:.02em}.k.head{margin-top:4px}
 .cue{padding-left:10px;text-indent:-10px}.arr{color:var(--acc)}
@@ -265,7 +265,7 @@ details.once{color:var(--mute);margin:0 0 20px}details.once summary{cursor:point
 </ul>
 </nav><main>
 <div class="tools"><label><input type="checkbox" id="en"> show English</label><button id="colall">collapse notecards</button><button id="expall">expand notecards</button><span id="hlinfo" class="note" style="margin:0"></span></div>
-<p class="note" data-view="cards" data-sec="A">Order: a chain. The first card overlaps the most with all the others; each next card is the unvisited card most similar to the one before (Jaccard on sentence ids). Green rows are sentences shared with the card just above, listed first and in that card's order. The small number on an id is how many cards use it. Click the notecard bar or the ad image to fold the cue block, an id to light it up everywhere.</p>
+<p class="note" data-view="cards" data-sec="A">Order: a chain. The first card overlaps the most with all the others; each next card is the unvisited card most similar to the one before (Jaccard on sentence ids). Green rows are sentences shared with the card just above, listed first and in that card's order. The small number on an id is how many cards use it. Click the notecard bar to fold the cue block, the ad image to fold everything under it (cue block and sentences), an id to light it up everywhere.</p>
 <section class="sec" data-sec="A" data-view="cards">
 <article class="card" id="A-69">
 <header><span class="rank">1</span><h2>A-69 · Buggy driving course</h2><span class="prev">start of chain</span></header>
@@ -4464,8 +4464,11 @@ $('#en').onchange=e=>document.body.classList.toggle('showen',e.target.checked);
 let collapsed=new Set();try{collapsed=new Set(JSON.parse(localStorage.getItem('nc_col')||'[]'))}catch(e){}
 function setCol(card,on){const nc=card.querySelector('.nc');nc.classList.toggle('collapsed',on);on?collapsed.add(card.id):collapsed.delete(card.id);try{localStorage.setItem('nc_col',JSON.stringify([...collapsed]))}catch(e){}}
 $$('.card').forEach(c=>{if(collapsed.has(c.id))c.querySelector('.nc').classList.add('collapsed');c.querySelector('.ncbar').onclick=()=>setCol(c,!c.querySelector('.nc').classList.contains('collapsed'))});
-$('#colall').onclick=()=>$$('.card').forEach(c=>setCol(c,true));$('#expall').onclick=()=>$$('.card').forEach(c=>setCol(c,false));
-$$('img.ad').forEach(i=>i.onclick=e=>{e.stopPropagation();const c=i.closest('.card');setCol(c,!c.querySelector('.nc').classList.contains('collapsed'))});
+$('#colall').onclick=()=>$$('.card').forEach(c=>setCol(c,true));$('#expall').onclick=()=>$$('.card').forEach(c=>{setCol(c,false);setFold(c,false)});
+let folded=new Set();try{folded=new Set(JSON.parse(localStorage.getItem('nc_fold')||'[]'))}catch(e){}
+function setFold(card,on){card.classList.toggle('fold',on);on?folded.add(card.id):folded.delete(card.id);try{localStorage.setItem('nc_fold',JSON.stringify([...folded]))}catch(e){}}
+$$('.card').forEach(c=>{if(folded.has(c.id))c.classList.add('fold')});
+$$('img.ad').forEach(i=>i.onclick=e=>{e.stopPropagation();const c=i.closest('.card');setFold(c,!c.classList.contains('fold'))});
 $('#q').oninput=e=>{const q=e.target.value.trim().toLowerCase();
 $$('.card,.srow').forEach(c=>c.classList.toggle('qhide',!!q&&!c.textContent.toLowerCase().includes(q)));
 $$('nav ol li').forEach(li=>{const a=li.querySelector('a');const c=a&&document.getElementById(a.getAttribute('href').slice(1));li.classList.toggle('qhide',!!(c&&c.classList.contains('qhide')))})};
